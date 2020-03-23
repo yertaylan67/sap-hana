@@ -32,7 +32,6 @@
         name: hdb_sizes
   roles:
     - { role: os-preparation }
-    - { role: os-disk-setup }
     - role: enable-prometheus
       when:
         - output.options.enable_prometheus == True
@@ -53,13 +52,6 @@
   become_user: root
   roles:
     - { role: sap-media-download }
-
-# Hana DB components install 
-- hosts: hanadbnodes
-  become: true
-  become_user: root
-  roles: 
-    - { role: hdb-server-install }
 
 # Linux jumpboxes components install
 - hosts: jumpboxes_linux
