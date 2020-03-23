@@ -12,6 +12,11 @@ variable "jumpboxes" {
 
 variable "options" {
   description = "Configuration options"
+  default = {
+    "enable_secure_transfer" : true,
+    "ansible_execution" : false,
+    "enable_prometheus" : true
+  }
 }
 
 variable "software" {

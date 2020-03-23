@@ -6,9 +6,6 @@ output "nics-dbnodes-db" {
   value = azurerm_network_interface.nics-dbnodes-db
 }
 
-output "loadbalancers" {
-  value = azurerm_lb.hana-lb
-}
 
 # Workaround to create dependency betweeen ../main.tf ansible_execution and module hdb_node
 output "dbnode-data-disk-att" {

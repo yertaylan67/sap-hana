@@ -1,4 +1,19 @@
 {
+    "ScaleOut": {
+        "compute" : {
+            "vm_size" : "Standard_D16s_v3",
+            "swap_size_gb" : 2
+        },
+        "storage" : [
+            {
+                "name" : "os",
+                "count" : 1,
+                "disk_type" : "StandardSSD_LRS",
+                "size_gb" : 64,
+                "caching" : "ReadWrite"
+            }
+        ]
+    },
     "Demo" : {
         "compute" : {
             "vm_size" : "Standard_D8s_v3",
