@@ -1,0 +1,88 @@
+# /*---------------------------------------------------------------------------8
+# |                                                                            |
+# |                                   BOM                                      |
+# |                                                                            |
+# +------------------------------------4--------------------------------------*/
+---
+#
+# BOM    :  HANA 2.0 
+# Version:  001
+# Name   :  BOM_HANA20v1
+#
+
+#
+# Target :  HANA 2.0  Revision: 2.00.046 PL 0
+#
+
+
+#
+# Product ID's
+#
+ProductIdSCS: 
+ProductIdHDB: 
+ProductIdPAS: 
+ProductIdAPP: 
+ProductIdWEB: 
+
+
+sasToken: '?sv=2019-02-02&ss=b&srt=sco&sp=rl&se=2021-02-24T02:36:25Z&st=2020-02-23T18:36:25Z&spr=https&sig=2jRu%2F%2F5OIPFwEFyLy4A3oEBaLveCI0x%2BWflvHxbVXg4%3D'
+
+# billOfMaterials:
+# - url:            ''          (Required: Source URL)
+#   fileName:       ''          (Required: Target filename after download; Full path)
+#   permissions:    ''          (Optional: File permissions in octal;         Default: 0644)
+#   extractDir:     ''          (Optional: Target directory for file extract)
+#   creates:        ''          (Optional: Full path filename to indicate if extract was performed)
+#   download:       true/false  (Optional: ; Default: true)
+#
+
+# TODO: make the path for the filename a variable and for creates
+
+# /*---------------------------------------------------------------------------8
+# |                                                                            |
+# |                               BASE INSTALL                                 |
+# |                                                                            |
+# +------------------------------------4--------------------------------------*/
+billOfMaterials:
+# SAPCAR 7.21
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/platform/SAPCAR_1311-80000935.EXE'
+  fileName:       'downloads/SAPCAR'
+  permissions:    '0755'
+
+
+# SAP HOST AGENT 7.21
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/platform/SAPHOSTAGENT45_45-20009394.SAR'
+  fileName:       'download_basket/SAPHOSTAGENT.SAR'
+
+
+# SAP HANA PLATFORM EDITION 2.0
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/hana/IMDB_SERVER20_046_0-80002031.SAR'
+  fileName:       'downloads/IMDB_SERVER20.SAR'
+  extractDir:     'CD_HDBSERVER'
+  creates:        'SIGNATURE.SMF'
+
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/hana/IMDB_CLIENT20_004_182-80002082.SAR'
+  fileName:       'download_basket/IMDB_CLIENT20.SAR'
+  extractDir:     'CD_CLIENT'
+  creates:        'SIGNATURE.SMF'
+
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/hana/IMDB_AFL20_046_0-80001894.SAR'
+  fileName:       'downloads/AFL20.SAR'
+  extractDir:     'CD_HDBSERVER/COMPONENTS'
+  creates:        'SAP_HANA_AFL/packages'
+
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/hana/VCH190900_2046_0-80004631.SAR'
+  fileName:       'downloads/VCHAFL.SAR'
+  extractDir:     'CD_HDBSERVER/COMPONENTS'
+  creates:        'VCH_AFL_1909/packages'
+
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/hana/IMDB_LCAPPS_2046_0-20010426.SAR'
+  fileName:       'downloads/LCAPPS.SAR'
+  extractDir:     'CD_HDBSERVER/COMPONENTS'
+  creates:        'SAP_HANA_LCAPPS/packages'
+
+
+...
+# /*---------------------------------------------------------------------------8
+# |                                   END                                      |
+# +------------------------------------4--------------------------------------*/
