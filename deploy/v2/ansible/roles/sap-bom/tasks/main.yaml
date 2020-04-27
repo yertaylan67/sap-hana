@@ -1,17 +1,58 @@
 ---
 
-# Required variables:
+# Required packages:
+#   unzip
+#   unrar
+#
+
+# Required variables or facts:
 #   _sapBom
 #   _installDirPath
+#
 
 
-
+# *====================================4=======================================8
+#
+#                              BOM Registration
+#
+# *====================================4=======================================8
+#
+#   Purpose:
+#     Reads in the BOM file and makes the included variables and dictionaries
+#     available under the sapbom object ID.
+#
+#   Available objects:
+#     sapbom.productIdSCS
+#     sapbom.productIdHDB
+#     sapbom.productIdPAS
+#     sapbom.productIdAPP
+#     sapbom.productIdWEB
+#     sapbom.sasToken
+#     sapbom.billOfMaterials
+#     sapbom.billOfMaterials.url
+#     sapbom.billOfMaterials.fileName
+#     sapbom.billOfMaterials.permissions
+#     sapbom.billOfMaterials.extract
+#     sapbom.billOfMaterials.extractDir
+#     sapbom.billOfMaterials.creates
+#     sapbom.billOfMaterials.download
+#     sapbom.billOfMaterials.sourceUrl
+#
 - name:         "BOM: Register BOM"
   include_vars:
     file:       "../boms/files/BOM_{{ _sapBom }}.yaml"
     name:       sapbom
 
 
+# *====================================4=======================================8
+#
+#                           Create Install Directories
+#
+# *====================================4=======================================8
+#
+#   Purpose:
+#     Create the Install directory structure.
+#
 - name: "BOM: Create SAP download directories"
   file:
     path:   "{{ _installDirPath }}/{{ item.dir }}"
@@ -22,6 +63,15 @@
     - { dir: 'download_basket' }
 
 
+# *====================================4=======================================8
+#
+#                           Create Extract Directories
+#
+# *====================================4=======================================8
+#
+#   Purpose:
+#     Create the directory structure into which software will be extracted.
+#
 - name: "BOM: Create BOM extraction directories"
   file:
     path:   "{{ _installDirPath }}/{{ item.extractDir }}"
@@ -32,6 +82,15 @@
                   or (item.extractDir == '') )
 
 
+# *====================================4=======================================8
+#
+#                              Download Software
+#
+# *====================================4=======================================8
+#
+#   Purpose:
+#     Download the software from the customer storage account
+#
 - name: "BOM: Download Files"
   get_url:
     url:    "{{ item.url }}{% if sapbom.sasToken is not undefined %}{{ sapbom.sasToken }}{% endif %}"
@@ -47,22 +106,34 @@
             item.download
 
 
-# /*---------------------------------------------------------------------------8
-# |                                                                            |
-# |                                   BOM                                      |
-# |                                                                            |
-# +------------------------------------4--------------------------------------*/
+# *====================================4=======================================8
+#
+#                               File Extractors
+#
+# *====================================4=======================================8
+#
+#   Purpose:
+#     Use SAPCAR to perform required extractions
+#
 - name:      "BOM: Extract File, SAPCAR"
   command:   /usr/sap/install/downloads/SAPCAR -manifest SIGNATURE.SMF -xf "{{ _installDirPath }}/{{ item.fileName }}"
   args:
     chdir:   "{{ _installDirPath }}/{{ item.extractDir }}"
     creates: "{{ _installDirPath }}/{{ item.creates }}"
   loop:      "{{ sapbom.billOfMaterials|flatten(levels=1) }}"
-  when:      (    item.extract is not undefined
-              and item.extract                  )
-              and (item.fileName|regex_search('[^.]+(?=\\.*$)')|upper=="SAR")
+  # when:      (    item.extract is not undefined
+  #             and item.extract                  )
+  #             and (item.fileName|regex_search('[^.]+(?=\\.*$)')|upper=="SAR")
+  when:      ( not (    (item.extractDir is undefined)
+                     or (item.extractDir == '') )
+               and (item.fileName|regex_search('[^.]+(?=\\.*$)')|upper=="SAR")
+# not (    (item.extractDir is undefined)
+#                   or (item.extractDir == '') )
 
-
+#
+#   Purpose:
+#     Use UNRAR to perform required extractions
+#
 - name:      "BOM: Extract File, UNRAR"
   command:   unrar x "{{ _installDirPath }}/{{ item.fileName }}"
   args:
@@ -74,6 +145,10 @@
               and (item.fileName|regex_search('[^.]+(?=\\.*$)')|upper=="RAR")
 
 
+#
+#   Purpose:
+#     Use UNZIP to perform required extractions
+#
 - name:      "BOM: Extract File, UNZIP"
   unarchive:
     src:        "{{ _installDirPath }}/{{ item.fileName }}"
