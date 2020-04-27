@@ -124,11 +124,11 @@
   # when:      (    item.extract is not undefined
   #             and item.extract                  )
   #             and (item.fileName|regex_search('[^.]+(?=\\.*$)')|upper=="SAR")
-  when:      ( ( not (    (item.extractDir is undefined)
+  when:      ( not (    (item.extractDir is undefined)
                      or (item.extractDir == '') ) )
                and (item.fileName|regex_search('[^.]+(?=\\.*$)')|upper=="SAR")
-# not (    (item.extractDir is undefined)
-#                   or (item.extractDir == '') )
+  # when:     not (    (item.extractDir is undefined)
+  #                 or (item.extractDir == '') )
 
 #
 #   Purpose:
