@@ -119,7 +119,7 @@
   command:      "{{ _installDirPath }}/downloads/SAPCAR -manifest SIGNATURE.SMF -xf '{{ _installDirPath }}/{{ item.fileName }}'"
   args:
     chdir:      "{{ _installDirPath }}/{{ item.extractDir }}"
-    creates:    "{{ _installDirPath }}/{{ item.creates }}"
+    creates:    "{{ _installDirPath }}/{{ item.extractDir }}/{{ item.creates }}"
   loop:         "{{ sapbom.billOfMaterials|flatten(levels=1) }}"
   when:         not (    (item.extractDir is undefined)
                       or (item.extractDir == '') )
@@ -133,7 +133,7 @@
   command:      unrar x "{{ _installDirPath }}/{{ item.fileName }}"
   args:
     chdir:      "{{ _installDirPath }}/{{ item.extractDir }}"
-    creates:    "{{ _installDirPath }}/{{ item.creates }}"
+    creates:    "{{ _installDirPath }}/{{ item.extractDir }}/{{ item.creates }}"
   loop:         "{{ sapbom.billOfMaterials|flatten(levels=1) }}"
   when:         not (    (item.extractDir is undefined)
                       or (item.extractDir == '') )
@@ -149,7 +149,7 @@
     src:        "{{ _installDirPath }}/{{ item.fileName }}"
     dest:       "{{ _installDirPath }}/{{ item.extractDir }}"
     remote_src: yes
-    creates:    "{{ _installDirPath }}/{{ item.creates }}"
+    creates:    "{{ _installDirPath }}/{{ item.extractDir }}/{{ item.creates }}"
   loop:         "{{ sapbom.billOfMaterials|flatten(levels=1) }}"
   when:         not (    (item.extractDir is undefined)
                       or (item.extractDir == '') )
