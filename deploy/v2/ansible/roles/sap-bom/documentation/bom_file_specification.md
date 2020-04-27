@@ -7,6 +7,7 @@ Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azur
 
 ## Table of contents <!-- omit in toc -->
 - [Getting Started](#getting-started)
+- [Dictionary - billOfMaterials](#dictionary---billofmaterials)
 
 <br>
 
@@ -20,7 +21,6 @@ Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azur
 | url         | String  | (Required) Customer Storage Accounmt Location URL                                        |
 | filename    | String  | (Required) Target filename after download                                                |
 | permissions | String  | (Optional) File permissions in octal;                                   (Default: 0644)  |
-| extract     | String  | (Optional) Perform extraction after download;                           (Default: false) |
 | extractDIR  | String  | (Optional) Target directory for file extract)                                            |
 | creates     | String  | (Optional) Relative path filename to indicate if extract was performed)                  |
 | download    | Boolean | (Optional) Enable / Disable the download of the software to the server  (Default: true)  |
@@ -31,7 +31,6 @@ Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azur
 # - url:            ''          (Required: Source URL)
 #   fileName:       ''          (Required: Target filename after download; Full path)
 #   permissions:    ''          (Optional: File permissions in octal;         Default: 0644)
-#   extract:        true/false  (Optional: Perform extraction after download; Default: false)
 #   extractDir:     ''          (Optional: Target directory for file extract)
 #   creates:        ''          (Optional: Full path filename to indicate if extract was performed)
 #   download:       true/false  (Optional: ; Default: true)
