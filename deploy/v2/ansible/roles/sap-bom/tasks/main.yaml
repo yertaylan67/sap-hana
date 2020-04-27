@@ -47,11 +47,16 @@
             item.download
 
 
+# /*---------------------------------------------------------------------------8
+# |                                                                            |
+# |                                   BOM                                      |
+# |                                                                            |
+# +------------------------------------4--------------------------------------*/
 - name:      "BOM: Extract File, SAPCAR"
   command:   /usr/sap/install/downloads/SAPCAR -manifest SIGNATURE.SMF -xf "{{ _installDirPath }}/{{ item.fileName }}"
   args:
-    chdir:   "{{ item.extractDir }}"
-    creates: "{{ item.creates }}"
+    chdir:   "{{ _installDirPath }}/{{ item.extractDir }}"
+    creates: "{{ _installDirPath }}/{{ item.creates }}"
   loop:      "{{ sapbom.billOfMaterials|flatten(levels=1) }}"
   when:      (    item.extract is not undefined
               and item.extract                  )
@@ -61,8 +66,8 @@
 - name:      "BOM: Extract File, UNRAR"
   command:   unrar x "{{ _installDirPath }}/{{ item.fileName }}"
   args:
-    chdir:   "{{ item.extractDir }}"
-    creates: "{{ item.creates }}"
+    chdir:   "{{ _installDirPath }}/{{ item.extractDir }}"
+    creates: "{{ _installDirPath }}/{{ item.creates }}"
   loop:      "{{ sapbom.billOfMaterials|flatten(levels=1) }}"
   when:      (    item.extract is not undefined
               and item.extract                  )
@@ -72,9 +77,9 @@
 - name:      "BOM: Extract File, UNZIP"
   unarchive:
     src:        "{{ _installDirPath }}/{{ item.fileName }}"
-    dest:       "{{ item.extractDir }}"
+    dest:       "{{ _installDirPath }}/{{ item.extractDir }}"
     remote_src: yes
-    creates:    "{{ item.creates }}"
+    creates:    "{{ _installDirPath }}/{{ item.creates }}"
   loop:      "{{ sapbom.billOfMaterials|flatten(levels=1) }}"
   when:      (    item.extract is not undefined
               and item.extract                  )
