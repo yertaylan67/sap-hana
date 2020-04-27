@@ -1,0 +1,78 @@
+#   2482103 - Installation with SWPM in unattended mode using parameter input file fails
+
+#############################################################################################################################
+#                                                                                                                           #
+# Installation service 'SAP S/4HANA 1909 > SAP S/4HANA Server > SAP HANA Database > Installation > Application Server ABAP  #
+#                       > Distributed System > ASCS Instance', product id 'NW_ABAP_ASCS:S4HANA1909.CORE.HDB.ABAP'           #
+#                       > Distributed System > Database Instance', product id 'NW_ABAP_DB:S4HANA1909.CORE.HDB.ABAP'         #
+#                       > Primary Application Server Instance', product id 'NW_ABAP_CI:S4HANA1909.CORE.HDB.ABAP'            #
+#                                                                                                                           #
+#############################################################################################################################
+
+# Location of Export CD
+SAPINST.CD.PACKAGE.HDBCLIENT                                         = {{ sap_cd_package_hdbclient }}
+SAPINST.CD.PACKAGE.CD1                                               = {{ sap_cd_package_cd1 }}
+SAPINST.CD.PACKAGE.CD2                                               = {{ sap_cd_package_cd2 }}
+SAPINST.CD.PACKAGE.CD3                                               = {{ sap_cd_package_cd3 }}
+SAPINST.CD.PACKAGE.CD4                                               = {{ sap_cd_package_cd4 }}
+SAPINST.CD.PACKAGE.CD5                                               = {{ sap_cd_package_cd5 }}
+
+
+HDB_Software_Dialogs.useMediaCD                                      = true
+NW_ABAP_Import_Dialog.dbCodepage                                     = 4103
+NW_ABAP_Import_Dialog.migmonJobNum                                   = 48
+NW_ABAP_Import_Dialog.migmonLoadArgs                                 = -c 100000 -rowstorelist /usr/sap/install/sapinst_instdir/S4HANA1909/CORE/HDB/INSTALL/DISTRIBUTED/ABAP/DB/rowstorelist.txt
+
+NW_CI_Instance.ascsVirtualHostname                                   = {{ ansible_hostname }}
+NW_CI_Instance.ciInstanceNumber                                      = {{ sapInstanceNumber }}
+NW_CI_Instance.ciMSPort                                              = 3600
+NW_CI_Instance.ciVirtualHostname                                     = {{ ansible_hostname }}
+NW_CI_Instance.scsVirtualHostname                                    = {{ ansible_hostname }}
+NW_CI_Instance_ABAP_Reports.executeReportsForDepooling               = true
+
+NW_Delete_Sapinst_Users.removeUsers                                  = true
+NW_GetMasterPassword.masterPwd                                       = {{ passwordMaster }}
+NW_GetSidNoProfiles.sid                                              = {{ sapSid|upper }}
+
+NW_HDB_DB.abapSchemaName                                             = SAPABAP1
+NW_HDB_DB.abapSchemaPassword                                         = {{ passwordHanaAbap }}
+NW_HDB_DBClient.clientPathStrategy                                   = SAPCPE
+NW_HDB_getDBInfo.dbhost                                              = {{ sapDbHostname }}
+NW_HDB_getDBInfo.dbsid                                               = {{ sapSid|upper }}
+NW_HDB_getDBInfo.instanceNumber                                      = {{ sapInstanceNumber }}
+NW_HDB_getDBInfo.systemDbPassword                                    = {{ passwordHanaSystem }}
+NW_HDB_getDBInfo.systemPassword                                      = {{ passwordHanaSystem }}
+NW_HDB_getDBInfo.systemid                                            = {{ sapSid|upper }}
+
+NW_SCS_Instance.ascsInstallGateway                                   = true
+NW_SCS_Instance.ascsInstallWebDispatcher                             = false
+NW_SCS_Instance.instanceNumber                                       = {{ sapInstanceNumber }}
+NW_SCS_Instance.scsVirtualHostname                                   = {{ ansible_hostname }}
+
+# NW_SLD_Configuration.configureSld                                  = false
+# NW_SLD_Configuration.sldHost                                       =
+# NW_SLD_Configuration.sldPort                                       =
+# NW_SLD_Configuration.sldUseHttps                                   = false
+# NW_SLD_Configuration.sldUser                                       =
+# NW_SLD_Configuration.sldUserPassword                               =
+
+NW_checkMsgServer.abapMSPort                                         = 3600
+NW_getFQDN.FQDN                                                      = {{ sap_fqdn }}
+NW_getLoadType.loadType                                              = SAP
+NW_liveCache.useLiveCache                                            = true
+NW_readProfileDir.profileDir                                         = /sapmnt/{{ sapSid|upper }}/profile
+
+# Location of SAR's
+archives.downloadBasket                                              = {{ sap_downloadbasket }}
+
+hanadb.landscape.reorg.useParameterFile                              = DONOTUSEFILE
+
+
+nwUsers.sapadmUID                                                    = {{ sapadmUID }}
+nwUsers.sapsysGID                                                    = {{ sapsysGID }}
+nwUsers.sidAdmUID                                                    = {{ sidadmUID }}
+
+storageBasedCopy.hdb.instanceNumber                                  = {{ sapInstanceNumber }}
+storageBasedCopy.hdb.systemPassword                                  = {{ passwordHanaSystem }}
+
+#############################################################################################################################

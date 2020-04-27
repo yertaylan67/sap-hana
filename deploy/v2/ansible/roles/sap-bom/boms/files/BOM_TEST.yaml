@@ -1,0 +1,104 @@
+# /*---------------------------------------------------------------------------8
+# |                                                                            |
+# |                                   BOM                                      |
+# |                                                                            |
+# +------------------------------------4--------------------------------------*/
+---
+#
+# BOM    :  S/4 - 1909
+# Version:  001
+# Name   :  BOM_S41909v1
+#
+
+#
+# Target :  ABAP PLATFORM 1909              01    (02/2020)
+#           SAP S/4HANA 1909                01    (02/2020) FP
+#           SAP S/4HANA FOUNDATION 1909     01    (02/2020) FP
+#           SAP FIORI FOR SAP S/4HANA 1909  01    (02/2020) FP
+#           SAP FIORI FRONT-END SERVER 6.0  SP01  (02/2020)
+#
+
+
+#
+# Product ID's
+#
+ProductIdSCS: NW_ABAP_ASCS:S4HANA1909.CORE.HDB.ABAP
+ProductIdHDB: NW_ABAP_DB:S4HANA1909.CORE.HDB.ABAP
+ProductIdPAS: NW_ABAP_CI:S4HANA1909.CORE.HDB.ABAP
+ProductIdAPP: 
+ProductIdWEB: 
+
+
+sasToken: '?sv=2019-02-02&ss=b&srt=sco&sp=rl&se=2021-02-24T02:36:25Z&st=2020-02-23T18:36:25Z&spr=https&sig=2jRu%2F%2F5OIPFwEFyLy4A3oEBaLveCI0x%2BWflvHxbVXg4%3D'
+
+# billOfMaterials:
+# - url:            ''          (Required: Source URL)
+#   fileName:       ''          (Required: Target filename after download; Full path)
+#   permissions:    ''          (Optional: File permissions in octal;         Default: 0644)
+#   extract:        true/false  (Optional: Perform extraction after download; Default: false)
+#   extractDir:     ''          (Optional: Target directory for file extract)
+#   creates:        ''          (Optional: Full path filename to indicate if extract was performed)
+#   download:       true/false  (Optional: ; Default: true)
+#
+
+# TODO: make the path for the filename a variable and for creates
+
+# /*---------------------------------------------------------------------------8
+# |                                                                            |
+# |                               BASE INSTALL                                 |
+# |                                                                            |
+# +------------------------------------4--------------------------------------*/
+billOfMaterials:
+# SAPCAR 7.21
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/platform/SAPCAR_1311-80000935.EXE'
+  fileName:       'downloads/SAPCAR'
+  permissions:    '0755'
+
+
+# SWPM 2.0
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/platform/SWPM20SP05_1-80003424.SAR'
+  fileName:       'downloads/SWPM.SAR'
+  extract:        true
+  extractDir:     'SWPM'
+  creates:        'SWPM/SIGNATURE.SMF'
+
+
+# SAP KERNEL 7.77
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/platform/SAPEXEDB_40-80004392.SAR'
+  fileName:       'download_basket/SAPEXEDB.SAR'
+
+
+
+# SAP S/4 1909
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_1.zip'
+  fileName:       'downloads/EXPORT_1.ZIP'
+  extract:        true
+  extractDir:     'CD_EXPORT'
+  creates:        'CD_EXPORT/SIGNATURE.SMF'
+
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_2.zip'
+  fileName:       'downloads/EXPORT_2.ZIP'
+  extract:        true
+  extractDir:     'CD_EXPORT'
+  creates:        'CD_EXPORT/S4CORE104_databackup_0_1'
+
+
+
+# /*---------------------------------------------------------------------------8
+# |                                                                            |
+# |                               POST INSTALL                                 |
+# |                                                                            |
+# +------------------------------------4--------------------------------------*/
+# SUM 2.0
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/SUM20SP07_2-80002456.SAR'
+  download:       false
+
+# EA-HR608
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/UIMDC001200.SAR'
+  download:       false
+  sourceUrl:      'https://softwaredownloads.sap.com/file/0010000000494332016'
+
+...
+# /*---------------------------------------------------------------------------8
+# |                                   END                                      |
+# +------------------------------------4--------------------------------------*/

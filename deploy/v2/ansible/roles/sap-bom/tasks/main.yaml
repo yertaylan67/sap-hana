@@ -1,0 +1,83 @@
+---
+
+# Required variables:
+#   _sapBom
+#   _installDirPath
+
+
+
+- name:         "BOM: Register BOM"
+  include_vars:
+    file:       "../boms/files/BOM_{{ _sapBom }}.yaml"
+    name:       sapbom
+
+
+- name: "BOM: Create SAP download directories"
+  file:
+    path:   "{{ _installDirPath }}/{{ item.dir }}"
+    state:  directory
+    mode:   0755
+  loop:
+    - { dir: 'downloads' }
+    - { dir: 'download_basket' }
+
+
+- name: "BOM: Create BOM extraction directories"
+  file:
+    path:   "{{ _installDirPath }}/{{ item.extractDir }}"
+    state:  directory
+    mode:   0755
+  loop:     "{{ sapbom.billOfMaterials|flatten(levels=1) }}"
+  when:     not (    (item.extractDir is undefined)
+                  or (item.extractDir == '') )
+
+
+- name: "BOM: Download Files"
+  get_url:
+    url:    "{{ item.url }}{% if sapbom.sasToken is not undefined %}{{ sapbom.sasToken }}{% endif %}"
+    dest:   "{{ _installDirPath }}/{{ item.fileName }}"
+    mode:   "{% if item.permissions is undefined %}0644{% else %}{{ item.permissions }}{% endif %}"
+
+  register: result
+  until:    result is succeeded
+  retries:  10
+  delay:    5
+  loop:     "{{ sapbom.billOfMaterials|flatten(levels=1) }}"
+  when:     item.download is undefined or
+            item.download
+
+
+- name:      "BOM: Extract File, SAPCAR"
+  command:   /usr/sap/install/downloads/SAPCAR -manifest SIGNATURE.SMF -xf "{{ _installDirPath }}/{{ item.fileName }}"
+  args:
+    chdir:   "{{ item.extractDir }}"
+    creates: "{{ item.creates }}"
+  loop:      "{{ sapbom.billOfMaterials|flatten(levels=1) }}"
+  when:      (    item.extract is not undefined
+              and item.extract                  )
+              and (item.fileName|regex_search('[^.]+(?=\\.*$)')|upper=="SAR")
+
+
+- name:      "BOM: Extract File, UNRAR"
+  command:   unrar x "{{ _installDirPath }}/{{ item.fileName }}"
+  args:
+    chdir:   "{{ item.extractDir }}"
+    creates: "{{ item.creates }}"
+  loop:      "{{ sapbom.billOfMaterials|flatten(levels=1) }}"
+  when:      (    item.extract is not undefined
+              and item.extract                  )
+              and (item.fileName|regex_search('[^.]+(?=\\.*$)')|upper=="RAR")
+
+
+- name:      "BOM: Extract File, UNZIP"
+  unarchive:
+    src:        "{{ _installDirPath }}/{{ item.fileName }}"
+    dest:       "{{ item.extractDir }}"
+    remote_src: yes
+    creates:    "{{ item.creates }}"
+  loop:      "{{ sapbom.billOfMaterials|flatten(levels=1) }}"
+  when:      (    item.extract is not undefined
+              and item.extract                  )
+              and (item.fileName|regex_search('[^.]+(?=\\.*$)')|upper=="ZIP")
+
+...
