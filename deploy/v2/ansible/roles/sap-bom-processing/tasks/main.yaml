@@ -52,7 +52,7 @@
 
 - name:         "BOM: Register Database BOM"
   include_vars:
-    file:       "../../sap-bom-files/files/BOM_{{ sapBom.databaseBom }}.yaml"
+    file:       "../../sap-bom-files/files/BOM_{{ sapbom.databaseBom }}.yaml"
     name:       sapdbbom
 
 # *=========== DEBUGGING ==============4
