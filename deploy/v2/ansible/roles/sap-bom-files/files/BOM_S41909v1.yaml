@@ -47,6 +47,8 @@ sasToken: '?sv=2019-02-02&ss=b&srt=sco&sp=rl&se=2021-02-24T02:36:25Z&st=2020-02-
 # |                               BASE INSTALL                                 |
 # |                                                                            |
 # +------------------------------------4--------------------------------------*/
+databaseBom: HANA20v1
+
 billOfMaterials:
 # SAPCAR 7.21
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/platform/SAPCAR_1311-80000935.EXE'
@@ -64,22 +66,27 @@ billOfMaterials:
 # SAP KERNEL 7.77
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/platform/SAPEXE_40-80004393.SAR'
   fileName:       'download_basket/SAPEXE.SAR'
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000000087132020'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/platform/SAPEXEDB_40-80004392.SAR'
   fileName:       'download_basket/SAPEXEDB.SAR'
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000000087152020'
 
 
 # SAP HOST AGENT 7.21
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/platform/SAPHOSTAGENT45_45-20009394.SAR'
   fileName:       'download_basket/SAPHOSTAGENT.SAR'
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000000021232020'
 
 
 # SAP IGS
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/platform/igsexe_10-80003187.sar'
   fileName:       'download_basket/igsexe.sar'
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000000046742020'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/platform/igshelper_17-10010245.sar'
   fileName:       'download_basket/igshelper.sar'
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000000703122018'
 
 
 # SAP HANA PLATFORM EDITION 2.0
@@ -114,126 +121,151 @@ billOfMaterials:
   fileName:       'downloads/EXPORT_1.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'SIGNATURE.SMF'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632352019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_2.zip'
   fileName:       'downloads/EXPORT_2.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_0_1'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632802019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_3.zip'
   fileName:       'downloads/EXPORT_3.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_4_1'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001633012019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_4.zip'
   fileName:       'downloads/EXPORT_4.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_5_1'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001633032019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_5.zip'
   fileName:       'downloads/EXPORT_5.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_2_1'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001633052019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_6.zip'
   fileName:       'downloads/EXPORT_6.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_1'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001633092019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_7.zip'
   fileName:       'downloads/EXPORT_7.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_2'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001633142019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_8.zip'
   fileName:       'downloads/EXPORT_8.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_3'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001633192019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_9.zip'
   fileName:       'downloads/EXPORT_9.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_4'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001633242019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_10.zip'
   fileName:       'downloads/EXPORT_10.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_5'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632372019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_11.zip'
   fileName:       'downloads/EXPORT_11.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_6'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632382019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_12.zip'
   fileName:       'downloads/EXPORT_12.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_7'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632402019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_13.zip'
   fileName:       'downloads/EXPORT_13.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_8'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632442019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_14.zip'
   fileName:       'downloads/EXPORT_14.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_9'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632472019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_15.zip'
   fileName:       'downloads/EXPORT_15.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_10'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632502019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_16.zip'
   fileName:       'downloads/EXPORT_16.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_11'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632562019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_17.zip'
   fileName:       'downloads/EXPORT_17.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_12'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632682019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_18.zip'
   fileName:       'downloads/EXPORT_18.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_13'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632732019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_19.zip'
   fileName:       'downloads/EXPORT_19.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_14'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632782019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_20.zip'
   fileName:       'downloads/EXPORT_20.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_15'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632832019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_21.zip'
   fileName:       'downloads/EXPORT_21.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_16'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632862019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_22.zip'
   fileName:       'downloads/EXPORT_22.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_17'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632902019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_23.zip'
   fileName:       'downloads/EXPORT_23.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_18'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632932019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_24.zip'
   fileName:       'downloads/EXPORT_24.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_19'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632972019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_25.zip'
   fileName:       'downloads/EXPORT_25.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_3_20'
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001633002019'
 
 
 
@@ -249,31 +281,38 @@ billOfMaterials:
 # EA-HR608
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/EA-HR608.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000059642016'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/GBX01HR5605.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000033172015'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/GBX01HR600.SAR'
   download:       false
-  sourceUrl:      'https://softwaredownloads.sap.com/file/0010000000029982015'
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000029982015'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/HANAUMML12_0-70001054.ZIP'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000000750422019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/HCORULEFW11_0-20011528.ZIP'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000018729142017'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10001INUIHR001.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000047072015'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10001INUIHR002.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000020421312017'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10001INUIILM001.SAR'
   download:       false
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10002INUIHR001.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000047182015'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10002INUIHR002.SAR'
   download:       false
@@ -283,6 +322,7 @@ billOfMaterials:
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10003INUIHR001.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000047312015'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10003INUIHR002.SAR'
   download:       false
@@ -292,6 +332,7 @@ billOfMaterials:
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10004INUIHR001.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000047422015'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10004INUIHR002.SAR'
   download:       false
@@ -301,6 +342,7 @@ billOfMaterials:
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10005INUIHR001.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000058752016'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10005INUIHR002.SAR'
   download:       false
@@ -310,6 +352,7 @@ billOfMaterials:
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10006INUIHR001.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000950212016'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10006INUIHR002.SAR'
   download:       false
@@ -319,6 +362,7 @@ billOfMaterials:
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10007INUIHR001.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000019055172017'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10007INUIHR002.SAR'
   download:       false
@@ -334,48 +378,61 @@ billOfMaterials:
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10008INUIHR001.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000020311342017'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10008INUIHR002.SAR'
   download:       false
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10009INUIHR001.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000393152018'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10010INUIHR001.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000001141472018'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10011INUIHR001.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000001897072018'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10012INUIHR001.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002406822018'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10013INUIHR001.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000452732019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10014INUIHR001.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000001303792019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10015INUIHR001.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000001713752019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-100AGINUIHR001.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000062222014'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-100AGINUIHR002.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000019183952017'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-100AGINUIILM001.SAR'
   download:       false
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10401INS4CORE.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002285802019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10401INS4COREOP.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002285822019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-10401INS4FND.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002285842019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-20001INUIMDC001.SAR'
   download:       false
@@ -421,6 +478,7 @@ billOfMaterials:
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-20401INS4CRM.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002285852019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-30001INUITRV001.SAR'
   download:       false
@@ -433,268 +491,347 @@ billOfMaterials:
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-50001INUIBAS001.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000032482020'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-50001INUIS4HOP1.SAR'
   download:       false
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-500AGINUIBAS001.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000001171932019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-500AGINUIS4HOP1.SAR'
   download:       false
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-60014INGBX01HR.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000001255172019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-60015INGBX01HR.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000001714692019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-60511INGBX01HR5.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000001303782019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-60512INGBX01HR5.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000001713732019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-60870INEAHR.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000001408362019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-60871INEAHR.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000001610262019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-60872INEAHR.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000001804692019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-60873INEAHR.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000001982812019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-70001INUIAPFI70.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000015682020'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-700AGINUIAPFI70.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000999632019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-74012INSTPI.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002162182019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-75401INSAPBASIS.SAR'
   download:       false
+  sapurl:         https://softwaredownloads.sap.com/file/0010000002197582019
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-75401INSAPBW.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002197592019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-75401INSAPGWFND.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002197602019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-75401INSAPUI.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000001661402019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-75402INSAPUI.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002197612019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-75E01INSAPABA.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002197622019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-80401INEADFPS.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002285862019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-80401INEAPS.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002285882019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-80401INFICAX.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002285892019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-80401ININSURANC.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002285912019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-80401INISOIL.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002285942019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-80401INISPRA.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002285952019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-80401INISPSCA.SAR'
   download:       false
+  sapcar:         'https://softwaredownloads.sap.com/file/0010000002285962019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-80401INISUT.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002285972019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-80401INMDGAPPL.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002285982019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-80401INMDGFND.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002285992019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/K-80401INMDGUX.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000002286002019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/KD75474.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000067712020'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/KE60870.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000001408342019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/KE60871.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000001610232019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/KE60872.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000001804682019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/KE60873.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000001982832019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_AR.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631652019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_BG.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631662019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_CA.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631682019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_CS.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631692019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_DA.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631702019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_DE.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631712019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_EL.SAR'
   download:       false
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_EN.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631732019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_ES.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631762019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_ET.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631772019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_FI.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631792019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_FR.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631802019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_HE.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631812019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_HI.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631832019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_HR.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631842019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_HU.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631852019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_IT.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631862019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_JA.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631872019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_KK.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631882019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_KO.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631892019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_LT.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631902019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_LV.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631912019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_MS.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631932019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_NL.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631942019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_NO.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631952019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_PL.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631962019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_PT.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631972019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_RO.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001631982019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_RU.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632002019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_SH.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632012019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_SK.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632022019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_SL.SAR'
   download:       false
+  sapurl:         https://softwaredownloads.sap.com/file/0030000001632032019
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_SV.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632042019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_TH.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632052019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_TR.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632072019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_UK.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632092019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_VI.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632102019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_ZF.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632112019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/S4HANAOP104_ERP_LANG_ZH.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0030000001632152019'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/SAP_HR608.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000249512014'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/SAPPAAPL4_2006_0-80004547.ZIP'
   download:       false
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/SRA004600.SAR'
   download:       false
-  sourceUrl:     'https://softwaredownloads.sap.com/file/0010000001964502018'
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000060132013'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/ST-API01T_731.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000001964502018'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/ST-PI740.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000297212015'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/UIHR001100.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000059602015'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/UIHR002100.SAR'
   download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000020208092017'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/UIILM001100.SAR'
   download:       false
+  sourceURL:      'https://softwaredownloads.sap.com/file/0010000000059632015'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/UIMDC001200.SAR'
   download:       false
-  sourceUrl:      'https://softwaredownloads.sap.com/file/0010000000494332016'
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000494332016'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/UIMDG001200.SAR'
   download:       false
-  sourceUrl:      'https://softwaredownloads.sap.com/file/0010000014247222017'
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000014247222017'
 
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/UITRV001300.SAR'
   download:       false
-  sourceUrl:      'https://softwaredownloads.sap.com/file/0010000000561182019'
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000561182019'
 
 ...
 # /*---------------------------------------------------------------------------8
