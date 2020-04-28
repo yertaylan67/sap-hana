@@ -46,7 +46,7 @@
 # *=========== DEBUGGING ==============4
 - debug:  
     msg:      "URL: {{ item.url }}"
-  loop:       "{{ sapbom.BillOfMaterials|flatten(levels=1) }}"
+  loop:       "{{ sapbom.billOfMaterials|flatten(levels=1) }}"
 # *================2===================4
 
 
@@ -58,7 +58,7 @@
 # *=========== DEBUGGING ==============4
 - debug:  
     msg:      "URL: {{ item.url }}"
-  loop:       "{{ sapdbbom.BillOfMaterials|flatten(levels=1) }}"
+  loop:       "{{ sapdbbom.billOfMaterials|flatten(levels=1) }}"
 # *================2===================4
 
 
