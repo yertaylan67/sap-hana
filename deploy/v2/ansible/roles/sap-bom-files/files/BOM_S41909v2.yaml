@@ -50,7 +50,6 @@ sasToken: '?sv=2019-02-02&ss=b&srt=sco&sp=rl&se=2021-02-24T02:36:25Z&st=2020-02-
 databaseBom: HANA20v1
 
 billOfMaterials:
-# SAPCAR 7.21
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SAPCAR_1320-80000935.EXE'
   fileName:       'downloads/SAPCAR'
   permissions:    '0755'
@@ -58,28 +57,27 @@ billOfMaterials:
 
 
 # SWPM 2.0
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SWPM20SP05_1-80003424.SAR'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SWPM20SP05_5-80003424.SAR'
   fileName:       'downloads/SWPM.SAR'
   extractDir:     'SWPM'
   creates:        'SIGNATURE.SMF'
-  sapurl:         'https://softwaredownloads.sap.com/file/0020000000217042020'
-  # link may be incorrect. SAP removed source.
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000000652032020'
 
 
 # SAP KERNEL 7.77
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SAPEXE_40-80004393.SAR'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SAPEXE_100-80004393.SAR'
   fileName:       'download_basket/SAPEXE.SAR'
-  sapurl:         'https://softwaredownloads.sap.com/file/0020000000087132020'
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000000272502020'
 
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SAPEXEDB_40-80004392.SAR'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SAPEXEDB_100-80004392.SAR'
   fileName:       'download_basket/SAPEXEDB.SAR'
-  sapurl:         'https://softwaredownloads.sap.com/file/0020000000087152020'
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000000272412020'
 
 
 # SAP HOST AGENT 7.21
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SAPHOSTAGENT45_45-20009394.SAR'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SAPHOSTAGENT46_46-20009394.SAR'
   fileName:       'download_basket/SAPHOSTAGENT.SAR'
-  sapurl:         'https://softwaredownloads.sap.com/file/0020000000021232020'
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000000497392020'
 
 
 # SAP IGS
@@ -251,10 +249,9 @@ billOfMaterials:
 # |                                                                            |
 # +------------------------------------4--------------------------------------*/
 # SUM 2.0
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SUM20SP07_2-80002456.SAR'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SUM20SP07_7-80002456.SAR'
   download:       false
-  sapurl:         'https://softwaredownloads.sap.com/file/0020000000219072020'
-  # link may be incorrect. SAP removed source.
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000000691012020'
 
 # EA-HR608
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/EA-HR608.SAR'
@@ -581,6 +578,10 @@ billOfMaterials:
   download:       false
   sapurl:         'https://softwaredownloads.sap.com/file/0010000002197612019'
 
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/K-75403INSAPUI.SAR'
+  download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000380882020'
+
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/K-75E01INSAPABA.SAR'
   download:       false
   sapurl:         'https://softwaredownloads.sap.com/file/0010000002197622019'
@@ -809,11 +810,6 @@ billOfMaterials:
   download:       false
   sapurl:         'https://softwaredownloads.sap.com/file/0010000000249512014'
 
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SAPPAAPL4_2006_0-80004547.ZIP'
-  download:       false
-  sapurl:         'https://softwaredownloads.sap.com/file/0020000000244662020'
-  # link may be incorrect. SAP removed source.
-
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SRA004600.SAR'
   download:       false
   sapurl:         'https://softwaredownloads.sap.com/file/0010000000060132013'
@@ -849,6 +845,14 @@ billOfMaterials:
 - url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/UITRV001300.SAR'
   download:       false
   sapurl:         'https://softwaredownloads.sap.com/file/0010000000561182019'
+
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SAP_UI754.SAR'
+  download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0010000000031692020'
+
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SAPPAAPL4_1904_0-80004547.ZIP'
+  download:       false
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000000747382019'
 
 ...
 # /*---------------------------------------------------------------------------8

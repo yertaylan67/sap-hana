@@ -1,0 +1,99 @@
+---
+
+# Required packages:
+#   unzip
+#   unrar
+#
+
+# Required variables or facts:
+#   _sapBom
+#   _installDirPath
+#
+
+
+# *====================================4=======================================8
+#
+#                              BOM Registration
+#
+# *====================================4=======================================8
+#
+#   Purpose:
+#     Reads in the BOM file and makes the included variables and dictionaries
+#     available under the sapbom object ID.
+#
+#   Available objects:
+#     sapbom.productIdSCS
+#     sapbom.productIdHDB
+#     sapbom.productIdPAS
+#     sapbom.productIdAPP
+#     sapbom.productIdWEB
+#     sapbom.sasToken
+#     sapbom.billOfMaterials
+#     sapbom.billOfMaterials.url
+#     sapbom.billOfMaterials.fileName
+#     sapbom.billOfMaterials.permissions
+#     sapbom.billOfMaterials.extract
+#     sapbom.billOfMaterials.extractDir
+#     sapbom.billOfMaterials.creates
+#     sapbom.billOfMaterials.download
+#     sapbom.billOfMaterials.sourceUrl
+#
+- name:         "BOM: Register BOM"
+  include_vars:
+    file:       "../../sap-bom-files/files/BOM_{{ _sapBom }}.yaml"
+    name:       sapbom
+
+- name:         "BOM: Register Database BOM"
+  include_vars:
+    file:       "../../sap-bom-files/files/BOM_{{ sapbom.databaseBom }}.yaml"
+    name:       sapdbbom
+
+# *=========== DEBUGGING ==============4
+# - debug:  
+#     msg:      "URL: {{ item.url }}"
+#   loop:       "{{ sapbom.billOfMaterials|flatten(levels=1) }}"
+#
+# - debug:  
+#     msg:      "URL: {{ item.url }}"
+#   loop:       "{{ sapdbbom.billOfMaterials|flatten(levels=1) }}"
+#
+# - debug:  
+#     msg:      "URL: {{ item.url }}"
+# #  loop:       "{{ (sapbom.billOfMaterials|flatten(levels=1)) + (sapdbbom.billOfMaterials|flatten(levels=1)) }}"
+#   loop:       "{{        (   sapbom.billOfMaterials | flatten(levels=1) )
+#                   | union( sapdbbom.billOfMaterials | flatten(levels=1) ) }}"
+# *================2===================4
+
+
+# TODO: Download Software
+# TODO: Catalog Software
+# TODO: make BOM Entry if required
+# TODO: Store Software in Storage Account
+
+# *====================================4=======================================8
+#
+#                              Download Software
+#
+# *====================================4=======================================8
+#
+#   Purpose:
+#     Download the software from the customer storage account
+#
+- name:         "BOM: Download Files"
+  get_url:
+    url:        "{{ item.sapurl }}"
+    dest:       ""
+    mode:       ""
+
+  register:     result
+  until:        result is succeeded
+  retries:      10
+  delay:        5
+  loop:         "{{        (   sapbom.billOfMaterials | flatten(levels=1) )
+                    | union( sapdbbom.billOfMaterials | flatten(levels=1) ) }}"
+  when:         not (    (item.sapurl is undefined)
+                      or (item.sapurl == '') )
+
+
+
+...

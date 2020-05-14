@@ -51,31 +51,31 @@ databaseBom:      HANA20v1
 
 billOfMaterials:
 # SAPCAR 7.21
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/platform/SAPCAR_1311-80000935.EXE'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SAPCAR_1311-80000935.EXE'
   fileName:       'downloads/SAPCAR'
   permissions:    '0755'
 
 
 # SWPM 2.0
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/platform/SWPM20SP05_1-80003424.SAR'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SWPM20SP05_1-80003424.SAR'
   fileName:       'downloads/SWPM.SAR'
   extractDir:     'SWPM'
   creates:        'SIGNATURE.SMF'
 
 
 # SAP KERNEL 7.77
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/platform/SAPEXEDB_40-80004392.SAR'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SAPEXEDB_40-80004392.SAR'
   fileName:       'download_basket/SAPEXEDB.SAR'
 
 
 
 # SAP S/4 1909
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_1.zip'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/S4CORE104_INST_EXPORT_1.zip'
   fileName:       'downloads/EXPORT_1.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'SIGNATURE.SMF'
 
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/dbexports/S4CORE104_INST_EXPORT_2.zip'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/S4CORE104_INST_EXPORT_2.zip'
   fileName:       'downloads/EXPORT_2.ZIP'
   extractDir:     'CD_EXPORT'
   creates:        'S4CORE104_databackup_0_1'
@@ -88,11 +88,11 @@ billOfMaterials:
 # |                                                                            |
 # +------------------------------------4--------------------------------------*/
 # SUM 2.0
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/SUM20SP07_2-80002456.SAR'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SUM20SP07_2-80002456.SAR'
   download:       false
 
 # EA-HR608
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/application/UIMDC001200.SAR'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/UIMDC001200.SAR'
   download:       false
   sourceUrl:      'https://softwaredownloads.sap.com/file/0010000000494332016'
 

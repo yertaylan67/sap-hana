@@ -45,41 +45,48 @@ sasToken: '?sv=2019-02-02&ss=b&srt=sco&sp=rl&se=2021-02-24T02:36:25Z&st=2020-02-
 # +------------------------------------4--------------------------------------*/
 billOfMaterials:
 # SAPCAR 7.21
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/platform/SAPCAR_1311-80000935.EXE'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SAPCAR_1320-80000935.EXE'
   fileName:       'downloads/SAPCAR'
   permissions:    '0755'
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000000662062020'
 
 
 # SAP HOST AGENT 7.21
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/platform/SAPHOSTAGENT45_45-20009394.SAR'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SAPHOSTAGENT46_46-20009394.SAR'
   fileName:       'download_basket/SAPHOSTAGENT.SAR'
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000000497392020'
 
 
 # SAP HANA PLATFORM EDITION 2.0
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/hana/IMDB_SERVER20_046_0-80002031.SAR'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/IMDB_SERVER20_047_0-80002031.SAR'
   fileName:       'downloads/IMDB_SERVER20.SAR'
   extractDir:     'CD_HDBSERVER'
   creates:        'SIGNATURE.SMF'
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000000652902020'
 
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/hana/IMDB_CLIENT20_004_182-80002082.SAR'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/IMDB_CLIENT20_004_194-80002082.SAR'
   fileName:       'download_basket/IMDB_CLIENT20.SAR'
   extractDir:     'CD_CLIENT'
   creates:        'SIGNATURE.SMF'
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000000655012020'
 
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/hana/IMDB_AFL20_046_0-80001894.SAR'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/IMDB_AFL20_047_0-80001894.SAR'
   fileName:       'downloads/AFL20.SAR'
   extractDir:     'CD_HDBSERVER/COMPONENTS'
   creates:        'SAP_HANA_AFL/packages'
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000000654052020'
 
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/hana/VCH190900_2046_0-80004631.SAR'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/VCH190900_2047_0-80004631.SAR'
   fileName:       'downloads/VCHAFL.SAR'
   extractDir:     'CD_HDBSERVER/COMPONENTS'
   creates:        'VCH_AFL_1909/packages'
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000000653932020'
 
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/hana/IMDB_LCAPPS_2046_0-20010426.SAR'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/IMDB_LCAPPS_2047_0-20010426.SAR'
   fileName:       'downloads/LCAPPS.SAR'
   extractDir:     'CD_HDBSERVER/COMPONENTS'
   creates:        'SAP_HANA_LCAPPS/packages'
+  sapurl:         'https://softwaredownloads.sap.com/file/0020000000653262020'
 
 
 ...

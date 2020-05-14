@@ -45,7 +45,7 @@ Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azur
 # +------------------------------------4--------------------------------------*/
 billOfMaterials:
 # SAPCAR 7.21
-- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/platform/SAPCAR_1311-80000935.EXE'
+- url:            'https://zscuslib4ea13ea2fccf9835.blob.core.windows.net/sapbits/sapfiles/SAPCAR_1311-80000935.EXE'
   fileName:       '/usr/sap/install/downloads/SAPCAR'
   permissions:    '0755'
 ```
