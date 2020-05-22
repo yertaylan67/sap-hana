@@ -15,6 +15,15 @@
       loop: "{{ output.databases|flatten(levels=1) }}"
       when: item.platform == 'HANA'
 
+# Inventory validation for HANA VMs
+- hosts: hanadbnodes
+  become: true
+  become_user: root
+  roles:
+    - role: inventory-validation
+      when:
+        - hana_database.size != "LargeInstance"   
+
 # Prepare os, disks and mount points on Hana Database servers
 - hosts: hanadbnodes
   become: true
@@ -61,15 +70,14 @@
   roles:
     - role: sap-media-download
 
-# When scenario is Large Instance, sap bits will be transferred to hanadbnodes
 - hosts: hanadbnodes
   become: true
   become_user: root
-  tasks:
-  - include_role:
-      name: sap-media-transfer
-      tasks_from: media_hanadbnode_copy.yml
-    when: hana_database.size == "LargeInstance"
+  roles:
+    - role: sap-media-transfer
+      when: hana_database.size == "LargeInstance"
+    - role: large-instance-environment-setup
+      when: hana_database.size == "LargeInstance"
 
 # Hana DB components install
 - hosts: hanadbnodes
@@ -78,6 +86,11 @@
   any_errors_fatal: true
   vars_files:
     - "vars/ha-packages.yml"
+  pre_tasks:
+    - name: Include SAP HANA DB sizes
+      include_vars:
+        file: ../hdb_sizes.json
+        name: hdb_sizes
   roles:
     - role: hdb-server-install
     - role: hana-system-replication
