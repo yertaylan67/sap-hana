@@ -88,13 +88,15 @@ resource "local_file" "ansible-inventory" {
     application           = var.application,
     ips-scs               = local.ips-scs,
     ips-app               = local.ips-app,
-    ips-web               = local.ips-web
+    ips-web               = local.ips-web,
+    hdb-sid               = local.hdb-sid,
+    app-sid               = local.app-sid
     }
   )
   filename = "${terraform.workspace}/ansible_config_files/hosts"
 }
 
-# Generates the Ansible Inventory file
+# Generates the Ansible Inventory yml file
 resource "local_file" "ansible-inventory-yml" {
   content = templatefile("${path.module}/ansible_inventory.yml.tmpl", {
     iscsi                 = lookup(var.infrastructure, "iscsi", {}),
@@ -110,6 +112,8 @@ resource "local_file" "ansible-inventory-yml" {
     ips-scs               = local.ips-scs,
     ips-app               = local.ips-app,
     ips-web               = local.ips-web
+    hdb-sid               = local.hdb-sid,
+    app-sid               = local.app-sid
     }
   )
   filename = "${terraform.workspace}/ansible_config_files/hosts.yml"

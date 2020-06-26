@@ -46,6 +46,10 @@ variable "hana-database-info" {
   description = "Updated hana database json"
 }
 
+variable "app-sid" {
+  description = "SID used when generating App tier"
+}
+
 variable "nics-scs" {
   description = "List of NICs for the SCS Application VMs"
 }
@@ -59,6 +63,8 @@ variable "nics-web" {
 }
 
 locals {
+  hdb-sid                      = var.hdb-sid
+  app-sid                      = var.app-sid
   ips-iscsi                    = var.nics-iscsi[*].private_ip_address
   ips-jumpboxes-windows        = var.nics-jumpboxes-windows[*].private_ip_address
   ips-jumpboxes-linux          = var.nics-jumpboxes-linux[*].private_ip_address

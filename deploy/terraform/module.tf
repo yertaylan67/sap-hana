@@ -89,6 +89,7 @@ module "output_files" {
   loadbalancers                = module.hdb_node.loadbalancers
   hdb-sid                      = module.hdb_node.hdb-sid
   hana-database-info           = module.hdb_node.hana-database-info
+  app-sid                      = module.app_tier.app-sid
   nics-scs                     = module.app_tier.nics-scs
   nics-app                     = module.app_tier.nics-app
   nics-web                     = module.app_tier.nics-web

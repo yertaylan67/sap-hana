@@ -27,4 +27,3 @@
   block:
     - name: Check yum repo on HANA VMs
       command: yum repolist
-
