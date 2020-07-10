@@ -34,6 +34,22 @@ locals {
   sub_app_nsg_arm_id = local.sub_app_nsg_exists ? try(local.var_sub_app_nsg.arm_id, "") : ""
   sub_app_nsg_name   = local.sub_app_nsg_exists ? "" : try(local.var_sub_app_nsg.name, "nsg-app")
 
+  # WEB subnet
+  #If subnet_web is not specified deploy into app subnet
+  var_sub_web_defined   = try(var.infrastructure.vnets.sap.subnet_web,null) == null ? false : true
+  var_sub_web           = try(var.infrastructure.vnets.sap.subnet_web, try(var.infrastructure.vnets.sap.subnet_app, {}))
+  sub_web_exists        = try(local.var_sub_web.is_existing, false)
+  sub_web_arm_id        = local.sub_web_exists ? try(local.var_sub_web.arm_id, "") : ""
+  sub_web_name          = local.sub_web_exists ? "" : try(local.var_sub_web.name, "subnet-web")
+  sub_web_prefix        = local.sub_web_exists ? "" : try(local.var_sub_web.prefix, "10.1.5.0/24")
+
+  # WEB NSG
+  var_sub_web_nsg    = try(local.var_sub_web.nsg, try(local.var_sub_app.nsg, {}))
+  sub_web_nsg_exists = try(local.var_sub_web_nsg.is_existing, false)
+  sub_web_nsg_arm_id = local.sub_web_nsg_exists ? try(local.var_sub_web_nsg.arm_id, "") : ""
+  sub_web_nsg_name   = local.sub_web_nsg_exists ? "" : try(local.var_sub_web_nsg.name, "nsg-web")
+
+
   application_sid          = try(var.application.sid, "HN1")
   enable_deployment        = try(var.application.enable_deployment, false)
   scs_instance_number      = try(var.application.scs_instance_number, "01")
@@ -159,7 +175,7 @@ locals {
     62000 + tonumber(local.scs_instance_number),
     62100 + tonumber(local.ers_instance_number)
   ]
-
+  
   # Create list of disks per VM
   app-data-disks = flatten([
     for vm_count in range(local.application_server_count) : [
