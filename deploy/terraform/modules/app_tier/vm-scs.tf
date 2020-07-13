@@ -8,8 +8,8 @@ resource "azurerm_network_interface" "scs" {
 
   ip_configuration {
     name                          = "IPConfig1"
-    subnet_id                     = local.var_sub_web_defined ? (local.sub_web_exists ? data.azurerm_subnet.subnet-sap-web[0].id : azurerm_subnet.subnet-sap-web[0].id) : (local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].id : azurerm_subnet.subnet-sap-app[0].id)
-    private_ip_address            = local.var_sub_web_defined ? cidrhost(local.sub_web_exists ? data.azurerm_subnet.subnet-sap-web[0].address_prefixes[0] : azurerm_subnet.subnet-sap-web[0].address_prefixes[0], tonumber(count.index) + local.ip_offsets.scs_vm) : cidrhost(local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].address_prefixes[0] : azurerm_subnet.subnet-sap-app[0].address_prefixes[0], tonumber(count.index) + local.ip_offsets.scs_vm)
+    subnet_id                     = local.sub_scs_defined ? (local.sub_scs_exists ? data.azurerm_subnet.subnet-sap-web[0].id : azurerm_subnet.subnet-sap-web[0].id) : (local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].id : azurerm_subnet.subnet-sap-app[0].id)
+    private_ip_address            = local.sub_scs_defined ? cidrhost(local.sub_scs_exists ? data.azurerm_subnet.subnet-sap-web[0].address_prefixes[0] : azurerm_subnet.subnet-sap-web[0].address_prefixes[0], tonumber(count.index) + local.ip_offsets.scs_vm) : cidrhost(local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].address_prefixes[0] : azurerm_subnet.subnet-sap-app[0].address_prefixes[0], tonumber(count.index) + local.ip_offsets.scs_vm)
     private_ip_address_allocation = "static"
   }
 }
