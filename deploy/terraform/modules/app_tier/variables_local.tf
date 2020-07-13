@@ -48,8 +48,6 @@ locals {
   sub_web_nsg_exists = try(local.var_sub_web_nsg.is_existing, false)
   sub_web_nsg_arm_id = local.sub_web_nsg_exists ? try(local.var_sub_web_nsg.arm_id, "") : ""
   sub_web_nsg_name   = local.sub_web_nsg_exists ? "" : try(local.var_sub_web_nsg.name, "nsg-web")
-
-
   application_sid          = try(var.application.sid, "HN1")
   enable_deployment        = try(var.application.enable_deployment, false)
   scs_instance_number      = try(var.application.scs_instance_number, "01")
