@@ -152,7 +152,6 @@ resource "azurerm_lb" "web" {
     subnet_id                     = local.var_sub_web_defined ? local.sub_web_exists ? data.azurerm_subnet.subnet-sap-web[0].id : azurerm_subnet.subnet-sap-web[0].id : local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].id : azurerm_subnet.subnet-sap-app[0].id
     private_ip_address_allocation = "Static"
     private_ip_address            = local.var_sub_web_defined ? cidrhost(local.sub_web_prefix, local.ip_offsets.web_lb) : cidrhost(local.sub_app_prefix, local.ip_offsets.web_lb)
-    
   }
 }
 
