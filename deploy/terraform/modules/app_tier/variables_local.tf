@@ -36,8 +36,8 @@ locals {
 
   # WEB subnet
   #If subnet_web is not specified deploy into app subnet
-  var_sub_web_defined   = try(var.infrastructure.vnets.sap.subnet_web,null) == null ? false : true
-  var_sub_web           = try(var.infrastructure.vnets.sap.subnet_web, try(var.infrastructure.vnets.sap.subnet_app, {}))
+  sub_web_defined   = try(var.infrastructure.vnets.sap.subnet_web,null) == null ? false : true
+  sub_web           = try(var.infrastructure.vnets.sap.subnet_web, try(var.infrastructure.vnets.sap.subnet_app, {}))
   sub_web_exists        = try(local.var_sub_web.is_existing, false)
   sub_web_arm_id        = local.sub_web_exists ? try(local.var_sub_web.arm_id, "") : ""
   sub_web_name          = local.sub_web_exists ? "" : try(local.var_sub_web.name, "subnet-web")
