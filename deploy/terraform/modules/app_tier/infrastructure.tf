@@ -56,7 +56,6 @@ resource "azurerm_lb" "scs" {
     subnet_id                     = local.var_sub_web_defined ? local.sub_web_exists ? data.azurerm_subnet.subnet-sap-web[0].id : azurerm_subnet.subnet-sap-web[0].id : local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].id : azurerm_subnet.subnet-sap-app[0].id
     private_ip_address_allocation = "Static"
     private_ip_address            = local.var_sub_web_defined ? var.infrastructure.vnets.sap.subnet_web.is_existing ? local.scs_lb_ips[1] : cidrhost(var.infrastructure.vnets.sap.subnet_web.prefix, 1 + local.ip_offsets.scs_lb) : var.infrastructure.vnets.sap.subnet_app.is_existing ? local.scs_lb_ips[1] : cidrhost(var.infrastructure.vnets.sap.subnet_app.prefix, 1 + local.ip_offsets.scs_lb)
-
   }
 }
 
