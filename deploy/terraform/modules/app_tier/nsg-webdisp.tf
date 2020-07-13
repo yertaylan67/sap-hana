@@ -16,7 +16,9 @@ data "azurerm_network_security_group" "nsg-web" {
 # Associates SAP app nsg to SAP app subnet
 resource "azurerm_subnet_network_security_group_association" "Associate-nsg-web" {
   count                     = local.enable_deployment && local.var_sub_web_defined ? (signum((local.sub_web_exists ? 0 : 1) + (local.sub_web_nsg_exists ? 0 : 1))) : 0
-  subnet_id                 = local.var_sub_web_defined ? (local.sub_web_exists ? data.azurerm_subnet.subnet-sap-web[0].id : azurerm_subnet.subnet-sap-web[0].id) : (local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].id : azurerm_subnet.subnet-sap-app[0].id)
+  subnet_id                 = local.var_sub_web_defined ? (
+  local.sub_web_exists ? data.azurerm_subnet.subnet-sap-web[0].id : azurerm_subnet.subnet-sap-web[0].id) : (
+  local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].id : azurerm_subnet.subnet-sap-app[0].id)
   network_security_group_id = local.var_sub_web_defined ? (local.sub_web_nsg_exists ? data.azurerm_network_security_group.nsg-web[0].id : azurerm_network_security_group.nsg-web[0].id) : (local.sub_app_nsg_exists ? data.azurerm_network_security_group.nsg-app[0].id : azurerm_network_security_group.nsg-app[0].id)
 }
 
