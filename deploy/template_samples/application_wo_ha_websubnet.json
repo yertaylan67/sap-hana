@@ -58,13 +58,13 @@
             "name": "nsg-app"
           }
         },
-        "subnet_scs": {
+        "subnet_web": {
           "is_existing": "false",
-          "name": "subnet-scs",
+          "name": "subnet-web",
           "prefix": "10.1.4.0/24",
           "nsg": {
             "is_existing": "false",
-            "name": "nsg-scs"
+            "name": "nsg-web"
           }
         }
       }
