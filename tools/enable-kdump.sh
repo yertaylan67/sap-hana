@@ -1,6 +1,8 @@
 #!/bin/bash
 # This script enables kdump on HANA Large Instances(Type 1/2)
 
+dev_mapper_id_regexp="/dev/mapper/[0-9a-z]{1,}"
+
 ExitIfFailed()
 {
     if [ "$1" != 0 ]; then
@@ -23,6 +25,40 @@ supported_version=( "12-SP2"
     "15-SP1"
     "15-SP2"
 )
+
+# scan the added lun and mount that to /var/crash
+# A race condition requires that rescan-scsi-bus.sh be run twice
+# if logical units are mapped for the first time. During the first scan,
+# rescan-scsi-bus.sh only adds LUN0; all other logical units are added in the second scan.
+# refer https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/5/html/online_storage_reconfiguration_guide/rescan-scsi-bus
+for i in {0..1}
+do
+    rescan-scsi-bus.sh
+    ExitIfFailed $? "Unable to scan lun"
+done
+
+# identify the new device mapper id with 100 GiB, 51 GiB, 30GiB for SDFlex, Mc990x and LI respectively
+regex_for_lun_size="100[ ]*GiB\|51[ ]*GiB\|30[ ]*GiB"
+luns_dev_mapper=$(fdisk -l | grep "/dev/mapper" | grep "$regex_for_lun_size" | grep -oP "$dev_mapper_id_regexp")
+# if multiple or zero lun found then exit the script
+kdump_total_luns=$(echo $luns_dev_mapper | wc -w)
+if [[ "$kdump_total_luns" != "1" ]]; then
+    echo "Failed to identify dedicated lun for kdump"
+    echo "0 or more than 1 luns with either 100 GB, 51 GB, 30 GB found"
+    exit 1
+fi
+
+# format a disk
+mkfs.xfs -f $luns_dev_mapper
+ExitIfFailed $? "Unable format kdump dedicated lun"
+
+# add entry in the /etc/fstab to mount the kdump lun
+echo "$luns_dev_mapper /var/crash xfs defaults 0 0" >> /etc/fstab
+ExitIfFailed $? "Unable to add lun mount entry in /etc/fstab"
+
+# mount the file system mentioned in the /etc/fstab file
+mount -a
+ExitIfFailed $? "Unable to mount lun kdump dedicated lun to the system"
 
 # get OS name and OS version
 # /etc/os-release file has this information
