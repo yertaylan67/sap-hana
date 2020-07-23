@@ -79,11 +79,12 @@ mkfs.xfs -f $lun_dev_mapper
 ExitIfFailed $? "Unable format kdump dedicated lun"
 
 # add entry in the /etc/fstab to mount the kdump lun
+# on reboot
 echo "$lun_dev_mapper /var/crash xfs defaults 0 0" >> /etc/fstab
 ExitIfFailed $? "Unable to add lun mount entry in /etc/fstab"
 
-# mount the file system mentioned in the /etc/fstab file
-mount -a
+# mount the kdump dedicated lun
+mount $lun_dev_mapper /var/crash
 ExitIfFailed $? "Unable to mount kdump dedicated lun"
 
 # get OS name and OS version
