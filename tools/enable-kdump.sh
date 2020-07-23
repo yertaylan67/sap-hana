@@ -1,14 +1,18 @@
 #!/bin/bash
 # This script enables kdump on HANA Large Instances(Type 1/2)
 
-dev_mapper_id_regexp="/dev/mapper/[0-9a-z]{1,}"
-
 ExitIfFailed()
 {
     if [ "$1" != 0 ]; then
         echo "$2 ! Exiting !!!!"
         exit 1
     fi
+}
+
+ExitIfLunNotFound()
+{
+    echo "Failed to identify dedicated lun for kdump"
+    exit 1
 }
 
 # operating system supported by this script
@@ -37,23 +41,46 @@ do
     ExitIfFailed $? "Unable to scan lun"
 done
 
-# identify the new device mapper id with 100 GiB, 51 GiB, 30GiB for SDFlex, Mc990x and LI respectively
-regex_for_lun_size="100[ ]*GiB\|51[ ]*GiB\|30[ ]*GiB"
-luns_dev_mapper=$(fdisk -l | grep "/dev/mapper" | grep "$regex_for_lun_size" | grep -oP "$dev_mapper_id_regexp")
-# if multiple or zero lun found then exit the script
-kdump_total_luns=$(echo $luns_dev_mapper | wc -w)
-if [[ "$kdump_total_luns" != "1" ]]; then
-    echo "Failed to identify dedicated lun for kdump"
-    echo "0 or more than 1 luns with either 100 GB, 51 GB, 30 GB found"
-    exit 1
+# sg_scan -i command will give mapping for the devices
+# output look like
+# /dev/sg32: scsi17 channel=0 id=3 lun=3
+#    NETAPP    LUN C-Mode        9600 [rmb=0 cmdq=1 pqual=0 pdev=0x0]
+# where lun=3 is the lun id
+# so in order to fetch the dedicated kdump lun which is attached to lun_id=3
+# we need to parse the SAN id and then map that id to device id in os
+# in above example SAN id is /dev/sg32
+san_disk=$(sg_scan -i | grep lun=3 | awk 'FNR==1'| egrep -o "^[ ]{0,}\/dev\/[a-z0-9]*")
+if [[ "$san_disk" == "" ]]; then
+    ExitIfLunNotFound
 fi
 
+# get the actual device using san_disk id
+# sg_map -sd show mapping to disk
+# output of sg_map -sd is like:
+# /dev/sg1  /dev/sda
+# /dev/sg2  /dev/sdb
+device=$(sg_map -sd | grep $san_disk | egrep -o "[ ]{1,}\/dev\/[a-z0-9]*"| sed -e 's/^[[:space:]]*//')
+if [[ "$device" == "" ]]; then
+    ExitIfLunNotFound
+fi
+
+# now use udevadm info --query=all --name /dev/id
+# to get the mapper id
+
+echo "the device is $device"
+id=$(udevadm info --query=all --name $device | grep "ID_SERIAL=" | egrep -o "[a-z0-9]{1,}")
+if [[ "$device" == "" ]]; then
+    ExitIfLunNotFound
+fi
+
+lun_dev_mapper="/dev/mapper/$id"
+
 # format a disk
-mkfs.xfs -f $luns_dev_mapper
+mkfs.xfs -f $lun_dev_mapper
 ExitIfFailed $? "Unable format kdump dedicated lun"
 
 # add entry in the /etc/fstab to mount the kdump lun
-echo "$luns_dev_mapper /var/crash xfs defaults 0 0" >> /etc/fstab
+echo "$lun_dev_mapper /var/crash xfs defaults 0 0" >> /etc/fstab
 ExitIfFailed $? "Unable to add lun mount entry in /etc/fstab"
 
 # mount the file system mentioned in the /etc/fstab file
