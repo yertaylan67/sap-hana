@@ -84,7 +84,7 @@ ExitIfFailed $? "Unable to add lun mount entry in /etc/fstab"
 
 # mount the file system mentioned in the /etc/fstab file
 mount -a
-ExitIfFailed $? "Unable to mount lun kdump dedicated lun to the system"
+ExitIfFailed $? "Unable to mount kdump dedicated lun"
 
 # get OS name and OS version
 # /etc/os-release file has this information
