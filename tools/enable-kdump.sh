@@ -67,7 +67,6 @@ fi
 # now use udevadm info --query=all --name /dev/id
 # to get the mapper id
 
-echo "the device is $device"
 id=$(udevadm info --query=all --name $device | grep "ID_SERIAL=" | egrep -o "[a-z0-9]{1,}")
 if [[ "$device" == "" ]]; then
     ExitIfLunNotFound
