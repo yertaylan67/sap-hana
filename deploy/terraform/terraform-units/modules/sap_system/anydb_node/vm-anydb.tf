@@ -20,7 +20,7 @@ resource azurerm_network_interface "anydb" {
 # Section for Linux Virtual machine 
 resource azurerm_linux_virtual_machine "dbserver" {
   count                        = local.enable_deployment ? ((upper(local.anydb_ostype) == "LINUX") ? length(local.anydb_vms) : 0) : 0
-  name                         = format("%s_%s", local.prefix,local.anydb_vms[count.index].name)
+  name                         = format("%s_%s-vm", local.prefix,local.anydb_vms[count.index].name)
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
   availability_set_id          = azurerm_availability_set.anydb[0].id
@@ -44,7 +44,7 @@ resource azurerm_linux_virtual_machine "dbserver" {
     iterator = disk
     for_each = flatten([for storage_type in lookup(local.sizes, local.anydb_size).storage : [for disk_count in range(storage_type.count) : { name = storage_type.name, id = disk_count, disk_type = storage_type.disk_type, size_gb = storage_type.size_gb, caching = storage_type.caching }] if storage_type.name == "os"])
     content {
-      name                 = format("%s-osdisk", local.anydb_vms[count.index].name)
+      name                 = format("%s_%s-osdisk", local.prefix,local.anydb_vms[count.index].name)
       caching              = disk.value.caching
       storage_account_type = disk.value.disk_type
       disk_size_gb         = disk.value.size_gb
@@ -73,7 +73,7 @@ resource azurerm_linux_virtual_machine "dbserver" {
 # Section for Windows Virtual machine based on a marketplace image 
 resource azurerm_windows_virtual_machine "dbserver" {
   count                        = local.enable_deployment ? ((upper(local.anydb_ostype) == "WINDOWS") ? length(local.anydb_vms) : 0) : 0
-  name                         = format("%s_%s", local.prefix,local.anydb_vms[count.index].name)
+  name                         = format("%s_%s-vm", local.prefix,local.anydb_vms[count.index].name)
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
   availability_set_id          = azurerm_availability_set.anydb[0].id
@@ -97,7 +97,7 @@ resource azurerm_windows_virtual_machine "dbserver" {
     iterator = disk
     for_each = flatten([for storage_type in lookup(local.sizes, local.anydb_size).storage : [for disk_count in range(storage_type.count) : { name = storage_type.name, id = disk_count, disk_type = storage_type.disk_type, size_gb = storage_type.size_gb, caching = storage_type.caching }] if storage_type.name == "os"])
     content {
-      name                 = format("%s-osdisk", local.anydb_vms[count.index].name)
+      name                 = format("%s_%s-osdisk", local.prefix,local.anydb_vms[count.index].name)
       caching              = disk.value.caching
       storage_account_type = disk.value.disk_type
       disk_size_gb         = disk.value.size_gb

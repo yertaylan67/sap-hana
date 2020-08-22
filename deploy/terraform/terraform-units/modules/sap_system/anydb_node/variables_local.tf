@@ -109,7 +109,7 @@ locals {
   anydb_sku    = try(lookup(local.sizes, local.anydb_size).compute.vmsize, "Standard_E4s_v3")
   anydb_fs     = try(local.anydb.filesystem, "xfs")
   anydb_ha     = try(local.anydb.high_availability, "false")
-  anydb_sid    = (length(local.anydb-databases) > 0) ? try(local.anydb.instance.sid, "OR1") : "OR1"
+  anydb_sid    = (length(local.anydb-databases) > 0) ? try(local.anydb.instance.sid, local.sid) : local.sid
   loadbalancer = try(local.anydb.loadbalancer, {})
 
   authentication = try(local.anydb.authentication,
@@ -192,7 +192,7 @@ locals {
       for database in local.anydb-databases : [
         for idx, dbnode in local.dbnodes : {
           platform       = local.anydb_platform,
-          name           = "${dbnode.name}-00",
+          name           = "${dbnode.name}00",
           db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[0],
           size           = local.anydb_sku
           os             = local.anydb_ostype,
@@ -205,7 +205,7 @@ locals {
       for database in local.anydb-databases : [
         for idx, dbnode in local.dbnodes : {
           platform       = local.anydb_platform,
-          name           = "${dbnode.name}-01",
+          name           = "${dbnode.name}01",
           db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[1],
           size           = local.anydb_sku,
           os             = local.anydb_ostype,

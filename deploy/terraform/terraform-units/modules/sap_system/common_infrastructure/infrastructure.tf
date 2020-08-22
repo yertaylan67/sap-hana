@@ -69,7 +69,7 @@ resource "random_id" "random-id" {
 
 # Creates boot diagnostics storage account
 resource "azurerm_storage_account" "storage-bootdiag" {
-  name                      = "sabootdiag${random_id.random-id.hex}"
+  name                      = lower(format("%s%s",local.sa_prefix,substr(random_id.random-id.hex,0,4)))
   resource_group_name       = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
   location                  = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
   account_replication_type  = "LRS"
