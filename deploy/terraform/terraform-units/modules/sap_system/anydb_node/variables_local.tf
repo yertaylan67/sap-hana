@@ -52,10 +52,7 @@ variable "region_mapping" {
   }
 }
 
-
 locals {
-
-
   region             = try(var.infrastructure.region, "")
   environment        = lower(try(var.infrastructure.environment, ""))
   sid                = upper(try(var.infrastructure.sid, ""))
@@ -65,8 +62,6 @@ locals {
   prefix             = try(var.infrastructure.resource_group.name, replace(format("%s-%s-%s-%s", local.environment, local.location_short, local.codename, local.sid),"--","-"))
   sa_prefix          = lower(replace(format("%s%s%sdiag", substr(local.environment,0,5), local.location_short, substr(local.codename,0,7)),"--","-"))
   rg_name            = local.prefix
-
-
 
   # DB subnet
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})

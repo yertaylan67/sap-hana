@@ -18,14 +18,59 @@ variable "ppg" {
   description = "Details of the proximity placement group"
 }
 
+variable "region_mapping" {
+  type        = map(string)
+  description = "Region Mapping: Full = Single CHAR, 4-CHAR"
+
+  # 28 Regions 
+
+  default = {
+    westus             = "weus"
+    westus2            = "wus2"
+    centralus          = "ceus"
+    eastus             = "eaus"
+    eastus2            = "eus2"
+    northcentralus     = "ncus"
+    southcentralus     = "scus"
+    westcentralus      = "wcus"
+    northeurope        = "noeu"
+    westeurope         = "weeu"
+    eastasia           = "eaas"
+    southeastasia      = "seas"
+    brazilsouth        = "brso"
+    japaneast          = "jpea"
+    japanwest          = "jpwe"
+    centralindia       = "cein"
+    southindia         = "soin"
+    westindia          = "wein"
+    uksouth2           = "uks2"
+    uknorth            = "ukno"
+    canadacentral      = "cace"
+    canadaeast         = "caea"
+    australiaeast      = "auea"
+    australiasoutheast = "ause"
+    uksouth            = "ukso"
+    ukwest             = "ukwe"
+    koreacentral       = "koce"
+    koreasouth         = "koso"
+  }
+}
 # Set defaults
 locals {
+  region             = try(var.infrastructure.region, "")
+  environment        = lower(try(var.infrastructure.environment, ""))
+  sid                = upper(try(var.infrastructure.sid, ""))
+  codename           = lower(try(var.infrastructure.codename, ""))
+  location_short     = lower(try(var.region_mapping[local.region], "unkn"))
+  # Using replace "--" with "-"  in case of one of the components like codename is empty
+  prefix             = try(var.infrastructure.resource_group.name, replace(format("%s-%s-%s-%s", local.environment, local.location_short, local.codename, local.sid),"--","-"))
+  sa_prefix          = lower(replace(format("%s%s%sdiag", substr(local.environment,0,5), local.location_short, substr(local.codename,0,7)),"--","-"))
 
   # APP subnet
   var_sub_app    = try(var.infrastructure.vnets.sap.subnet_app, {})
   sub_app_exists = try(local.var_sub_app.is_existing, false)
   sub_app_arm_id = local.sub_app_exists ? try(local.var_sub_app.arm_id, "") : ""
-  sub_app_name   = local.sub_app_exists ? "" : try(local.var_sub_app.name, "subnet-app")
+  sub_app_name   = local.sub_app_exists ? "" : try(local.var_sub_app.name, format("%s_app-subnet", local.prefix))
   sub_app_prefix = local.sub_app_exists ? "" : try(local.var_sub_app.prefix, "10.1.4.0/24")
 
   # APP NSG
@@ -40,7 +85,7 @@ locals {
   sub_web         = try(var.infrastructure.vnets.sap.subnet_web, {})
   sub_web_exists  = try(local.sub_web.is_existing, false)
   sub_web_arm_id  = local.sub_web_exists ? try(local.sub_web.arm_id, "") : ""
-  sub_web_name    = local.sub_web_exists ? "" : try(local.sub_web.name, "subnet-web")
+  sub_web_name    = local.sub_web_exists ? "" : try(local.sub_web.name, format("%s_web-subnet", local.prefix))
   sub_web_prefix  = local.sub_web_exists ? "" : try(local.sub_web.prefix, "10.1.5.0/24")
   sub_web_deployed = try(local.sub_web_defined ? (
     local.sub_web_exists ? data.azurerm_subnet.subnet-sap-web[0] : azurerm_subnet.subnet-sap-web[0]) : (
@@ -50,12 +95,12 @@ locals {
   sub_web_nsg        = try(local.sub_web.nsg, {})
   sub_web_nsg_exists = try(local.sub_web_nsg.is_existing, false)
   sub_web_nsg_arm_id = local.sub_web_nsg_exists ? try(local.sub_web_nsg.arm_id, "") : ""
-  sub_web_nsg_name   = local.sub_web_nsg_exists ? "" : try(local.sub_web_nsg.name, "nsg-web")
+  sub_web_nsg_name   = local.sub_web_nsg_exists ? "" : try(local.sub_web_nsg.name, format("%s_web-nsg", local.prefix))
   sub_web_nsg_deployed = try(local.sub_web_defined ? (
     local.sub_web_nsg_exists ? data.azurerm_network_security_group.nsg-web[0] : azurerm_network_security_group.nsg-web[0]) : (
   local.sub_app_nsg_exists ? data.azurerm_network_security_group.nsg-app[0] : azurerm_network_security_group.nsg-app[0]), null)
 
-  application_sid          = try(var.application.sid, "HN1")
+  application_sid          = try(var.application.sid, "")
   enable_deployment        = try(var.application.enable_deployment, false)
   scs_instance_number      = try(var.application.scs_instance_number, "01")
   ers_instance_number      = try(var.application.ers_instance_number, "02")
@@ -181,12 +226,13 @@ locals {
     62100 + tonumber(local.ers_instance_number)
   ]
 
+  app_computername = upper(local.app_ostype) == "WINDOWS" ? format("%sappw", lower(local.sid)) : format("%sappl", lower(local.sid))
   # Create list of disks per VM
   app-data-disks = flatten([
     for vm_count in range(local.application_server_count) : [
       for disk_spec in local.app_sizing.storage : {
         vm_index          = vm_count
-        name              = "${upper(local.application_sid)}_app${format("%02d", vm_count)}-${disk_spec.name}"
+        name              = format("%s_%s%02d-%s", local.prefix, local.app_computername, vm_count,disk_spec.name)
         disk_type         = lookup(disk_spec, "disk_type", "Premium_LRS")
         size_gb           = lookup(disk_spec, "size_gb", 512)
         caching           = lookup(disk_spec, "caching", false)
@@ -194,12 +240,14 @@ locals {
       }
     ]
   ])
+
+  scs_computername = upper(local.app_ostype) == "WINDOWS" ? format("%sscsw", lower(local.sid)) : format("%sscsl", lower(local.sid))
 
   scs-data-disks = flatten([
     for vm_count in(local.scs_high_availability ? range(2) : range(1)) : [
       for disk_spec in local.scs_sizing.storage : {
         vm_index          = vm_count
-        name              = "${upper(local.application_sid)}_scs${format("%02d", vm_count)}-${disk_spec.name}"
+        name              = format("%s_%s%02d-%s", local.prefix, local.scs_computername, vm_count,disk_spec.name)
         disk_type         = lookup(disk_spec, "disk_type", "Premium_LRS")
         size_gb           = lookup(disk_spec, "size_gb", 512)
         caching           = lookup(disk_spec, "caching", false)
@@ -208,11 +256,13 @@ locals {
     ]
   ])
 
+  web_computername = upper(local.app_ostype) == "WINDOWS" ? format("%swebw", lower(local.sid)) : format("%swebl", lower(local.sid))
+
   web-data-disks = flatten([
     for vm_count in range(local.webdispatcher_count) : [
       for disk_spec in local.web_sizing.storage : {
         vm_index          = vm_count
-        name              = "${upper(local.application_sid)}_web${format("%02d", vm_count)}-${disk_spec.name}"
+        name              = format("%s_%s%02d-%s", local.prefix, local.web_computername, vm_count,disk_spec.name)
         disk_type         = lookup(disk_spec, "disk_type", "Premium_LRS")
         size_gb           = lookup(disk_spec, "size_gb", 512)
         caching           = lookup(disk_spec, "caching", false)

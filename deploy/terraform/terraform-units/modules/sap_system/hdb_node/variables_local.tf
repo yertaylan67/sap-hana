@@ -21,37 +21,80 @@ variable "storage-bootdiag" {
 variable "ppg" {
   description = "Details of the proximity placement group"
 }
+variable "region_mapping" {
+  type        = map(string)
+  description = "Region Mapping: Full = Single CHAR, 4-CHAR"
 
+  # 28 Regions 
+
+  default = {
+    westus             = "weus"
+    westus2            = "wus2"
+    centralus          = "ceus"
+    eastus             = "eaus"
+    eastus2            = "eus2"
+    northcentralus     = "ncus"
+    southcentralus     = "scus"
+    westcentralus      = "wcus"
+    northeurope        = "noeu"
+    westeurope         = "weeu"
+    eastasia           = "eaas"
+    southeastasia      = "seas"
+    brazilsouth        = "brso"
+    japaneast          = "jpea"
+    japanwest          = "jpwe"
+    centralindia       = "cein"
+    southindia         = "soin"
+    westindia          = "wein"
+    uksouth2           = "uks2"
+    uknorth            = "ukno"
+    canadacentral      = "cace"
+    canadaeast         = "caea"
+    australiaeast      = "auea"
+    australiasoutheast = "ause"
+    uksouth            = "ukso"
+    ukwest             = "ukwe"
+    koreacentral       = "koce"
+    koreasouth         = "koso"
+  }
+}
 # Set defaults
 locals {
-  # Name of the landscape
-  landscape_id = try(var.infrastructure.landscape, "DEMO")
+  region             = try(var.infrastructure.region, "")
+  environment        = lower(try(var.infrastructure.environment, ""))
+  sid                = upper(try(var.infrastructure.sid, ""))
+  codename           = lower(try(var.infrastructure.codename, ""))
+  location_short     = lower(try(var.region_mapping[local.region], "unkn"))
+  # Using replace "--" with "-"  in case of one of the components like codename is empty
+  prefix             = try(var.infrastructure.resource_group.name, replace(format("%s-%s-%s-%s", local.environment, local.location_short, local.codename, local.sid),"--","-"))
+  sa_prefix          = lower(replace(format("%s%s%sdiag", substr(local.environment,0,5), local.location_short, substr(local.codename,0,7)),"--","-"))
+  rg_name            = local.prefix
 
   # Admin subnet
   var_sub_admin    = try(var.infrastructure.vnets.sap.subnet_admin, {})
   sub_admin_exists = try(local.var_sub_admin.is_existing, false)
   sub_admin_arm_id = local.sub_admin_exists ? try(local.var_sub_admin.arm_id, "") : ""
-  sub_admin_name   = local.sub_admin_exists ? "" : try(local.var_sub_admin.name, "subnet-admin")
+  sub_admin_name   = local.sub_admin_exists ? "" : try(local.var_sub_admin.name, format("%s_admin-subnet", local.prefix))
   sub_admin_prefix = local.sub_admin_exists ? "" : try(local.var_sub_admin.prefix, "10.1.1.0/24")
 
   # Admin NSG
   var_sub_admin_nsg    = try(var.infrastructure.vnets.sap.subnet_admin.nsg, {})
   sub_admin_nsg_exists = try(local.var_sub_admin_nsg.is_existing, false)
   sub_admin_nsg_arm_id = local.sub_admin_nsg_exists ? try(local.var_sub_admin_nsg.arm_id, "") : ""
-  sub_admin_nsg_name   = local.sub_admin_nsg_exists ? "" : try(local.var_sub_admin_nsg.name, "nsg-admin")
+  sub_admin_nsg_name   = local.sub_admin_nsg_exists ? "" : try(local.var_sub_admin_nsg.name, format("%s_admin-nsg", local.prefix))
 
   # DB subnet
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
   sub_db_exists = try(local.var_sub_db.is_existing, false)
   sub_db_arm_id = local.sub_db_exists ? try(local.var_sub_db.arm_id, "") : ""
-  sub_db_name   = local.sub_db_exists ? "" : try(local.var_sub_db.name, "subnet-db")
+  sub_db_name   = local.sub_db_exists ? "" : try(local.var_sub_db.name, format("%s_db-subnet", local.prefix))
   sub_db_prefix = local.sub_db_exists ? "" : try(local.var_sub_db.prefix, "10.1.2.0/24")
 
   # DB NSG
   var_sub_db_nsg    = try(var.infrastructure.vnets.sap.subnet_db.nsg, {})
   sub_db_nsg_exists = try(local.var_sub_db_nsg.is_existing, false)
   sub_db_nsg_arm_id = local.sub_db_nsg_exists ? try(local.var_sub_db_nsg.arm_id, "") : ""
-  sub_db_nsg_name   = local.sub_db_nsg_exists ? "" : try(local.var_sub_db_nsg.name, "nsg-db")
+  sub_db_nsg_name   = local.sub_db_nsg_exists ? "" : try(local.var_sub_db_nsg.name, format("%s_db-nsg", local.prefix))
 
   hdb_list = [
     for db in var.databases : db
@@ -148,7 +191,7 @@ locals {
     [
       for dbnode in local.hana_database.dbnodes : {
         platform       = local.hana_database.platform,
-        name           = "${dbnode.name}-0",
+        name           = "${dbnode.name}00",
         admin_nic_ip   = lookup(dbnode, "admin_nic_ips", [false, false])[0],
         db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[0],
         size           = local.hana_database.size,
@@ -160,7 +203,7 @@ locals {
     [
       for dbnode in local.hana_database.dbnodes : {
         platform       = local.hana_database.platform,
-        name           = "${dbnode.name}-1",
+        name           = "${dbnode.name}01",
         admin_nic_ip   = lookup(dbnode, "admin_nic_ips", [false, false])[1],
         db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[1],
         size           = local.hana_database.size,

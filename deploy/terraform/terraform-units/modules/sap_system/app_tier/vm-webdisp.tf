@@ -1,7 +1,7 @@
 # Create Web dispatcher NICs
 resource "azurerm_network_interface" "web" {
   count                         = local.enable_deployment ? local.webdispatcher_count : 0
-  name                          = "${upper(local.application_sid)}_web${format("%02d", count.index)}-nic"
+  name                          = format("%s_%s%02d-nic", local.prefix, local.web_computername,count.index)
   location                      = var.resource-group[0].location
   resource_group_name           = var.resource-group[0].name
   enable_accelerated_networking = local.web_sizing.compute.accelerated_networking
@@ -17,8 +17,8 @@ resource "azurerm_network_interface" "web" {
 # Create the Linux Web dispatcher VM(s)
 resource "azurerm_linux_virtual_machine" "web" {
   count                        = local.enable_deployment ? (upper(local.app_ostype) == "LINUX" ? local.webdispatcher_count : 0) : 0
-  name                         = "${upper(local.application_sid)}_web${format("%02d", count.index)}"
-  computer_name                = "${upper(local.application_sid)}web${format("%02d", count.index)}"
+  name                         = format("%s_%s%02d",  local.prefix, local.web_computername, count.index)
+  computer_name                = format("%s%02d",  local.web_computername, count.index)
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
   availability_set_id          = azurerm_availability_set.web[0].id
@@ -31,7 +31,7 @@ resource "azurerm_linux_virtual_machine" "web" {
   disable_password_authentication = true
 
   os_disk {
-    name                 = "${upper(local.application_sid)}_web${format("%02d", count.index)}-osDisk"
+    name                 = format("%s_%s%02d-osdisk", local.prefix,local.web_computername, count.index)
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
@@ -61,8 +61,8 @@ resource "azurerm_linux_virtual_machine" "web" {
 # Create the Windows Web dispatcher VM(s)
 resource "azurerm_windows_virtual_machine" "web" {
   count                        = local.enable_deployment ? (upper(local.app_ostype) == "WINDOWS" ? local.webdispatcher_count : 0) : 0
-  name                         = "${upper(local.application_sid)}_web${format("%02d", count.index)}"
-  computer_name                = "${upper(local.application_sid)}web${format("%02d", count.index)}"
+  name                         = format("%s_%s%02d",  local.prefix, local.web_computername, count.index)
+  computer_name                = format("%s%02d",  local.web_computername, count.index)
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
   availability_set_id          = azurerm_availability_set.web[0].id
@@ -75,7 +75,7 @@ resource "azurerm_windows_virtual_machine" "web" {
   admin_password = local.authentication.password
 
   os_disk {
-    name                 = "${upper(local.application_sid)}_web${format("%02d", count.index)}-osDisk"
+    name                 = format("%s_%s%02d-osdisk", local.prefix,local.web_computername, count.index)
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
