@@ -1,6 +1,9 @@
 {
   "infrastructure": {
-    "region": "eastus",
+    "region": "",
+    "environment": "",
+    "sid": "",
+    "codename":"",
     "resource_group": {
       "is_existing": "false",
       "name": "test-anydb-ha-rg"

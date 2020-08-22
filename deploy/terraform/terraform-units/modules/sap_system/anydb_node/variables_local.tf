@@ -14,20 +14,72 @@ variable "ppg" {
   description = "Details of the proximity placement group"
 }
 
+variable "region_mapping" {
+  type        = map(string)
+  description = "Region Mapping: Full = Single CHAR, 4-CHAR"
+
+  # 28 Regions 
+
+  default = {
+    westus             = "weus"
+    westus2            = "wus2"
+    centralus          = "ceus"
+    eastus             = "eaus"
+    eastus2            = "eus2"
+    northcentralus     = "ncus"
+    southcentralus     = "scus"
+    westcentralus      = "wcus"
+    northeurope        = "noeu"
+    westeurope         = "weeu"
+    eastasia           = "eaas"
+    southeastasia      = "seas"
+    brazilsouth        = "brso"
+    japaneast          = "jpea"
+    japanwest          = "jpwe"
+    centralindia       = "cein"
+    southindia         = "soin"
+    westindia          = "wein"
+    uksouth2           = "uks2"
+    uknorth            = "ukno"
+    canadacentral      = "cace"
+    canadaeast         = "caea"
+    australiaeast      = "auea"
+    australiasoutheast = "ause"
+    uksouth            = "ukso"
+    ukwest             = "ukwe"
+    koreacentral       = "koce"
+    koreasouth         = "koso"
+  }
+}
+
+
 locals {
+
+
+  region             = try(var.infrastructure.region, "")
+  environment        = lower(try(var.infrastructure.environment, ""))
+  sid                = upper(try(var.infrastructure.sid, ""))
+  codename           = lower(try(var.infrastructure.codename, ""))
+  location_short     = lower(try(var.region_mapping[local.region], "unkn"))
+  # Using replace "--" with "-"  in case of one of the components like codename is empty
+  prefix             = try(var.infrastructure.resource_group.name, replace(format("%s-%s-%s-%s", local.environment, local.location_short, local.codename, local.sid),"--","-"))
+  sa_prefix          = lower(replace(format("%s%s%sdiag", substr(local.environment,0,5), local.location_short, substr(local.codename,0,7)),"--","-"))
+  rg_name            = local.prefix
+
+
 
   # DB subnet
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
   sub_db_exists = try(local.var_sub_db.is_existing, false)
   sub_db_arm_id = local.sub_db_exists ? try(local.var_sub_db.arm_id, "") : ""
-  sub_db_name   = local.sub_db_exists ? "" : try(local.var_sub_db.name, "subnet-db")
+  sub_db_name   = local.sub_db_exists ? "" : try(local.var_sub_db.name, format("%s_db-subnet", local.prefix))
   sub_db_prefix = local.sub_db_exists ? "" : try(local.var_sub_db.prefix, "10.1.2.0/24")
 
   # DB NSG
   var_sub_db_nsg    = try(var.infrastructure.vnets.sap.subnet_db.nsg, {})
   sub_db_nsg_exists = try(local.var_sub_db_nsg.is_existing, false)
   sub_db_nsg_arm_id = local.sub_db_nsg_exists ? try(local.var_sub_db_nsg.arm_id, "") : ""
-  sub_db_nsg_name   = local.sub_db_nsg_exists ? "" : try(local.var_sub_db_nsg.name, "nsg-db")
+  sub_db_nsg_name   = local.sub_db_nsg_exists ? "" : try(local.var_sub_db_nsg.name, format("%s_db-nsg", local.prefix))
 
   # Imports database sizing information
   sizes = jsondecode(file("${path.module}/../../../../../configs/anydb_sizes.json"))
@@ -195,7 +247,7 @@ locals {
       for storage_type in lookup(local.sizes, local.anydb_size).storage : [
         for disk_count in range(storage_type.count) : {
           vm_index                  = vm_counter
-          name                      = format("%s-%s%02d", anydb_vm.name, storage_type.name, (disk_count))
+          name                      = format("%s_%s-%s%02d", local.prefix,anydb_vm.name, storage_type.name, (disk_count))
           storage_account_type      = storage_type.disk_type
           disk_size_gb              = storage_type.size_gb
           caching                   = storage_type.caching
