@@ -86,10 +86,10 @@ locals {
   codename           = lower(try(local.var_infra.codename, ""))
   location_short     = lower(try(var.region_mapping[local.region], "unkn"))
   # Using replace "--" with "-"  in case of one of the components like codename is empty
-  prefix             = try(local.var_infra.resource_group.name, replace(format("%s-%s-%s-%s", local.environment, local.location_short, local.codename, local.sid),"--","-"))
-  sa_prefix          = lower(format("%s%s%s%sdiag", substr(local.environment,0,5), local.location_short, substr(local.codename,0,7),local.sid))
+  prefix             = try(local.var_infra.resource_group.name, replace(format("%s-%s-%s-%s", local.landscape, local.location_short, local.codename, local.sid),"--","-"))
+  sa_prefix          = lower(format("%s%s%s%sdiag", substr(local.landscape,0,5), local.location_short, substr(local.codename,0,7),local.sid))
 
-  vnet_prefix        = try(local.var_infra.resource_group.name, format("%s-%s", local.environment, local.location_short))
+  vnet_prefix        = try(local.var_infra.resource_group.name, format("%s-%s", local.landscape, local.location_short))
 
   # Resource group
   var_rg    = try(local.var_infra.resource_group, {})

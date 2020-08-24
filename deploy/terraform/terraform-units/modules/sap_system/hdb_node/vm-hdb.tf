@@ -60,7 +60,7 @@ resource "azurerm_lb" "hdb" {
     name                          = format("%s_hdb-alb-feip", local.prefix)
     subnet_id                     = local.sub_db_exists ? data.azurerm_subnet.subnet-sap-db[0].id : azurerm_subnet.subnet-sap-db[0].id
     private_ip_address_allocation = "Static"
-    private_ip_address            = local.sub_db_exists ? try(local.hana_database.loadbalancer.frontend_ip, cidrhost(local.sub_db_prefix, tonumber(count.index) + 4)) : cidrhost(local.sub_db_prefix, tonumber(count.index) + 4)
+    private_ip_address            = try(local.hana_database.loadbalancer.frontend_ip, (local.sub_db_exists ? cidrhost(data.azurerm_subnet.subnet-sap-db[0].address_prefixes[0] , tonumber(count.index) + 4) : cidrhost(azurerm_subnet.subnet-sap-db[0].address_prefixes[0] , tonumber(count.index) + 4)))
   }
 }
 

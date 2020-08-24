@@ -9,7 +9,7 @@ resource "azurerm_network_interface" "web" {
   ip_configuration {
     name                          = "IPConfig1"
     subnet_id                     = local.sub_web_deployed.id
-    private_ip_address            = cidrhost(local.sub_web_defined ? local.sub_web_prefix : local.sub_app_prefix, tonumber(count.index) + local.ip_offsets.web_vm)
+    private_ip_address            = cidrhost(local.sub_web_defined ? (local.sub_web_exists ? data.azurerm_subnet.subnet-sap-web[0].address_prefixes[0] : azurerm_subnet.subnet-sap-web[0].address_prefixes[0]) : (local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].address_prefixes[0] : azurerm_subnet.subnet-sap-app[0].address_prefixes[0]), tonumber(count.index) + local.ip_offsets.web_vm)
     private_ip_address_allocation = "static"
   }
 }

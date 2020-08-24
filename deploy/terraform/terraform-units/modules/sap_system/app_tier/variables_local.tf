@@ -58,21 +58,21 @@ variable "region_mapping" {
 # Set defaults
 locals {
   region             = try(var.infrastructure.region, "")
-  environment        = lower(try(var.infrastructure.environment, ""))
+  landscape          = lower(try(var.infrastructure.landscape, ""))
   sid                = upper(try(var.infrastructure.sid, ""))
   codename           = lower(try(var.infrastructure.codename, ""))
   location_short     = lower(try(var.region_mapping[local.region], "unkn"))
 
   # Using replace "--" with "-"  in case of one of the components like codename is empty
-  prefix             = try(var.infrastructure.resource_group.name, replace(format("%s-%s-%s-%s", local.environment, local.location_short, local.codename, local.sid),"--","-"))
-  sa_prefix          = lower(replace(format("%s%s%sdiag", substr(local.environment,0,5), local.location_short, substr(local.codename,0,7)),"--","-"))
+  prefix             = try(var.infrastructure.resource_group.name, replace(format("%s-%s-%s-%s", local.landscape, local.location_short, local.codename, local.sid),"--","-"))
+  sa_prefix          = lower(replace(format("%s%s%sdiag", substr(local.landscape,0,5), local.location_short, substr(local.codename,0,7)),"--","-"))
 
   # APP subnet
   var_sub_app    = try(var.infrastructure.vnets.sap.subnet_app, {})
   sub_app_exists = try(local.var_sub_app.is_existing, false)
   sub_app_arm_id = local.sub_app_exists ? try(local.var_sub_app.arm_id, "") : ""
   sub_app_name   = local.sub_app_exists ? "" : try(local.var_sub_app.name, format("%s_app-subnet", local.prefix))
-  sub_app_prefix = local.sub_app_exists ? "" : try(local.var_sub_app.prefix, "10.1.4.0/24")
+  sub_app_prefix = local.sub_app_exists ? "" : try(local.var_sub_app.prefix, "")
 
   # APP NSG
   var_sub_app_nsg    = try(local.var_sub_app.nsg, {})
@@ -87,7 +87,7 @@ locals {
   sub_web_exists  = try(local.sub_web.is_existing, false)
   sub_web_arm_id  = local.sub_web_exists ? try(local.sub_web.arm_id, "") : ""
   sub_web_name    = local.sub_web_exists ? "" : try(local.sub_web.name, format("%s_web-subnet", local.prefix))
-  sub_web_prefix  = local.sub_web_exists ? "" : try(local.sub_web.prefix, "10.1.5.0/24")
+  sub_web_prefix  = local.sub_web_exists ? "" : try(local.sub_web.prefix, "")
   sub_web_deployed = try(local.sub_web_defined ? (
     local.sub_web_exists ? data.azurerm_subnet.subnet-sap-web[0] : azurerm_subnet.subnet-sap-web[0]) : (
   local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0] : azurerm_subnet.subnet-sap-app[0]), null)

@@ -54,13 +54,13 @@ variable "region_mapping" {
 
 locals {
   region             = try(var.infrastructure.region, "")
-  environment        = lower(try(var.infrastructure.environment, ""))
+  landscape         = lower(try(var.infrastructure.landscape, ""))
   sid                = upper(try(var.infrastructure.sid, ""))
   codename           = lower(try(var.infrastructure.codename, ""))
   location_short     = lower(try(var.region_mapping[local.region], "unkn"))
   # Using replace "--" with "-"  in case of one of the components like codename is empty
-  prefix             = try(var.infrastructure.resource_group.name, replace(format("%s-%s-%s-%s", local.environment, local.location_short, local.codename, local.sid),"--","-"))
-  sa_prefix          = lower(replace(format("%s%s%sdiag", substr(local.environment,0,5), local.location_short, substr(local.codename,0,7)),"--","-"))
+  prefix             = try(var.infrastructure.resource_group.name, replace(format("%s-%s-%s-%s", local.landscape, local.location_short, local.codename, local.sid),"--","-"))
+  sa_prefix          = lower(replace(format("%s%s%sdiag", substr(local.landscape,0,5), local.location_short, substr(local.codename,0,7)),"--","-"))
   rg_name            = local.prefix
 
   # DB subnet
