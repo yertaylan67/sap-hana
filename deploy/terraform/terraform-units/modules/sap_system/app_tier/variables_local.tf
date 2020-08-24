@@ -62,6 +62,7 @@ locals {
   sid                = upper(try(var.infrastructure.sid, ""))
   codename           = lower(try(var.infrastructure.codename, ""))
   location_short     = lower(try(var.region_mapping[local.region], "unkn"))
+
   # Using replace "--" with "-"  in case of one of the components like codename is empty
   prefix             = try(var.infrastructure.resource_group.name, replace(format("%s-%s-%s-%s", local.environment, local.location_short, local.codename, local.sid),"--","-"))
   sa_prefix          = lower(replace(format("%s%s%sdiag", substr(local.environment,0,5), local.location_short, substr(local.codename,0,7)),"--","-"))
@@ -77,7 +78,7 @@ locals {
   var_sub_app_nsg    = try(local.var_sub_app.nsg, {})
   sub_app_nsg_exists = try(local.var_sub_app_nsg.is_existing, false)
   sub_app_nsg_arm_id = local.sub_app_nsg_exists ? try(local.var_sub_app_nsg.arm_id, "") : ""
-  sub_app_nsg_name   = local.sub_app_nsg_exists ? "" : try(local.var_sub_app_nsg.name, "nsg-app")
+  sub_app_nsg_name   = local.sub_app_nsg_exists ? "" : try(local.var_sub_app_nsg.name, format("%s_app-nsg", local.prefix))
 
   # WEB subnet
   #If subnet_web is not specified deploy into app subnet

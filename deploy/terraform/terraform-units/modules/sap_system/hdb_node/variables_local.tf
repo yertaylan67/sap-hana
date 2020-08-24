@@ -138,7 +138,7 @@ locals {
   shine                  = try(local.hdb.shine, { email = "shinedemo@microsoft.com" })
 
   dbnodes = [for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
-    "name" = try(dbnode.name, format("%s_%s_hdb%02d", local.sap_sid, local.hdb_sid, idx)),
+    "name" = try(dbnode.name, lower(format("%shdb%sl%02d", local.sap_sid, local.hdb_sid, idx))),
     "role" = try(dbnode.role, "worker")
     }
   ]
@@ -176,7 +176,7 @@ locals {
   )
 
   # SAP SID used in HDB resource naming convention
-  sap_sid = try(var.application.sid, "HN1")
+  sap_sid = try(var.application.sid, local.sid)
 
 }
 
@@ -260,7 +260,7 @@ locals {
   data-disk-list = flatten([
     for hdb_vm in local.hdb_vms : [
       for datadisk in local.data-disk-per-dbnode : {
-        name                      = join("-", [hdb_vm.name, datadisk.name])
+        name                      = format("%s_%s-%s", local.prefix,hdb_vm.name, datadisk.name)
         caching                   = datadisk.caching
         storage_account_type      = datadisk.storage_account_type
         disk_size_gb              = datadisk.disk_size_gb

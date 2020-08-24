@@ -17,7 +17,7 @@ resource "azurerm_network_interface" "app" {
 # Create the Linux Application VM(s)
 resource "azurerm_linux_virtual_machine" "app" {
   count                        = local.enable_deployment ? (upper(local.app_ostype) == "LINUX" ? local.application_server_count : 0) : 0
-  name                         = format("%s_%s%02d",  local.prefix, local.app_computername, count.index)
+  name                         = format("%s_%s%02d-vm",  local.prefix, local.app_computername, count.index)
   computer_name                = format("%s%02d",  local.app_computername, count.index)
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
@@ -61,7 +61,7 @@ resource "azurerm_linux_virtual_machine" "app" {
 # Create the Windows Application VM(s)
 resource "azurerm_windows_virtual_machine" "app" {
   count                        = local.enable_deployment ? (upper(local.app_ostype) == "WINDOWS" ? local.application_server_count : 0) : 0
-  name                         = format("%s_%s%02d",  local.prefix, local.app_computername, count.index)
+  name                         = format("%s_%s%02d-vm",  local.prefix, local.app_computername, count.index)
   computer_name                = format("%s%02d",  local.app_computername, count.index)
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
