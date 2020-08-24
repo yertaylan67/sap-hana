@@ -151,7 +151,7 @@ resource "azurerm_lb" "web" {
     name                          = "sap${lower(local.prefix)}web"
     subnet_id                     = local.sub_web_deployed.id
     private_ip_address_allocation = "Static"
-    private_ip_address            =  cidrhost(local.sub_web_defined ? (local.sub_web_exists ? data.azurerm_subnet.subnet-sap-web[0].address_prefixes[0] : azurerm_subnet.subnet-sap-web[0].address_prefixes[0]) : (local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].address_prefixes[0] : azurerm_subnet.subnet-sap-app[0].address_prefixes[0]), tonumber(count.index) + local.ip_offsets.web_lb)
+    private_ip_address            = cidrhost(local.sub_web_defined ? (local.sub_web_exists ? data.azurerm_subnet.subnet-sap-web[0].address_prefixes[0] : azurerm_subnet.subnet-sap-web[0].address_prefixes[0]) : (local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].address_prefixes[0] : azurerm_subnet.subnet-sap-app[0].address_prefixes[0]), tonumber(count.index) + local.ip_offsets.web_lb)
   }
 }
 

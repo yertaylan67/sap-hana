@@ -81,7 +81,7 @@ locals {
 
   # Region and metadata
   region             = try(local.var_infra.region, "")
-  environment        = lower(try(local.var_infra.environment, ""))
+  landscape          = lower(try(local.var_infra.landscape, ""))
   sid                = upper(try(local.var_infra.sid, ""))
   codename           = lower(try(local.var_infra.codename, ""))
   location_short     = lower(try(var.region_mapping[local.region], "unkn"))

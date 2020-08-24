@@ -60,22 +60,22 @@ variable "region_mapping" {
 }
 # Set defaults
 locals {
-  region             = try(var.infrastructure.region, "")
-  landscape        = lower(try(var.infrastructure.landscape, ""))
-  sid                = upper(try(var.infrastructure.sid, ""))
-  codename           = lower(try(var.infrastructure.codename, ""))
-  location_short     = lower(try(var.region_mapping[local.region], "unkn"))
+  region         = try(var.infrastructure.region, "")
+  landscape      = lower(try(var.infrastructure.landscape, ""))
+  sid            = upper(try(var.infrastructure.sid, ""))
+  codename       = lower(try(var.infrastructure.codename, ""))
+  location_short = lower(try(var.region_mapping[local.region], "unkn"))
   # Using replace "--" with "-"  in case of one of the components like codename is empty
-  prefix             = try(var.infrastructure.resource_group.name, replace(format("%s-%s-%s-%s", local.landscape, local.location_short, local.codename, local.sid),"--","-"))
-  sa_prefix          = lower(replace(format("%s%s%sdiag", substr(local.landscape,0,5), local.location_short, substr(local.codename,0,7)),"--","-"))
-  rg_name            = local.prefix
+  prefix    = try(var.infrastructure.resource_group.name, replace(format("%s-%s-%s-%s", local.landscape, local.location_short, local.codename, local.sid), "--", "-"))
+  sa_prefix = lower(replace(format("%s%s%sdiag", substr(local.landscape, 0, 5), local.location_short, substr(local.codename, 0, 7)), "--", "-"))
+  rg_name   = local.prefix
 
   # Admin subnet
   var_sub_admin    = try(var.infrastructure.vnets.sap.subnet_admin, {})
   sub_admin_exists = try(local.var_sub_admin.is_existing, false)
   sub_admin_arm_id = local.sub_admin_exists ? try(local.var_sub_admin.arm_id, "") : ""
-  sub_admin_name   = local.sub_admin_exists ? "" : try(local.var_sub_admin.name, format("%s_admin-subnet", local.prefix))
-  sub_admin_prefix = local.sub_admin_exists ? "" : try(local.var_sub_admin.prefix, "10.1.1.0/24")
+  sub_admin_name   = local.sub_admin_exists ? try(split("/", local.sub_admin_arm_id)[10], "") : try(local.var_sub_admin.name, format("%s_admin-subnet", local.prefix))
+  sub_admin_prefix = local.sub_admin_exists ? "" : try(local.var_sub_admin.prefix, "")
 
   # Admin NSG
   var_sub_admin_nsg    = try(var.infrastructure.vnets.sap.subnet_admin.nsg, {})
@@ -87,8 +87,8 @@ locals {
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
   sub_db_exists = try(local.var_sub_db.is_existing, false)
   sub_db_arm_id = local.sub_db_exists ? try(local.var_sub_db.arm_id, "") : ""
-  sub_db_name   = local.sub_db_exists ? "" : try(local.var_sub_db.name, format("%s_db-subnet", local.prefix))
-  sub_db_prefix = local.sub_db_exists ? "" : try(local.var_sub_db.prefix, "10.1.2.0/24")
+  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s_db-subnet", local.prefix))
+  sub_db_prefix = local.sub_db_exists ? "" : try(local.var_sub_db.prefix, "")
 
   # DB NSG
   var_sub_db_nsg    = try(var.infrastructure.vnets.sap.subnet_db.nsg, {})
@@ -138,8 +138,10 @@ locals {
   shine                  = try(local.hdb.shine, { email = "shinedemo@microsoft.com" })
 
   dbnodes = [for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
-    "name" = try(dbnode.name, lower(format("%shdb%sl%02d", local.sap_sid, local.hdb_sid, idx))),
-    "role" = try(dbnode.role, "worker")
+    "name"          = try(dbnode.name, lower(format("%shdb%sl", local.sap_sid, local.hdb_sid))),
+    "role"          = try(dbnode.role, "worker")
+    "admin_nic_ips" = try(dbnode.admin_nic_ips, [false, false]),
+    "db_nic_ips"    = try(dbnode.db_nic_ips, [false, false])
     }
   ]
 
@@ -192,8 +194,8 @@ locals {
       for dbnode in local.hana_database.dbnodes : {
         platform       = local.hana_database.platform,
         name           = "${dbnode.name}00",
-        admin_nic_ip   = lookup(dbnode, "admin_nic_ips", [false, false])[0],
-        db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[0],
+        admin_nic_ip   = dbnode.admin_nic_ips[0],
+        db_nic_ip      = dbnode.db_nic_ips[0],
         size           = local.hana_database.size,
         os             = local.hana_database.os,
         authentication = local.hana_database.authentication
@@ -204,8 +206,8 @@ locals {
       for dbnode in local.hana_database.dbnodes : {
         platform       = local.hana_database.platform,
         name           = "${dbnode.name}01",
-        admin_nic_ip   = lookup(dbnode, "admin_nic_ips", [false, false])[1],
-        db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[1],
+        admin_nic_ip   = dbnode.admin_nic_ips[1],
+        db_nic_ip      = dbnode.db_nic_ips[1],
         size           = local.hana_database.size,
         os             = local.hana_database.os,
         authentication = local.hana_database.authentication
@@ -242,25 +244,38 @@ locals {
 
 # List of data disks to be created for HANA DB nodes
 locals {
-  data-disk-per-dbnode = flatten(
-    length(local.hdb_vms) > 0 ?
+  data-disk-per-dbnode = (length(local.hdb_vms) > 0) ? flatten([
     [
       for storage_type in lookup(local.sizes, local.hdb_vms[0].size).storage : [
         for disk_count in range(storage_type.count) : {
-          name                      = join("-", [storage_type.name, disk_count])
+          name                      = format("%s%02d", storage_type.name, disk_count)
           storage_account_type      = storage_type.disk_type,
           disk_size_gb              = storage_type.size_gb,
           caching                   = storage_type.caching,
           write_accelerator_enabled = storage_type.write_accelerator
         }
       ]
-      if storage_type.name != "os"
-  ] : [])
+      if storage_type.name != "os" && storage_type.count > 1
+    ],
+    [
+      for storage_type in lookup(local.sizes, local.hdb_vms[0].size).storage : [
+        for disk_count in range(storage_type.count) : {
+          name                      = format("%s", storage_type.name)
+          storage_account_type      = storage_type.disk_type,
+          disk_size_gb              = storage_type.size_gb,
+          caching                   = storage_type.caching,
+          write_accelerator_enabled = storage_type.write_accelerator
+        }
+      ]
+      if storage_type.name != "os" && storage_type.count == 1
+    ]
+  ]
+  ) : []
 
   data-disk-list = flatten([
     for hdb_vm in local.hdb_vms : [
       for datadisk in local.data-disk-per-dbnode : {
-        name                      = format("%s_%s-%s", local.prefix,hdb_vm.name, datadisk.name)
+        name                      = format("%s_%s-%s", local.prefix, hdb_vm.name, datadisk.name)
         caching                   = datadisk.caching
         storage_account_type      = datadisk.storage_account_type
         disk_size_gb              = datadisk.disk_size_gb

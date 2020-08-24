@@ -53,15 +53,15 @@ variable "region_mapping" {
 }
 
 locals {
-  region             = try(var.infrastructure.region, "")
-  landscape         = lower(try(var.infrastructure.landscape, ""))
-  sid                = upper(try(var.infrastructure.sid, ""))
-  codename           = lower(try(var.infrastructure.codename, ""))
-  location_short     = lower(try(var.region_mapping[local.region], "unkn"))
+  region         = try(var.infrastructure.region, "")
+  landscape      = lower(try(var.infrastructure.landscape, ""))
+  sid            = upper(try(var.infrastructure.sid, ""))
+  codename       = lower(try(var.infrastructure.codename, ""))
+  location_short = lower(try(var.region_mapping[local.region], "unkn"))
   # Using replace "--" with "-"  in case of one of the components like codename is empty
-  prefix             = try(var.infrastructure.resource_group.name, replace(format("%s-%s-%s-%s", local.landscape, local.location_short, local.codename, local.sid),"--","-"))
-  sa_prefix          = lower(replace(format("%s%s%sdiag", substr(local.landscape,0,5), local.location_short, substr(local.codename,0,7)),"--","-"))
-  rg_name            = local.prefix
+  prefix    = try(var.infrastructure.resource_group.name, replace(format("%s-%s-%s-%s", local.landscape, local.location_short, local.codename, local.sid), "--", "-"))
+  sa_prefix = lower(replace(format("%s%s%sdiag", substr(local.landscape, 0, 5), local.location_short, substr(local.codename, 0, 7)), "--", "-"))
+  rg_name   = local.prefix
 
   # DB subnet
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
@@ -177,8 +177,9 @@ locals {
   )
 
   dbnodes = [for idx, dbnode in try(local.anydb.dbnodes, []) : {
-    "name" = try(dbnode.name, upper(local.anydb_ostype) == "WINDOWS" ? format("%sxdbw", lower(local.anydb_sid)) : format("%sxdbl", lower(local.anydb_sid)))
-    "role" = try(dbnode.role, "worker")
+    "name"       = try(dbnode.name, upper(local.anydb_ostype) == "WINDOWS" ? format("%sxdbw", lower(local.anydb_sid)) : format("%sxdbl", lower(local.anydb_sid)))
+    "role"       = try(dbnode.role, "worker"),
+    "db_nic_ips" = try(dbnode.db_nic_ips, [false, false])
     }
   ]
 
@@ -188,7 +189,7 @@ locals {
         for idx, dbnode in local.dbnodes : {
           platform       = local.anydb_platform,
           name           = "${dbnode.name}00",
-          db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[0],
+          db_nic_ip      = dbnode.db_nic_ips[0],
           size           = local.anydb_sku
           os             = local.anydb_ostype,
           authentication = local.authentication
@@ -201,7 +202,7 @@ locals {
         for idx, dbnode in local.dbnodes : {
           platform       = local.anydb_platform,
           name           = "${dbnode.name}01",
-          db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[1],
+          db_nic_ip      = dbnode.db_nic_ips[1],
           size           = local.anydb_sku,
           os             = local.anydb_ostype,
           authentication = local.authentication
@@ -242,7 +243,7 @@ locals {
       for storage_type in lookup(local.sizes, local.anydb_size).storage : [
         for disk_count in range(storage_type.count) : {
           vm_index                  = vm_counter
-          name                      = format("%s_%s-%s%02d", local.prefix,anydb_vm.name, storage_type.name, (disk_count))
+          name                      = format("%s_%s-%s%02d", local.prefix, anydb_vm.name, storage_type.name, (disk_count))
           storage_account_type      = storage_type.disk_type
           disk_size_gb              = storage_type.size_gb
           caching                   = storage_type.caching
