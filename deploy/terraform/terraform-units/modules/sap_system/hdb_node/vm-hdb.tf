@@ -68,7 +68,7 @@ resource "azurerm_lb_backend_address_pool" "hdb" {
   count               = local.enable_deployment ? 1 : 0
   resource_group_name = var.resource-group[0].name
   loadbalancer_id     = azurerm_lb.hdb[count.index].id
-  name                = format("%s_hdbalb-bepool", local.prefix)
+  name                = format("%s_dbalb-bepool", local.prefix)
 }
 
 resource "azurerm_lb_probe" "hdb" {
@@ -100,7 +100,7 @@ resource "azurerm_lb_rule" "hdb" {
   protocol                       = "Tcp"
   frontend_port                  = local.loadbalancer_ports[count.index].port
   backend_port                   = local.loadbalancer_ports[count.index].port
-  frontend_ip_configuration_name = format("%s_hdb-alb-feip", local.prefix)
+  frontend_ip_configuration_name = format("%s_db-alb-feip", local.prefix)
   backend_address_pool_id        = azurerm_lb_backend_address_pool.hdb[0].id
   probe_id                       = azurerm_lb_probe.hdb[0].id
   enable_floating_ip             = true
