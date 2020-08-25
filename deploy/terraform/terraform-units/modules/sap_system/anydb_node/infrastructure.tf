@@ -4,7 +4,7 @@ Load balancer front IP address range: .4 - .9
 
 resource "azurerm_lb" "anydb" {
   count               = local.enable_deployment ? 1 : 0
-  name                = format("%s_xdb-alb", local.prefix)
+  name                = format("%s_db-alb", local.prefix)
   
   resource_group_name = var.resource-group[0].name
   location            = var.resource-group[0].location
@@ -21,7 +21,7 @@ resource "azurerm_lb_backend_address_pool" "anydb" {
   count               = local.enable_deployment ? 1 : 0
   resource_group_name = var.resource-group[0].name
   loadbalancer_id     = azurerm_lb.anydb[count.index].id
-  name                = format("%s_xdbalb-bepool", local.prefix)
+  name                = format("%s_dbalb-bepool", local.prefix)
 }
 
 resource "azurerm_lb_probe" "anydb" {
@@ -46,7 +46,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "anydb" {
 
 resource "azurerm_availability_set" "anydb" {
   count                        = local.enable_deployment ? 1 : 0
-  name                         = format("%s_xdb-avset", local.prefix)
+  name                         = format("%s_db-avset", local.prefix)
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
   platform_update_domain_count = 20

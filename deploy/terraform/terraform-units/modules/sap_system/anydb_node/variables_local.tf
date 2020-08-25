@@ -14,6 +14,10 @@ variable "ppg" {
   description = "Details of the proximity placement group"
 }
 
+variable "random-id" {
+  description = "Random hex string"
+}
+
 variable "region_mapping" {
   type        = map(string)
   description = "Region Mapping: Full = Single CHAR, 4-CHAR"
@@ -59,21 +63,21 @@ locals {
   codename       = lower(try(var.infrastructure.codename, ""))
   location_short = lower(try(var.region_mapping[local.region], "unkn"))
   // Using replace "--" with "-"  in case of one of the components like codename is empty
-  prefix    = try(var.infrastructure.resource_group.name, replace(format("%s-%s-%s-%s", local.landscape, local.location_short, local.codename, local.sid), "--", "-"))
+  prefix    = try(var.infrastructure.resource_group.name, upper(replace(format("%s-%s_%s-%s", local.landscape, local.location_short, local.codename, local.sid), "_-", "-")))
   sa_prefix = lower(replace(format("%s%s%sdiag", substr(local.landscape, 0, 5), local.location_short, substr(local.codename, 0, 7)), "--", "-"))
 
   // DB subnet
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
   sub_db_exists = try(local.var_sub_db.is_existing, false)
   sub_db_arm_id = local.sub_db_exists ? try(local.var_sub_db.arm_id, "") : ""
-  sub_db_name   = local.sub_db_exists ?  try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s_db-subnet", local.prefix))
+  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s_db-subnet", local.prefix))
   sub_db_prefix = local.sub_db_exists ? "" : try(local.var_sub_db.prefix, "")
 
   // DB NSG
   var_sub_db_nsg    = try(var.infrastructure.vnets.sap.subnet_db.nsg, {})
   sub_db_nsg_exists = try(local.var_sub_db_nsg.is_existing, false)
   sub_db_nsg_arm_id = local.sub_db_nsg_exists ? try(local.var_sub_db_nsg.arm_id, "") : ""
-  sub_db_nsg_name   = local.sub_db_nsg_exists ?  try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s_db-nsg", local.prefix))
+  sub_db_nsg_name   = local.sub_db_nsg_exists ? try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s_dbSubnet-nsg", local.prefix))
 
   // Imports database sizing information
   sizes = jsondecode(file("${path.module}/../../../../../configs/anydb_sizes.json"))
@@ -103,7 +107,7 @@ locals {
   anydb_sku    = try(lookup(local.sizes, local.anydb_size).compute.vmsize, "Standard_E4s_v3")
   anydb_fs     = try(local.anydb.filesystem, "xfs")
   anydb_ha     = try(local.anydb.high_availability, "false")
-  anydb_sid    = (length(local.anydb-databases) > 0) ? try(local.anydb.instance.sid, local.sid) : local.sid
+  anydb_sid    = (length(local.anydb-databases) > 0) ? try(local.anydb.instance.sid, lower(substr(local.anydb_platform, 0, 3))) : lower(substr(local.anydb_platform, 0, 3))
   loadbalancer = try(local.anydb.loadbalancer, {})
 
   authentication = try(local.anydb.authentication,
@@ -175,8 +179,8 @@ locals {
     { loadbalancer = local.loadbalancer }
   )
 
-  dbnodes = [for idx, dbnode in try(local.anydb.dbnodes, []) : {
-    "name"       = try(dbnode.name, upper(local.anydb_ostype) == "WINDOWS" ? format("%sxdbw", lower(local.anydb_sid)) : format("%sxdbl", lower(local.anydb_sid)))
+  dbnodes = [for dbnode in try(local.anydb.dbnodes, []) : {
+    "name"       = try(dbnode.name, format("%sxdb%s", lower(local.sid), lower(local.anydb_sid)))
     "role"       = try(dbnode.role, "worker"),
     "db_nic_ips" = try(dbnode.db_nic_ips, [false, false])
     }
@@ -187,7 +191,7 @@ locals {
       for database in local.anydb-databases : [
         for idx, dbnode in local.dbnodes : {
           platform       = local.anydb_platform,
-          name           = "${dbnode.name}00",
+          name           = format("%s00%s0%s", dbnode.name, upper(local.anydb_ostype) == "WINDOWS" ? "w" : "l", substr(var.random-id.hex, 0, 3))
           db_nic_ip      = dbnode.db_nic_ips[0],
           size           = local.anydb_sku
           os             = local.anydb_ostype,
@@ -200,7 +204,7 @@ locals {
       for database in local.anydb-databases : [
         for idx, dbnode in local.dbnodes : {
           platform       = local.anydb_platform,
-          name           = "${dbnode.name}01",
+          name           = format("%s01%s1%s", dbnode.name, upper(local.anydb_ostype) == "WINDOWS" ? "w" : "l", substr(var.random-id.hex, 0, 3))
           db_nic_ip      = dbnode.db_nic_ips[1],
           size           = local.anydb_sku,
           os             = local.anydb_ostype,

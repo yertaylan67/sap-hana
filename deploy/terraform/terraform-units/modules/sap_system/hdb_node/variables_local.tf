@@ -21,6 +21,11 @@ variable "storage-bootdiag" {
 variable "ppg" {
   description = "Details of the proximity placement group"
 }
+
+variable "random-id" {
+  description = "Random hex string"
+}
+
 variable "region_mapping" {
   type        = map(string)
   description = "Region Mapping: Full = Single CHAR, 4-CHAR"
@@ -66,7 +71,7 @@ locals {
   codename       = lower(try(var.infrastructure.codename, ""))
   location_short = lower(try(var.region_mapping[local.region], "unkn"))
   // Using replace "--" with "-"  in case of one of the components like codename is empty
-  prefix    = try(var.infrastructure.resource_group.name, replace(format("%s-%s-%s-%s", local.landscape, local.location_short, local.codename, local.sid), "--", "-"))
+  prefix    = try(var.infrastructure.resource_group.name, upper(replace(format("%s-%s_%s-%s", local.landscape, local.location_short, local.codename, local.sid), "_-", "-")))
   sa_prefix = lower(replace(format("%s%s%sdiag", substr(local.landscape, 0, 5), local.location_short, substr(local.codename, 0, 7)), "--", "-"))
   rg_name   = local.prefix
 
@@ -81,7 +86,7 @@ locals {
   var_sub_admin_nsg    = try(var.infrastructure.vnets.sap.subnet_admin.nsg, {})
   sub_admin_nsg_exists = try(local.var_sub_admin_nsg.is_existing, false)
   sub_admin_nsg_arm_id = local.sub_admin_nsg_exists ? try(local.var_sub_admin_nsg.arm_id, "") : ""
-  sub_admin_nsg_name   = local.sub_admin_nsg_exists ? try(split("/", local.sub_admin_nsg_arm_id)[8], "") : try(local.var_sub_admin_nsg.name, format("%s_admin-nsg", local.prefix))
+  sub_admin_nsg_name   = local.sub_admin_nsg_exists ? try(split("/", local.sub_admin_nsg_arm_id)[8], "") : try(local.var_sub_admin_nsg.name, format("%s_adminSubnet-nsg", local.prefix))
 
   // DB subnet
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
@@ -94,7 +99,7 @@ locals {
   var_sub_db_nsg    = try(var.infrastructure.vnets.sap.subnet_db.nsg, {})
   sub_db_nsg_exists = try(local.var_sub_db_nsg.is_existing, false)
   sub_db_nsg_arm_id = local.sub_db_nsg_exists ? try(local.var_sub_db_nsg.arm_id, "") : ""
-  sub_db_nsg_name   = local.sub_db_nsg_exists ? try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s_db-nsg", local.prefix))
+  sub_db_nsg_name   = local.sub_db_nsg_exists ? try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s_dbSubnet-nsg", local.prefix))
 
   hdb_list = [
     for db in var.databases : db
@@ -122,9 +127,9 @@ locals {
       "type"     = "key"
       "username" = "azureadm"
   })
-  hdb_ins = try(local.hdb.instance, {})
-  // HANA database sid from the Databases array for use as reference to LB/AS
-  hdb_sid                = try(local.hdb_ins.sid, "HN1")
+
+  hdb_ins                = try(local.hdb.instance, {})
+  hdb_sid                = try(local.hdb_ins.sid, local.sid) // HANA database sid from the Databases array for use as reference to LB/AS
   hdb_nr                 = try(local.hdb_ins.instance_number, "01")
   hdb_cred               = try(local.hdb.credentials, {})
   db_systemdb_password   = try(local.hdb_cred.db_systemdb_password, "")
@@ -134,11 +139,11 @@ locals {
   cockpit_admin_password = try(local.hdb_cred.cockpit_admin_password, "")
   ha_cluster_password    = try(local.hdb_cred.ha_cluster_password, "")
   components             = merge({ hana_database = [] }, try(local.hdb.components, {}))
-  xsa                    = try(local.hdb.xsa, { routing = "ports" })
-  shine                  = try(local.hdb.shine, { email = "shinedemo@microsoft.com" })
+  xsa                    = try(local.hdb.xsa, "")
+  shine                  = try(local.hdb.shine, "")
 
-  dbnodes = [for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
-    "name"          = try(dbnode.name, lower(format("%shdb%sl", local.sap_sid, local.hdb_sid))),
+  dbnodes = [for dbnode in try(local.hdb.dbnodes, []) : {
+    "name"          = try(dbnode.name, format("%shdb%s", lower(local.sap_sid), lower(local.hdb_sid)))
     "role"          = try(dbnode.role, "worker")
     "admin_nic_ips" = try(dbnode.admin_nic_ips, [false, false]),
     "db_nic_ips"    = try(dbnode.db_nic_ips, [false, false])
@@ -180,20 +185,14 @@ locals {
   // SAP SID used in HDB resource naming convention
   sap_sid = try(var.application.sid, local.sid)
 
-}
-
-// Imports HANA database sizing information
-locals {
+  // Imports HANA database sizing information
   sizes = jsondecode(file("${path.module}/../../../../../configs/hdb_sizes.json"))
-}
-
-locals {
   // Numerically indexed Hash of HANA DB nodes to be created
   hdb_vms = flatten([
     [
       for dbnode in local.hana_database.dbnodes : {
         platform       = local.hana_database.platform,
-        name           = "${dbnode.name}00",
+        name           = format("%s00l0%s", dbnode.name, substr(var.random-id.hex, 0, 3)),
         admin_nic_ip   = dbnode.admin_nic_ips[0],
         db_nic_ip      = dbnode.db_nic_ips[0],
         size           = local.hana_database.size,
@@ -205,7 +204,7 @@ locals {
     [
       for dbnode in local.hana_database.dbnodes : {
         platform       = local.hana_database.platform,
-        name           = "${dbnode.name}01",
+        name           = format("%s01l1%s", dbnode.name, substr(var.random-id.hex, 0, 3)),
         admin_nic_ip   = dbnode.admin_nic_ips[1],
         db_nic_ip      = dbnode.db_nic_ips[1],
         size           = local.hana_database.size,
@@ -240,10 +239,8 @@ locals {
       port = tonumber(port) + (tonumber(local.hana_database.instance.instance_number) * 100)
     }
   ])
-}
 
-// List of data disks to be created for HANA DB nodes
-locals {
+  // List of data disks to be created for HANA DB nodes
   data-disk-per-dbnode = (length(local.hdb_vms) > 0) ? flatten(
     [
       for storage_type in lookup(local.sizes, local.hdb_vms[0].size).storage : [
@@ -270,4 +267,5 @@ locals {
       }
     ]
   ])
+
 }

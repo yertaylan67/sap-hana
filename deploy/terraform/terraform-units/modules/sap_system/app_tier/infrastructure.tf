@@ -26,7 +26,7 @@ resource "azurerm_subnet" "subnet-sap-web" {
 
 # Imports data of existing SAP web dispatcher subnet
 data "azurerm_subnet" "subnet-sap-web" {
-  count                = local.enable_deployment && local.sub_web_defined ? (local.sub_web_exists ? 1 : 0) : 0
+  count                = local.enable_deployment && local.sub_web_defined ? (local.sub_web_exists ? 1 : 0) : 1
   name                 = split("/", local.sub_web_arm_id)[10]
   resource_group_name  = split("/", local.sub_web_arm_id)[4]
   virtual_network_name = split("/", local.sub_web_arm_id)[8]
@@ -48,7 +48,7 @@ resource "azurerm_lb" "scs" {
     name                          = format("%s_scs-feip", local.prefix)
     subnet_id                     = local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].id : azurerm_subnet.subnet-sap-app[0].id
     private_ip_address_allocation = "Static"
-    private_ip_address            = local.sub_app_exists ? local.scs_lb_ips[0] : cidrhost(local.sub_app_prefix, 0 + local.ip_offsets.scs_lb)
+    private_ip_address            = try(local.scs_lb_ips[0] , cidrhost(local.sub_app_prefix, 0 + local.ip_offsets.scs_lb))
   }
 
   frontend_ip_configuration {
@@ -149,9 +149,9 @@ resource "azurerm_lb" "web" {
 
   frontend_ip_configuration {
     name                          = "sap${lower(local.prefix)}web"
-    subnet_id                     = local.sub_web_deployed.id
+    subnet_id                     = local.sub_web_defined ? (local.sub_web_exists ? data.azurerm_subnet.subnet-sap-web[0].id : azurerm_subnet.subnet-sap-web[0].id) : (local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].id : azurerm_subnet.subnet-sap-app[0].id)
     private_ip_address_allocation = "Static"
-    private_ip_address            = cidrhost(local.sub_web_defined ? (local.sub_web_exists ? data.azurerm_subnet.subnet-sap-web[0].address_prefixes[0] : azurerm_subnet.subnet-sap-web[0].address_prefixes[0]) : (local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].address_prefixes[0] : azurerm_subnet.subnet-sap-app[0].address_prefixes[0]), tonumber(count.index) + local.ip_offsets.web_lb)
+    private_ip_address            = try(local.web_lb_ips [0],cidrhost(local.sub_web_defined ? (local.sub_web_exists ? data.azurerm_subnet.subnet-sap-web[0].address_prefixes[0] : azurerm_subnet.subnet-sap-web[0].address_prefixes[0]) : (local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].address_prefixes[0] : azurerm_subnet.subnet-sap-app[0].address_prefixes[0]), tonumber(count.index) + local.ip_offsets.web_lb))
   }
 }
 

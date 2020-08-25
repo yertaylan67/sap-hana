@@ -57,7 +57,7 @@ resource "azurerm_role_assignment" "sub_user_admin" {
 // Linux Virtual Machine for Deployer
 resource "azurerm_linux_virtual_machine" "deployer" {
   count                           = length(local.deployers)
-  name                            = format("%s%02d-vm", local.deployers[count.index].name, count.index)
+  name                            = format("%s%02d", local.deployers[count.index].name, count.index)
   computer_name                   = format("%s%02dvm", replace(replace(local.deployers[count.index].name,"-",""),"_",""), count.index)
   location                        = azurerm_resource_group.deployer[0].location
   resource_group_name             = azurerm_resource_group.deployer[0].name

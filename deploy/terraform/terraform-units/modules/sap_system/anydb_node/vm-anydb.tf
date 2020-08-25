@@ -4,7 +4,7 @@
 
 resource azurerm_network_interface "anydb" {
   count               = local.enable_deployment ? length(local.anydb_vms) : 0
-  name                = format("%s_%s-nic", local.prefix, local.anydb_vms[count.index].name)
+  name                = format("%s_%s-db-nic", local.prefix, local.anydb_vms[count.index].name)
   location            = var.resource-group[0].location
   resource_group_name = var.resource-group[0].name
 
@@ -21,7 +21,7 @@ resource azurerm_network_interface "anydb" {
 # Section for Linux Virtual machine 
 resource azurerm_linux_virtual_machine "dbserver" {
   count                        = local.enable_deployment ? ((upper(local.anydb_ostype) == "LINUX") ? length(local.anydb_vms) : 0) : 0
-  name                         = format("%s_%s-vm", local.prefix, local.anydb_vms[count.index].name)
+  name                         = format("%s_%s", local.prefix, local.anydb_vms[count.index].name)
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
   availability_set_id          = azurerm_availability_set.anydb[0].id
@@ -74,7 +74,7 @@ resource azurerm_linux_virtual_machine "dbserver" {
 # Section for Windows Virtual machine based on a marketplace image 
 resource azurerm_windows_virtual_machine "dbserver" {
   count                        = local.enable_deployment ? ((upper(local.anydb_ostype) == "WINDOWS") ? length(local.anydb_vms) : 0) : 0
-  name                         = format("%s_%s-vm", local.prefix, local.anydb_vms[count.index].name)
+  name                         = format("%s_%s", local.prefix, local.anydb_vms[count.index].name)
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
   availability_set_id          = azurerm_availability_set.anydb[0].id

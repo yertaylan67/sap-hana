@@ -52,12 +52,12 @@ Load balancer front IP address range: .4 - .9
 
 resource "azurerm_lb" "hdb" {
   count               = local.enable_deployment ? 1 : 0
-  name                = format("%s_hdb-alb", local.prefix)
+  name                = format("%s_db-alb", local.prefix)
   resource_group_name = var.resource-group[0].name
   location            = var.resource-group[0].location
 
   frontend_ip_configuration {
-    name                          = format("%s_hdb-alb-feip", local.prefix)
+    name                          = format("%s_db-alb-feip", local.prefix)
     subnet_id                     = local.sub_db_exists ? data.azurerm_subnet.subnet-sap-db[0].id : azurerm_subnet.subnet-sap-db[0].id
     private_ip_address_allocation = "Static"
     private_ip_address            = try(local.hana_database.loadbalancer.frontend_ip, (local.sub_db_exists ? cidrhost(data.azurerm_subnet.subnet-sap-db[0].address_prefixes[0] , tonumber(count.index) + 4) : cidrhost(azurerm_subnet.subnet-sap-db[0].address_prefixes[0] , tonumber(count.index) + 4)))
@@ -75,7 +75,7 @@ resource "azurerm_lb_probe" "hdb" {
   count               = local.enable_deployment ? 1 : 0
   resource_group_name = var.resource-group[0].name
   loadbalancer_id     = azurerm_lb.hdb[count.index].id
-  name                = format("%s_hdbalb-hp", local.prefix)
+  name                = format("%s_dbalb-hp", local.prefix)
   port                = "625${local.hana_database.instance.instance_number}"
   protocol            = "Tcp"
   interval_in_seconds = 5
@@ -135,7 +135,7 @@ resource "azurerm_managed_disk" "data-disk" {
 # Manages Linux Virtual Machine for HANA DB servers
 resource "azurerm_linux_virtual_machine" "vm-dbnode" {
   count                        = local.enable_deployment ? length(local.hdb_vms) : 0
-  name                         = format("%s_%s-vm", local.prefix,local.hdb_vms[count.index].name)
+  name                         = format("%s_%s", local.prefix,local.hdb_vms[count.index].name)
   computer_name                = replace(local.hdb_vms[count.index].name, "_", "")
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
