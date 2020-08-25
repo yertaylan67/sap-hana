@@ -82,7 +82,7 @@ locals {
   # Region and metadata
   region             = try(local.var_infra.region, "")
   landscape          = lower(try(local.var_infra.landscape, ""))
-  sid                = upper(try(local.var_infra.sid, ""))
+  sid                = upper(try(var.application.sid, ""))
   codename           = lower(try(local.var_infra.codename, ""))
   location_short     = lower(try(var.region_mapping[local.region], "unkn"))
   # Using replace "--" with "-"  in case of one of the components like codename is empty
@@ -95,13 +95,13 @@ locals {
   var_rg    = try(local.var_infra.resource_group, {})
   rg_exists = try(local.var_rg.is_existing, false)
   rg_arm_id = local.rg_exists ? try(local.var_rg.arm_id, "") : ""
-  rg_name   = local.rg_exists ? "" : try(local.var_rg.name, local.prefix)
+  rg_name   = local.rg_exists ? try(split("/", local.rg_arm_id)[4], "") : try(local.var_rg.name, local.prefix)
 
   # PPG
   var_ppg    = try(local.var_infra.ppg, {})
   ppg_exists = try(local.var_ppg.is_existing, false)
   ppg_arm_id = local.ppg_exists ? try(local.var_ppg.arm_id, "") : ""
-  ppg_name   = local.ppg_exists ? "" : try(local.var_ppg.name, format("%s_ppg",local.prefix))
+  ppg_name   = local.ppg_exists ? try(split("/", local.ppg_arm_id)[8], "") : try(local.var_ppg.name, format("%s_ppg",local.prefix))
 
   # iSCSI
   var_iscsi = try(local.var_infra.iscsi, {})
@@ -140,48 +140,47 @@ locals {
   var_vnet_sap    = try(local.var_infra.vnets.sap, {})
   vnet_sap_exists = try(local.var_vnet_sap.is_existing, false)
   vnet_sap_arm_id = local.vnet_sap_exists ? try(local.var_vnet_sap.arm_id, "") : ""
-  vnet_sap_name   = local.vnet_sap_exists ? "" : try(local.var_vnet_sap.name, format("%s-sap-vnet",local.vnet_prefix))
+  vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, format("%s-sap-vnet",local.vnet_prefix))
   vnet_sap_addr   = local.vnet_sap_exists ? "" : try(local.var_vnet_sap.address_space, "")
       
   # Admin subnet
   var_sub_admin    = try(local.var_vnet_sap.subnet_admin, {})
   sub_admin_exists = try(local.var_sub_admin.is_existing, false)
   sub_admin_arm_id = local.sub_admin_exists ? try(local.var_sub_admin.arm_id, "") : ""
-  sub_admin_name   = local.sub_admin_exists ? "" : try(local.var_sub_admin.name, format("%s-sap-vnet_admin-subnet",local.vnet_prefix))
+  sub_admin_name   = local.sub_admin_exists ? try(split("/", local.sub_admin_arm_id)[10], "") : try(local.var_sub_admin.name, format("%s-sap-vnet_admin-subnet",local.vnet_prefix))
   sub_admin_prefix = local.sub_admin_exists ? "" : try(local.var_sub_admin.prefix, "")
 
   # Admin NSG
   var_sub_admin_nsg    = try(local.var_sub_admin.nsg, {})
   sub_admin_nsg_exists = try(local.var_sub_admin_nsg.is_existing, false)
   sub_admin_nsg_arm_id = local.sub_admin_nsg_exists ? try(local.var_sub_admin_nsg.arm_id, "") : ""
-  sub_admin_nsg_name   = local.sub_admin_nsg_exists ? "" : try(local.var_sub_admin_nsg.name, format("%s-sap-vnet_admin-nsg",local.vnet_prefix))
+  sub_admin_nsg_name   = local.sub_admin_nsg_exists ?  try(split("/", local.sub_admin_nsg_arm_id)[8], "") : try(local.var_sub_admin_nsg.name, format("%s-sap-vnet_admin-nsg",local.vnet_prefix))
 
   # DB subnet
   var_sub_db    = try(local.var_vnet_sap.subnet_db, {})
   sub_db_exists = try(local.var_sub_db.is_existing, false)
   sub_db_arm_id = local.sub_db_exists ? try(local.var_sub_db.arm_id, "") : ""
-  sub_db_name   = local.sub_db_exists ? "" : try(local.var_sub_db.name, format("%s-sap-vnet_db-subnet",local.vnet_prefix))
+  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s-sap-vnet_db-subnet",local.vnet_prefix))
   sub_db_prefix = local.sub_db_exists ? "" : try(local.var_sub_db.prefix, "")
 
   # DB NSG
   var_sub_db_nsg    = try(local.var_sub_db.nsg, {})
   sub_db_nsg_exists = try(local.var_sub_db_nsg.is_existing, false)
   sub_db_nsg_arm_id = local.sub_db_nsg_exists ? try(local.var_sub_db_nsg.arm_id, "") : ""
-  sub_db_nsg_name   = local.sub_db_nsg_exists ? "" : try(local.var_sub_db_nsg.name, format("%s-sap-vnet_db-nsg",local.vnet_prefix))
+  sub_db_nsg_name   = local.sub_db_nsg_exists ? try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s-sap-vnet_db-nsg",local.vnet_prefix))
 
   # iSCSI subnet
   var_sub_iscsi    = try(local.var_vnet_sap.subnet_iscsi, {})
   sub_iscsi_exists = try(local.var_sub_iscsi.is_existing, false)
   sub_iscsi_arm_id = local.sub_iscsi_exists ? try(local.var_sub_iscsi.arm_id, "") : ""
-
-  sub_iscsi_name   = local.sub_iscsi_exists ? "" : try(local.var_sub_iscsi.name, format("%s-sap-vnet_iscsi-subnet",local.vnet_prefix))
+  sub_iscsi_name   = local.sub_iscsi_exists ? try(split("/", local.sub_iscsi_arm_id)[10], "") : try(local.var_sub_iscsi.name, format("%s-sap-vnet_iscsi-subnet",local.vnet_prefix))
   sub_iscsi_prefix = local.sub_iscsi_exists ? "" : try(local.var_sub_iscsi.prefix, "")
 
   # iSCSI NSG
   var_sub_iscsi_nsg    = try(local.var_sub_iscsi.nsg, {})
   sub_iscsi_nsg_exists = try(local.var_sub_iscsi_nsg.is_existing, false)
   sub_iscsi_nsg_arm_id = local.sub_iscsi_nsg_exists ? try(local.var_sub_iscsi_nsg.arm_id, "") : ""
-  sub_iscsi_nsg_name   = local.sub_iscsi_nsg_exists ? "" : try(local.var_sub_iscsi_nsg.name, format("%s-sap-vnet_iscsi-nsg",local.vnet_prefix))
+  sub_iscsi_nsg_name   = local.sub_iscsi_nsg_exists ? try(split("/", local.sub_iscsi_nsg_arm_id)[8], "") : try(local.var_sub_iscsi_nsg.name, format("%s-sap-vnet_iscsi-nsg",local.vnet_prefix))
 
   # APP subnet
   var_sub_app    = try(local.var_vnet_sap.subnet_app, {})
@@ -194,7 +193,7 @@ locals {
   var_sub_app_nsg    = try(local.var_sub_app.nsg, {})
   sub_app_nsg_exists = try(local.var_sub_app_nsg.is_existing, false)
   sub_app_nsg_arm_id = local.sub_app_nsg_exists ? try(local.var_sub_app_nsg.arm_id, "") : ""
-  sub_app_nsg_name   = local.sub_app_nsg_exists ? "" : try(local.var_sub_app_nsg.name, format("%s-sap-vnet_app-nsg",local.vnet_prefix))
+  sub_app_nsg_name   = local.sub_app_nsg_exists ?  try(split("/", local.sub_app_nsg_arm_id)[8], "") : try(local.var_sub_app_nsg.name, format("%s-sap-vnet_app-nsg",local.vnet_prefix))
 
   //---- Update infrastructure with defaults ----//
   infrastructure = {

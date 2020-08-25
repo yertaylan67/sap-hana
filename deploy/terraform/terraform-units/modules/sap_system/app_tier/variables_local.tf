@@ -22,7 +22,7 @@ variable "region_mapping" {
   type        = map(string)
   description = "Region Mapping: Full = Single CHAR, 4-CHAR"
 
-  # 28 Regions 
+  // 28 Regions 
 
   default = {
     westus             = "weus"
@@ -55,50 +55,48 @@ variable "region_mapping" {
     koreasouth         = "koso"
   }
 }
-# Set defaults
+// Set defaults
 locals {
   region             = try(var.infrastructure.region, "")
   landscape          = lower(try(var.infrastructure.landscape, ""))
-  sid                = upper(try(var.infrastructure.sid, ""))
+  sid                = upper(try(var.application.sid, ""))
   codename           = lower(try(var.infrastructure.codename, ""))
   location_short     = lower(try(var.region_mapping[local.region], "unkn"))
 
-  # Using replace "--" with "-"  in case of one of the components like codename is empty
+  // Using replace "--" with "-"  in case of one of the components like codename is empty
   prefix             = try(var.infrastructure.resource_group.name, replace(format("%s-%s-%s-%s", local.landscape, local.location_short, local.codename, local.sid),"--","-"))
   sa_prefix          = lower(replace(format("%s%s%sdiag", substr(local.landscape,0,5), local.location_short, substr(local.codename,0,7)),"--","-"))
 
-  # APP subnet
+  // APP subnet
   var_sub_app    = try(var.infrastructure.vnets.sap.subnet_app, {})
   sub_app_exists = try(local.var_sub_app.is_existing, false)
   sub_app_arm_id = local.sub_app_exists ? try(local.var_sub_app.arm_id, "") : ""
-
-  sub_app_name   = local.sub_app_exists ? "" : try(local.var_sub_app.name, format("%s_app-subnet", local.prefix))
+  sub_app_name   = local.sub_app_exists ?  try(split("/", local.sub_app_arm_id)[10], "") : try(local.var_sub_app.name, format("%s_app-subnet", local.prefix))
   sub_app_prefix = local.sub_app_exists ? "" : try(local.var_sub_app.prefix, "")
 
-  # APP NSG
+  // APP NSG
   var_sub_app_nsg    = try(local.var_sub_app.nsg, {})
   sub_app_nsg_exists = try(local.var_sub_app_nsg.is_existing, false)
   sub_app_nsg_arm_id = local.sub_app_nsg_exists ? try(local.var_sub_app_nsg.arm_id, "") : ""
-  sub_app_nsg_name   = local.sub_app_nsg_exists ? "" : try(local.var_sub_app_nsg.name, format("%s_app-nsg", local.prefix))
+  sub_app_nsg_name   = local.sub_app_nsg_exists ? try(split("/", local.sub_app_nsg_arm_id)[8], "") : try(local.var_sub_app_nsg.name, format("%s_app-nsg", local.prefix))
 
-  # WEB subnet
+  // WEB subnet
   #If subnet_web is not specified deploy into app subnet
   sub_web_defined = try(var.infrastructure.vnets.sap.subnet_web, null) == null ? false : true
   sub_web         = try(var.infrastructure.vnets.sap.subnet_web, {})
   sub_web_exists  = try(local.sub_web.is_existing, false)
   sub_web_arm_id  = local.sub_web_exists ? try(local.sub_web.arm_id, "") : ""
-  sub_web_name    = local.sub_web_exists ? "" : try(local.sub_web.name, format("%s_web-subnet", local.prefix))
-
+  sub_web_name    = local.sub_web_exists ?  try(split("/", local.sub_web_arm_id)[10], "") : try(local.sub_web.name, format("%s_web-subnet", local.prefix))
   sub_web_prefix  = local.sub_web_exists ? "" : try(local.sub_web.prefix, "")
   sub_web_deployed = try(local.sub_web_defined ? (
     local.sub_web_exists ? data.azurerm_subnet.subnet-sap-web[0] : azurerm_subnet.subnet-sap-web[0]) : (
   local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0] : azurerm_subnet.subnet-sap-app[0]), null)
 
-  # WEB NSG
+  // WEB NSG
   sub_web_nsg        = try(local.sub_web.nsg, {})
   sub_web_nsg_exists = try(local.sub_web_nsg.is_existing, false)
   sub_web_nsg_arm_id = local.sub_web_nsg_exists ? try(local.sub_web_nsg.arm_id, "") : ""
-  sub_web_nsg_name   = local.sub_web_nsg_exists ? "" : try(local.sub_web_nsg.name, format("%s_web-nsg", local.prefix))
+  sub_web_nsg_name   = local.sub_web_nsg_exists ?  try(split("/", local.sub_web_nsg_arm_id)[8], "") : try(local.sub_web_nsg.name, format("%s_web-nsg", local.prefix))
   sub_web_nsg_deployed = try(local.sub_web_defined ? (
     local.sub_web_nsg_exists ? data.azurerm_network_security_group.nsg-web[0] : azurerm_network_security_group.nsg-web[0]) : (
   local.sub_app_nsg_exists ? data.azurerm_network_security_group.nsg-app[0] : azurerm_network_security_group.nsg-app[0]), null)
@@ -126,8 +124,8 @@ locals {
       "password" = "Sap@hana2019!"
   })
 
-  # OS image for all Application Tier VMs
-  # If custom image is used, we do not overwrite os reference with default value
+  // OS image for all Application Tier VMs
+  // If custom image is used, we do not overwrite os reference with default value
   app_custom_image = try(var.application.os.source_image_id, "") != "" ? true : false
 
   app_os = {
@@ -140,14 +138,14 @@ locals {
 
 }
 
-# Imports Disk sizing sizing information
+// Imports Disk sizing sizing information
 locals {
   sizes = jsondecode(file("${path.module}/../../../../../configs/app_sizes.json"))
 }
 
 locals {
-  # Subnet IP Offsets
-  # Note: First 4 IP addresses in a subnet are reserved by Azure
+  // Subnet IP Offsets
+  // Note: First 4 IP addresses in a subnet are reserved by Azure
   ip_offsets = {
     scs_lb = 4 + 1
     web_lb = 4 + 3
@@ -156,31 +154,31 @@ locals {
     web_vm = 4 + 20
   }
 
-  # Default VM config should be merged with any the user passes in
+  // Default VM config should be merged with any the user passes in
   app_sizing = lookup(local.sizes.app, local.vm_sizing, lookup(local.sizes.app, "Default"))
 
   scs_sizing = lookup(local.sizes.scs, local.vm_sizing, lookup(local.sizes.scs, "Default"))
 
   web_sizing = lookup(local.sizes.web, local.vm_sizing, lookup(local.sizes.web, "Default"))
 
-  # Ports used for specific ASCS, ERS and Web dispatcher
+  // Ports used for specific ASCS, ERS and Web dispatcher
   lb-ports = {
     "scs" = [
-      3200 + tonumber(local.scs_instance_number),          # e.g. 3201
-      3600 + tonumber(local.scs_instance_number),          # e.g. 3601
-      3900 + tonumber(local.scs_instance_number),          # e.g. 3901
-      8100 + tonumber(local.scs_instance_number),          # e.g. 8101
-      50013 + (tonumber(local.scs_instance_number) * 100), # e.g. 50113
-      50014 + (tonumber(local.scs_instance_number) * 100), # e.g. 50114
-      50016 + (tonumber(local.scs_instance_number) * 100), # e.g. 50116
+      3200 + tonumber(local.scs_instance_number),          // e.g. 3201
+      3600 + tonumber(local.scs_instance_number),          // e.g. 3601
+      3900 + tonumber(local.scs_instance_number),          // e.g. 3901
+      8100 + tonumber(local.scs_instance_number),          // e.g. 8101
+      50013 + (tonumber(local.scs_instance_number) * 100), // e.g. 50113
+      50014 + (tonumber(local.scs_instance_number) * 100), // e.g. 50114
+      50016 + (tonumber(local.scs_instance_number) * 100), // e.g. 50116
     ]
 
     "ers" = [
-      3200 + tonumber(local.ers_instance_number),          # e.g. 3202
-      3300 + tonumber(local.ers_instance_number),          # e.g. 3302
-      50013 + (tonumber(local.ers_instance_number) * 100), # e.g. 50213
-      50014 + (tonumber(local.ers_instance_number) * 100), # e.g. 50214
-      50016 + (tonumber(local.ers_instance_number) * 100), # e.g. 50216
+      3200 + tonumber(local.ers_instance_number),          // e.g. 3202
+      3300 + tonumber(local.ers_instance_number),          // e.g. 3302
+      50013 + (tonumber(local.ers_instance_number) * 100), // e.g. 50213
+      50014 + (tonumber(local.ers_instance_number) * 100), // e.g. 50214
+      50016 + (tonumber(local.ers_instance_number) * 100), // e.g. 50216
     ]
 
     "web" = [
@@ -189,7 +187,7 @@ locals {
     ]
   }
 
-  # Ports used for ASCS, ERS and Web dispatcher NSG rules
+  // Ports used for ASCS, ERS and Web dispatcher NSG rules
   nsg-ports = {
     "web" = [
       {
@@ -220,17 +218,17 @@ locals {
     ]
   }
 
-  # Ports used for the health probes.
-  # Where Instance Number is nn:
-  # SCS (index 0) - 620nn
-  # ERS (index 1) - 621nn
+  // Ports used for the health probes.
+  // Where Instance Number is nn:
+  // SCS (index 0) - 620nn
+  // ERS (index 1) - 621nn
   hp-ports = [
     62000 + tonumber(local.scs_instance_number),
     62100 + tonumber(local.ers_instance_number)
   ]
 
   app_computername = upper(local.app_ostype) == "WINDOWS" ? format("%sappw", lower(local.sid)) : format("%sappl", lower(local.sid))
-  # Create list of disks per VM
+  // Create list of disks per VM
   app-data-disks = flatten([
     for vm_count in range(local.application_server_count) : [
       for disk_spec in local.app_sizing.storage : {

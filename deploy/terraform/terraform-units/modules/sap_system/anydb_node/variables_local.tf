@@ -18,7 +18,7 @@ variable "region_mapping" {
   type        = map(string)
   description = "Region Mapping: Full = Single CHAR, 4-CHAR"
 
-  # 28 Regions 
+  // 28 Regions 
 
   default = {
     westus             = "weus"
@@ -55,49 +55,47 @@ variable "region_mapping" {
 locals {
   region         = try(var.infrastructure.region, "")
   landscape      = lower(try(var.infrastructure.landscape, ""))
-  sid            = upper(try(var.infrastructure.sid, ""))
+  sid            = upper(try(var.application.sid, ""))
   codename       = lower(try(var.infrastructure.codename, ""))
   location_short = lower(try(var.region_mapping[local.region], "unkn"))
-  # Using replace "--" with "-"  in case of one of the components like codename is empty
+  // Using replace "--" with "-"  in case of one of the components like codename is empty
   prefix    = try(var.infrastructure.resource_group.name, replace(format("%s-%s-%s-%s", local.landscape, local.location_short, local.codename, local.sid), "--", "-"))
   sa_prefix = lower(replace(format("%s%s%sdiag", substr(local.landscape, 0, 5), local.location_short, substr(local.codename, 0, 7)), "--", "-"))
-  rg_name   = local.prefix
 
-  # DB subnet
+  // DB subnet
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
   sub_db_exists = try(local.var_sub_db.is_existing, false)
   sub_db_arm_id = local.sub_db_exists ? try(local.var_sub_db.arm_id, "") : ""
-
-  sub_db_name   = local.sub_db_exists ? "" : try(local.var_sub_db.name, format("%s_db-subnet", local.prefix))
+  sub_db_name   = local.sub_db_exists ?  try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s_db-subnet", local.prefix))
   sub_db_prefix = local.sub_db_exists ? "" : try(local.var_sub_db.prefix, "")
 
-  # DB NSG
+  // DB NSG
   var_sub_db_nsg    = try(var.infrastructure.vnets.sap.subnet_db.nsg, {})
   sub_db_nsg_exists = try(local.var_sub_db_nsg.is_existing, false)
   sub_db_nsg_arm_id = local.sub_db_nsg_exists ? try(local.var_sub_db_nsg.arm_id, "") : ""
-  sub_db_nsg_name   = local.sub_db_nsg_exists ? "" : try(local.var_sub_db_nsg.name, format("%s_db-nsg", local.prefix))
+  sub_db_nsg_name   = local.sub_db_nsg_exists ?  try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s_db-nsg", local.prefix))
 
-  # Imports database sizing information
+  // Imports database sizing information
   sizes = jsondecode(file("${path.module}/../../../../../configs/anydb_sizes.json"))
 
-  # PPG Information
+  // PPG Information
   ppgId = lookup(var.infrastructure, "ppg", false) != false ? (var.ppg[0].id) : null
 
   anydb          = try(local.anydb-databases[0], {})
   anydb_platform = try(local.anydb.platform, "NONE")
   anydb_version  = try(local.anydb.db_version, "")
 
-  # Filter the list of databases to only AnyDB platform entries
-  # Supported databases: Oracle, DB2, SQLServer, ASE 
+  // Filter the list of databases to only AnyDB platform entries
+  // Supported databases: Oracle, DB2, SQLServer, ASE 
   anydb-databases = [
     for database in var.databases : database
     if contains(["ORACLE", "DB2", "SQLSERVER", "ASE"], upper(try(database.platform, "NONE")))
   ]
 
-  # Enable deployment based on length of local.anydb-databases
+  // Enable deployment based on length of local.anydb-databases
   enable_deployment = (length(local.anydb-databases) > 0) ? true : false
 
-  # If custom image is used, we do not overwrite os reference with default value
+  // If custom image is used, we do not overwrite os reference with default value
   anydb_custom_image = try(local.anydb.os.source_image_id, "") != "" ? true : false
 
   anydb_ostype = try(local.anydb.os.os_type, "Linux")
@@ -118,7 +116,7 @@ locals {
   anydb_cred           = try(local.anydb.credentials, {})
   db_systemdb_password = try(local.anydb_cred.db_systemdb_password, "")
 
-  # Default values in case not provided
+  // Default values in case not provided
   os_defaults = {
     ORACLE = {
       "publisher" = "Oracle",
@@ -160,7 +158,7 @@ locals {
     "version"         = try(local.anydb.os.version, local.anydb_custom_image ? "" : local.os_defaults[upper(local.anydb_platform)].version)
   }
 
-  # Update database information with defaults
+  // Update database information with defaults
   anydb_database = merge(local.anydb,
     { platform = local.anydb_platform },
     { db_version = local.anydb_version },
@@ -214,7 +212,7 @@ locals {
     ]
   ])
 
-  # Ports used for specific DB Versions
+  // Ports used for specific DB Versions
   lb_ports = {
     "ASE" = [
       "1433"
