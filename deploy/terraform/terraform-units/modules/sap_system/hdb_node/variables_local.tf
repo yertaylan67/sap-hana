@@ -71,9 +71,21 @@ locals {
   codename       = lower(try(var.infrastructure.codename, ""))
   location_short = lower(try(var.region_mapping[local.region], "unkn"))
   // Using replace "--" with "-"  in case of one of the components like codename is empty
-  prefix    = try(var.infrastructure.resource_group.name, upper(replace(format("%s-%s_%s-%s", local.landscape, local.location_short, local.codename, local.sid), "_-", "-")))
+  prefix         = try(local.var_infra.resource_group.name, upper(replace(format("%s-%s-%s_%s-%s", local.landscape, local.location_short, local.vnet_sap_name_prefix, local.codename, local.sid),"_-","-")))
   sa_prefix = lower(replace(format("%s%s%sdiag", substr(local.landscape, 0, 5), local.location_short, substr(local.codename, 0, 7)), "--", "-"))
   rg_name   = local.prefix
+
+  # SAP vnet
+  var_infra            = try(var.infrastructure, {})
+  var_vnet_sap         = try(local.var_infra.vnets.sap, {})
+  vnet_sap_exists      = try(local.var_vnet_sap.is_existing, false)
+  vnet_sap_arm_id      = local.vnet_sap_exists ? try(local.var_vnet_sap.arm_id, "") : ""
+  vnet_sap_name        = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, "sap")
+  vnet_nr_parts        = length(split("-",local.vnet_sap_name))
+  // Default naming of vnet has multiple parts. Taking the second-last part as the name 
+  vnet_sap_name_prefix = local.vnet_nr_parts >= 3 ? split("-",upper(local.vnet_sap_name))[local.vnet_nr_parts - 1]=="VNET" ? split("-",local.vnet_sap_name)[local.vnet_nr_parts - 2] : local.vnet_sap_name : local.vnet_sap_name
+
+
 
   // Admin subnet
   var_sub_admin    = try(var.infrastructure.vnets.sap.subnet_admin, {})
