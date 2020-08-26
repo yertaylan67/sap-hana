@@ -59,7 +59,7 @@ variable "region_mapping" {
 locals {
   region         = try(var.infrastructure.region, "")
   landscape      = lower(try(var.infrastructure.landscape, ""))
-  sid            = upper(try(var.application.sid, ""))
+  sid            = upper(try(var.application.sid, local.anydb_sid))
   codename       = lower(try(var.infrastructure.codename, ""))
   location_short = lower(try(var.region_mapping[local.region], "unkn"))
   // Using replace "--" with "-"  in case of one of the components like codename is empty

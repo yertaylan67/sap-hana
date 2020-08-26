@@ -26,7 +26,7 @@ resource "azurerm_subnet" "subnet-sap-web" {
 
 # Imports data of existing SAP web dispatcher subnet
 data "azurerm_subnet" "subnet-sap-web" {
-  count                = local.enable_deployment && local.sub_web_defined ? (local.sub_web_exists ? 1 : 0) : 1
+  count                = local.enable_deployment && local.sub_web_defined ? (local.sub_web_exists ? 1 : 0) : 0
   name                 = split("/", local.sub_web_arm_id)[10]
   resource_group_name  = split("/", local.sub_web_arm_id)[4]
   virtual_network_name = split("/", local.sub_web_arm_id)[8]
