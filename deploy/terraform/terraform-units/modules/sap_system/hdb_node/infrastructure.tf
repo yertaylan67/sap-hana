@@ -33,7 +33,7 @@ data "azurerm_subnet" "subnet-sap-db" {
 }
 
 # Creates SAP admin subnet nsg
-resource "azurerm_network_security_group" "nsg-admin" {
+resource "azurerm_network_security_group" "admin-nsg" {
   count               = local.enable_deployment ? (local.sub_admin_nsg_exists ? 0 : 1) : 0
   name                = local.sub_admin_nsg_name
   resource_group_name = var.resource-group[0].name
@@ -49,7 +49,7 @@ resource "azurerm_network_security_group" "nsg-db" {
 }
 
 # Imports the SAP admin subnet nsg data
-data "azurerm_network_security_group" "nsg-admin" {
+data "azurerm_network_security_group" "admin-nsg" {
   count               = local.enable_deployment ? (local.sub_admin_nsg_exists ? 1 : 0) : 0
   name                = split("/", local.sub_admin_nsg_arm_id)[8]
   resource_group_name = split("/", local.sub_admin_nsg_arm_id)[4]
@@ -63,10 +63,10 @@ data "azurerm_network_security_group" "nsg-db" {
 }
 
 # Associates SAP admin nsg to SAP admin subnet
-resource "azurerm_subnet_network_security_group_association" "Associate-nsg-admin" {
+resource "azurerm_subnet_network_security_group_association" "Associate-admin-nsg" {
   count                     = local.enable_deployment ? (signum((local.sub_admin_exists ? 0 : 1) + (local.sub_admin_nsg_exists ? 0 : 1))) : 0
   subnet_id                 = local.sub_admin_exists ? data.azurerm_subnet.subnet-sap-admin[0].id : azurerm_subnet.subnet-sap-admin[0].id
-  network_security_group_id = local.sub_admin_nsg_exists ? data.azurerm_network_security_group.nsg-admin[0].id : azurerm_network_security_group.nsg-admin[0].id
+  network_security_group_id = local.sub_admin_nsg_exists ? data.azurerm_network_security_group.admin-nsg[0].id : azurerm_network_security_group.admin-nsg[0].id
 }
 
 # Associates SAP db nsg to SAP db subnet
