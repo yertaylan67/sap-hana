@@ -81,7 +81,7 @@ locals {
   sub_db_exists = try(local.var_sub_db.is_existing, false)
   sub_db_arm_id = local.sub_db_exists ? try(local.var_sub_db.arm_id, "") : ""
   sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s_db-subnet", local.prefix))
-  sub_db_prefix = local.sub_db_exists ? data.azurerm_subnet.anydb[0].address_prefixes[0] : try(local.var_sub_db.prefix, "")
+  sub_db_prefix = local.sub_db_exists && local.enable_deployment ? data.azurerm_subnet.anydb[0].address_prefixes[0]) : try(local.var_sub_db.prefix, "")
 
   // DB NSG
   var_sub_db_nsg    = try(var.infrastructure.vnets.sap.subnet_db.nsg, {})
