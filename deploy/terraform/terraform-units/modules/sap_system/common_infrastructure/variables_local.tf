@@ -267,17 +267,6 @@ locals {
             arm_id      = local.sub_app_nsg_arm_id,
             name        = local.sub_app_nsg_name
           }
-        },
-        subnet_web = {
-          is_existing = local.sub_web_exists,
-          arm_id      = local.sub_web_arm_id,
-          name        = local.sub_web_name,
-          prefix      = local.sub_web_prefix,
-          nsg = {
-            is_existing = local.sub_web_nsg_exists,
-            arm_id      = local.sub_web_nsg_arm_id,
-            name        = local.sub_web_nsg_name
-          }
         }
       }
     }
