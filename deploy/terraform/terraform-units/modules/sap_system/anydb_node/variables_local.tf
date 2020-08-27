@@ -190,7 +190,7 @@ locals {
   )
 
   dbnodes = [for dbnode in try(local.anydb.dbnodes, []) : {
-    "name"       = try(dbnode.name, format("%sdb%s", lower(local.sid), lower(local.anydb_sid)))
+    "name"       = try(dbnode.name, format("%sd%s", lower(local.sid), lower(local.anydb_sid)))
     "role"       = try(dbnode.role, "worker"),
     "db_nic_ips" = try(dbnode.db_nic_ips, [false, false])
     }

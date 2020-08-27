@@ -155,7 +155,7 @@ locals {
   shine                  = try(local.hdb.shine, "")
 
   dbnodes = [for dbnode in try(local.hdb.dbnodes, []) : {
-    "name"          = try(dbnode.name, format("%shdb%s", lower(local.sap_sid), lower(local.hdb_sid)))
+    "name"          = try(dbnode.name, format("%sd%s", lower(local.sap_sid), lower(local.hdb_sid)))
     "role"          = try(dbnode.role, "worker")
     "admin_nic_ips" = try(dbnode.admin_nic_ips, [false, false]),
     "db_nic_ips"    = try(dbnode.db_nic_ips, [false, false])
