@@ -86,9 +86,9 @@ locals {
   codename       = lower(try(local.var_infra.codename, ""))
   location_short = lower(try(var.region_mapping[local.region], "unkn"))
   # Using replace "--" with "-"  in case of one of the components like codename is empty
-  prefix   = try(local.var_infra.resource_group.name, upper(replace(format("%s-%s-%s_%s-%s", local.landscape, local.location_short, local.vnet_sap_name_prefix, local.codename, local.sid), "_-", "-")))
-  sa_prefix    = lower(format("%s%s%s%sdiag", substr(local.landscape, 0, 5), local.location_short, substr(local.codename, 0, 7), local.sid))
-  vnet_prefix  = try(local.var_infra.resource_group.name, upper(format("%s-%s-%s", local.landscape, local.location_short,local.vnet_sap_name_prefix)))
+  prefix      = try(local.var_infra.resource_group.name, upper(replace(format("%s-%s-%s_%s-%s", local.landscape, local.location_short, local.vnet_sap_name_prefix, local.codename, local.sid), "_-", "-")))
+  sa_prefix   = lower(format("%s%s%s%sdiag", substr(local.landscape, 0, 5), local.location_short, substr(local.codename, 0, 7), local.sid))
+  vnet_prefix = try(local.var_infra.resource_group.name, upper(format("%s-%s-%s", local.landscape, local.location_short, local.vnet_sap_name_prefix)))
 
   # Resource group
   var_rg    = try(local.var_infra.resource_group, {})
@@ -267,7 +267,7 @@ locals {
             arm_id      = local.sub_app_nsg_arm_id,
             name        = local.sub_app_nsg_name
           }
-        }, 
+        },
         subnet_web = {
           is_existing = local.sub_web_exists,
           arm_id      = local.sub_web_arm_id,
@@ -277,7 +277,8 @@ locals {
             is_existing = local.sub_web_nsg_exists,
             arm_id      = local.sub_web_nsg_arm_id,
             name        = local.sub_web_nsg_name
-          } 
+          }
+        }
       }
     }
   }

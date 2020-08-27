@@ -93,7 +93,7 @@ locals {
   enable_deployers = length(local.deployer_input) > 0 ? true : false
   deployers = [
     for idx, deployer in local.deployer_input : {
-      "name"                 = format("%s_deployer",local.prefix),
+      "name"                 = "deployer",
       "destroy_after_deploy" = true,
       "size"                 = try(deployer.size, "Standard_D2s_v3"),
       "disk_type"            = try(deployer.disk_type, "StandardSSD_LRS")
