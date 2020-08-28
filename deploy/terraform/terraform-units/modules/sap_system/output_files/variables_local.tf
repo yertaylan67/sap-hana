@@ -79,6 +79,9 @@ variable "nics-anydb" {
   description = "List of NICs for the Web dispatcher VMs"
 }
 
+variable "random-id" {
+  description = "Random hex string"
+}
 variable "anydb-loadbalancers" {
   description = "List of LoadBalancers created for HANA Databases"
 }
@@ -109,7 +112,7 @@ locals {
           role           = dbnode.role,
           platform       = database.platform,
           authentication = database.authentication,
-          name           = "${dbnode.name}-0"
+          name           = format("%s00l0%s", dbnode.name, substr(var.random-id.hex, 0, 3)),
         }
         if try(database.platform, "NONE") == "HANA"
       ],
@@ -118,7 +121,7 @@ locals {
           role           = dbnode.role,
           platform       = database.platform,
           authentication = database.authentication,
-          name           = "${dbnode.name}-1"
+          name           = format("%s00l0%s", dbnode.name, substr(var.random-id.hex, 0, 3)),
         }
         if try(database.platform, "NONE") == "HANA" && database.high_availability
       ]
@@ -140,7 +143,7 @@ locals {
           role           = dbnode.role,
           platform       = upper(adatabase.platform),
           authentication = adatabase.authentication,
-          name           = "${dbnode.name}-00"
+          name           = format("%s00l0%s", dbnode.name, substr(var.random-id.hex, 0, 3)),
         }
         if contains(["ORACLE", "DB2", "SQLSERVER", "ASE"], upper(try(adatabase.platform, "NONE")))
       ],
@@ -149,7 +152,7 @@ locals {
           role           = dbnode.role,
           platform       = upper(adatabase.platform),
           authentication = adatabase.authentication,
-          name           = "${dbnode.name}-01"
+          name           = format("%s01l1%s", dbnode.name, substr(var.random-id.hex, 0, 3)),
         }
         if adatabase.high_availability && contains(["ORACLE", "DB2", "SQLSERVER", "ASE"], upper(try(adatabase.platform, "NONE")))
       ]

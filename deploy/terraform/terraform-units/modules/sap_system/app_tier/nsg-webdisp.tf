@@ -32,7 +32,7 @@ resource "azurerm_network_security_rule" "webRule_internet" {
   source_port_range            = "*"
   destination_address_prefixes = local.sub_web_deployed.address_prefixes
   destination_port_range       = "*"
-  resource_group_name          =  var.resource-group[0].name
+  resource_group_name          = var.resource-group[0].name
   network_security_group_name  = local.sub_web_nsg_deployed.name
 }
 
@@ -48,6 +48,6 @@ resource "azurerm_network_security_rule" "web" {
   source_port_range            = "*"
   destination_address_prefixes = local.sub_web_deployed.address_prefixes
   destination_port_range       = local.nsg-ports.web[count.index].port
-  resource_group_name          = local.sub_web_exists ? data.azurerm_subnet.subnet-sap-web[0].resource_group_name : azurerm_subnet.subnet-sap-web[0].resource_group_name
+  resource_group_name          = var.resource-group[0].name
   network_security_group_name  = local.sub_web_nsg_deployed.name
 }
