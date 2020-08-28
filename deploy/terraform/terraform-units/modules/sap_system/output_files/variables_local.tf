@@ -112,7 +112,7 @@ locals {
           role           = dbnode.role,
           platform       = database.platform,
           authentication = database.authentication,
-          name           = format("%s00l0%s", dbnode.name, substr(var.random-id.hex, 0, 3)),
+          name           = dbnode.name
         }
         if try(database.platform, "NONE") == "HANA"
       ],
@@ -121,7 +121,7 @@ locals {
           role           = dbnode.role,
           platform       = database.platform,
           authentication = database.authentication,
-          name           = format("%s00l0%s", dbnode.name, substr(var.random-id.hex, 0, 3)),
+          name           = dbnode.name
         }
         if try(database.platform, "NONE") == "HANA" && database.high_availability
       ]
@@ -143,7 +143,7 @@ locals {
           role           = dbnode.role,
           platform       = upper(adatabase.platform),
           authentication = adatabase.authentication,
-          name           = format("%s00l0%s", dbnode.name, substr(var.random-id.hex, 0, 3)),
+          name           = dbnode.name
         }
         if contains(["ORACLE", "DB2", "SQLSERVER", "ASE"], upper(try(adatabase.platform, "NONE")))
       ],
@@ -152,7 +152,7 @@ locals {
           role           = dbnode.role,
           platform       = upper(adatabase.platform),
           authentication = adatabase.authentication,
-          name           = format("%s01l1%s", dbnode.name, substr(var.random-id.hex, 0, 3)),
+          name           = dbnode.name
         }
         if adatabase.high_availability && contains(["ORACLE", "DB2", "SQLSERVER", "ASE"], upper(try(adatabase.platform, "NONE")))
       ]

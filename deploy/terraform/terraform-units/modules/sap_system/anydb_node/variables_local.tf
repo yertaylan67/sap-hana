@@ -63,18 +63,18 @@ locals {
   codename       = lower(try(var.infrastructure.codename, ""))
   location_short = lower(try(var.region_mapping[local.region], "unkn"))
   // Using replace "--" with "-"  in case of one of the components like codename is empty
-  prefix         = try(local.var_infra.resource_group.name, upper(replace(format("%s-%s-%s_%s-%s", local.landscape, local.location_short, local.vnet_sap_name_prefix, local.codename, local.sid),"_-","-")))
-  sa_prefix      = lower(replace(format("%s%s%sdiag", substr(local.landscape, 0, 5), local.location_short, substr(local.codename, 0, 7)), "--", "-"))
+  prefix    = try(local.var_infra.resource_group.name, upper(replace(format("%s-%s-%s_%s-%s", local.landscape, local.location_short, local.vnet_sap_name_prefix, local.codename, local.sid), "_-", "-")))
+  sa_prefix = lower(replace(format("%s%s%sdiag", substr(local.landscape, 0, 5), local.location_short, substr(local.codename, 0, 7)), "--", "-"))
 
   # SAP vnet
-  var_infra            = try(var.infrastructure, {})
-  var_vnet_sap         = try(local.var_infra.vnets.sap, {})
-  vnet_sap_exists      = try(local.var_vnet_sap.is_existing, false)
-  vnet_sap_arm_id      = local.vnet_sap_exists ? try(local.var_vnet_sap.arm_id, "") : ""
-  vnet_sap_name        = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, "sap")
-  vnet_nr_parts        = length(split("-",local.vnet_sap_name))
+  var_infra       = try(var.infrastructure, {})
+  var_vnet_sap    = try(local.var_infra.vnets.sap, {})
+  vnet_sap_exists = try(local.var_vnet_sap.is_existing, false)
+  vnet_sap_arm_id = local.vnet_sap_exists ? try(local.var_vnet_sap.arm_id, "") : ""
+  vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, "sap")
+  vnet_nr_parts   = length(split("-", local.vnet_sap_name))
   // Default naming of vnet has multiple parts. Taking the second-last part as the name 
-  vnet_sap_name_prefix = local.vnet_nr_parts >= 3 ? split("-",upper(local.vnet_sap_name))[local.vnet_nr_parts - 1]=="VNET" ? split("-",local.vnet_sap_name)[local.vnet_nr_parts - 2] : local.vnet_sap_name : local.vnet_sap_name
+  vnet_sap_name_prefix = local.vnet_nr_parts >= 3 ? split("-", upper(local.vnet_sap_name))[local.vnet_nr_parts - 1] == "VNET" ? split("-", local.vnet_sap_name)[local.vnet_nr_parts - 2] : local.vnet_sap_name : local.vnet_sap_name
 
   // DB subnet
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
@@ -113,10 +113,11 @@ locals {
   anydb_custom_image = try(local.anydb.os.source_image_id, "") != "" ? true : false
 
   anydb_ostype = try(local.anydb.os.os_type, "Linux")
+  anydb_oscode = upper(local.anydb_ostype) == "LINUX" ? "l" : "w"
   anydb_size   = try(local.anydb.size, "500")
   anydb_sku    = try(lookup(local.sizes, local.anydb_size).compute.vmsize, "Standard_E4s_v3")
   anydb_fs     = try(local.anydb.filesystem, "xfs")
-  anydb_ha     = try(local.anydb.high_availability, "false")
+  anydb_ha     = try(local.anydb.high_availability, false)
   anydb_sid    = (length(local.anydb-databases) > 0) ? try(local.anydb.instance.sid, lower(substr(local.anydb_platform, 0, 3))) : lower(substr(local.anydb_platform, 0, 3))
   loadbalancer = try(local.anydb.loadbalancer, {})
 
@@ -185,44 +186,46 @@ locals {
       db_systemdb_password = local.db_systemdb_password
       }
     },
-    { dbnodes = local.dbnodes },
+    { dbnodes = local.anydb_ha && length(local.dbnodes) == 1 ? local.defaultdbnodenames : local.dbnodes },
     { loadbalancer = local.loadbalancer }
   )
 
-  dbnodes = [for dbnode in try(local.anydb.dbnodes, []) : {
-    "name"       = try(dbnode.name, format("%sd%s", lower(local.sid), lower(local.anydb_sid)))
-    "role"       = try(dbnode.role, "worker"),
-    "db_nic_ips" = try(dbnode.db_nic_ips, [false, false])
+  defaultdbnodenames = [for idx in range(local.anydb_ha ? 2 : 1) :
+    {
+      "name" = lower(format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx, local.anydb_oscode, idx, substr(var.random-id.hex, 0, 3))),
+      "role" = "worker"
+    }
+  ]
+
+  dbnodes = [for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
+    "name" = try(dbnode.name, lower(format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx, local.anydb_oscode, idx, substr(var.random-id.hex, 0, 3)))),
+    "role" = try(dbnode.role, "worker")
     }
   ]
 
   anydb_vms = flatten([
     [
-      for database in local.anydb-databases : [
-        for idx, dbnode in local.dbnodes : {
-          platform       = local.anydb_platform,
-          name           = format("%s00%s0%s", dbnode.name, upper(local.anydb_ostype) == "WINDOWS" ? "w" : "l", substr(var.random-id.hex, 0, 3))
-          db_nic_ip      = dbnode.db_nic_ips[0],
-          size           = local.anydb_sku
-          os             = local.anydb_ostype,
-          authentication = local.authentication
-          sid            = local.anydb_sid
-        }
-      ]
+      for idx, dbnode in local.dbnodes : {
+        platform       = local.anydb_platform,
+        name           = lookup(dbnode, "name", local.defaultdbnodenames[0].name)
+        db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[0],
+        size           = local.anydb_sku
+        os             = local.anydb_ostype,
+        authentication = local.authentication
+        sid            = local.anydb_sid
+      }
     ],
     [
-      for database in local.anydb-databases : [
-        for idx, dbnode in local.dbnodes : {
-          platform       = local.anydb_platform,
-          name           = format("%s01%s1%s", dbnode.name, upper(local.anydb_ostype) == "WINDOWS" ? "w" : "l", substr(var.random-id.hex, 0, 3))
-          db_nic_ip      = dbnode.db_nic_ips[1],
-          size           = local.anydb_sku,
-          os             = local.anydb_ostype,
-          authentication = local.authentication
-          sid            = local.anydb_sid
-        }
-      ]
-      if database.high_availability
+      for idx, dbnode in local.dbnodes : {
+        platform       = local.anydb_platform,
+        name           = length(local.dbnodes) > 1 ? lookup(dbnode, "name", local.defaultdbnodenames[1].name) : local.defaultdbnodenames[1].name
+        db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[1],
+        size           = local.anydb_sku
+        os             = local.anydb_ostype,
+        authentication = local.authentication
+        sid            = local.anydb_sid
+      }
+      if local.anydb_ha
     ]
   ])
 

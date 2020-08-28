@@ -71,19 +71,19 @@ locals {
   codename       = lower(try(var.infrastructure.codename, ""))
   location_short = lower(try(var.region_mapping[local.region], "unkn"))
   // Using replace "--" with "-"  in case of one of the components like codename is empty
-  prefix         = try(local.var_infra.resource_group.name, upper(replace(format("%s-%s-%s_%s-%s", local.landscape, local.location_short, local.vnet_sap_name_prefix, local.codename, local.sid),"_-","-")))
+  prefix    = try(local.var_infra.resource_group.name, upper(replace(format("%s-%s-%s_%s-%s", local.landscape, local.location_short, local.vnet_sap_name_prefix, local.codename, local.sid), "_-", "-")))
   sa_prefix = lower(replace(format("%s%s%sdiag", substr(local.landscape, 0, 5), local.location_short, substr(local.codename, 0, 7)), "--", "-"))
   rg_name   = local.prefix
 
   # SAP vnet
-  var_infra            = try(var.infrastructure, {})
-  var_vnet_sap         = try(local.var_infra.vnets.sap, {})
-  vnet_sap_exists      = try(local.var_vnet_sap.is_existing, false)
-  vnet_sap_arm_id      = local.vnet_sap_exists ? try(local.var_vnet_sap.arm_id, "") : ""
-  vnet_sap_name        = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, "sap")
-  vnet_nr_parts        = length(split("-",local.vnet_sap_name))
+  var_infra       = try(var.infrastructure, {})
+  var_vnet_sap    = try(local.var_infra.vnets.sap, {})
+  vnet_sap_exists = try(local.var_vnet_sap.is_existing, false)
+  vnet_sap_arm_id = local.vnet_sap_exists ? try(local.var_vnet_sap.arm_id, "") : ""
+  vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, "sap")
+  vnet_nr_parts   = length(split("-", local.vnet_sap_name))
   // Default naming of vnet has multiple parts. Taking the second-last part as the name 
-  vnet_sap_name_prefix = local.vnet_nr_parts >= 3 ? split("-",upper(local.vnet_sap_name))[local.vnet_nr_parts - 1]=="VNET" ? split("-",local.vnet_sap_name)[local.vnet_nr_parts - 2] : local.vnet_sap_name : local.vnet_sap_name
+  vnet_sap_name_prefix = local.vnet_nr_parts >= 3 ? split("-", upper(local.vnet_sap_name))[local.vnet_nr_parts - 1] == "VNET" ? split("-", local.vnet_sap_name)[local.vnet_nr_parts - 2] : local.vnet_sap_name : local.vnet_sap_name
 
 
 
@@ -133,7 +133,7 @@ locals {
   }
   hdb_size = try(local.hdb.size, "Demo")
   hdb_fs   = try(local.hdb.filesystem, "xfs")
-  hdb_ha   = try(local.hdb.high_availability, "false")
+  hdb_ha   = try(local.hdb.high_availability, false)
   hdb_auth = try(local.hdb.authentication,
     {
       "type"     = "key"
@@ -154,11 +154,16 @@ locals {
   xsa                    = try(local.hdb.xsa, "")
   shine                  = try(local.hdb.shine, "")
 
-  dbnodes = [for idx, dbnode in try(local.hdb.dbnodes, []) : {
-    "name"          = try(dbnode.name, format("%sd%s", lower(local.sap_sid), lower(local.hdb_sid)))
-    "role"          = try(dbnode.role, "worker")
-    "admin_nic_ips" = try(dbnode.admin_nic_ips, [false, false]),
-    "db_nic_ips"    = try(dbnode.db_nic_ips, [false, false])
+  defaultdbnodenames = [for idx in range(local.hdb_ha ? 2 : 1) :
+    {
+      "name" = format("%sd%s%02dl%d%s", lower(local.sap_sid), lower(local.hdb_sid), idx, idx, substr(var.random-id.hex, 0, 3)),
+      "role" = "worker"
+    }
+  ]
+
+  dbnodes = [for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
+    "name" = try(dbnode.name, format("%sd%s%02dl%d%s", lower(local.sap_sid), lower(local.hdb_sid), idx, idx, substr(var.random-id.hex, 0, 3))),
+    "role" = try(dbnode.role, "worker")
     }
   ]
 
@@ -190,7 +195,7 @@ locals {
     { components = local.components },
     { xsa = local.xsa },
     { shine = local.shine },
-    { dbnodes = local.dbnodes },
+    { dbnodes = local.hdb_ha && length(local.dbnodes) == 1 ? local.defaultdbnodenames : local.dbnodes },
     { loadbalancer = local.loadbalancer }
   )
 
@@ -199,14 +204,15 @@ locals {
 
   // Imports HANA database sizing information
   sizes = jsondecode(file("${path.module}/../../../../../configs/hdb_sizes.json"))
+
   // Numerically indexed Hash of HANA DB nodes to be created
   hdb_vms = flatten([
     [
       for dbnode in local.hana_database.dbnodes : {
         platform       = local.hana_database.platform,
-        name           = format("%s00l0%s", dbnode.name, substr(var.random-id.hex, 0, 3)),
-        admin_nic_ip   = dbnode.admin_nic_ips[0],
-        db_nic_ip      = dbnode.db_nic_ips[0],
+        name           = lookup(dbnode, "name", local.defaultdbnodenames[0].name)
+        admin_nic_ip   = lookup(dbnode, "admin_nic_ips", [false, false])[0],
+        db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[0],
         size           = local.hana_database.size,
         os             = local.hana_database.os,
         authentication = local.hana_database.authentication
@@ -216,9 +222,9 @@ locals {
     [
       for dbnode in local.hana_database.dbnodes : {
         platform       = local.hana_database.platform,
-        name           = format("%s01l1%s", dbnode.name, substr(var.random-id.hex, 0, 3)),
-        admin_nic_ip   = dbnode.admin_nic_ips[1],
-        db_nic_ip      = dbnode.db_nic_ips[1],
+        name           = length(local.hana_database.dbnodes) > 1 ? lookup(dbnode, "name", local.defaultdbnodenames[1].name) : local.defaultdbnodenames[1].name
+        admin_nic_ip   = lookup(dbnode, "admin_nic_ips", [false, false])[1],
+        db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[1],
         size           = local.hana_database.size,
         os             = local.hana_database.os,
         authentication = local.hana_database.authentication
@@ -227,7 +233,6 @@ locals {
       if local.hana_database.high_availability
     ]
   ])
-
   // Ports used for specific HANA Versions
   lb_ports = {
     "1" = [
@@ -246,7 +251,7 @@ locals {
   }
 
   loadbalancer_ports = flatten([
-    for port in local.lb_ports[split(".", local.hana_database.db_version)[0]] : {
+    for port in local.lb_ports[split(".", local.hdb_version)[0]] : {
       sid  = local.sap_sid
       port = tonumber(port) + (tonumber(local.hana_database.instance.instance_number) * 100)
     }
