@@ -22,7 +22,7 @@ resource "azurerm_network_interface" "nics-dbnodes-admin" {
   ip_configuration {
     name                          = format("%s_%s-admin-nic-ip", local.prefix,local.hdb_vms[count.index].name)
     subnet_id                     = local.sub_admin_exists ? data.azurerm_subnet.subnet-sap-admin[0].id : azurerm_subnet.subnet-sap-admin[0].id
-    private_ip_address            = local.sub_admin_exists ? local.hdb_vms[count.index].admin_nic_ip : lookup(local.hdb_vms[count.index], "admin_nic_ip", false) != false ? local.hdb_vms[count.index].admin_nic_ip : cidrhost(local.sub_admin_prefix, tonumber(count.index) + 10)
+    private_ip_address            = lookup(local.hdb_vms[count.index], "admin_nic_ip", false) != false ? local.hdb_vms[count.index].admin_nic_ip : cidrhost(local.sub_admin_exists ? data.azurerm_subnet.subnet-sap-admin[0].address_prefixes[0] : azurerm_subnet.subnet-sap-admin[0].address_prefixes[0], tonumber(count.index) + 10)
     private_ip_address_allocation = "static"
   }
 }
@@ -39,7 +39,7 @@ resource "azurerm_network_interface" "nics-dbnodes-db" {
     primary                       = true
     name                          = format("%s_%s-db-nic-ip", local.prefix,local.hdb_vms[count.index].name)
     subnet_id                     = local.sub_db_exists ? data.azurerm_subnet.subnet-sap-db[0].id : azurerm_subnet.subnet-sap-db[0].id
-    private_ip_address            = local.hdb_vms[count.index].db_nic_ip != false ? local.hdb_vms[count.index].db_nic_ip : cidrhost(local.sub_db_exists ? data.azurerm_subnet.subnet-sap-db[0].address_prefixes[0] : azurerm_subnet.subnet-sap-db[0].address_prefixes[0], tonumber(count.index) + 10)
+    private_ip_address            = lookup(local.hdb_vms[count.index], "db_nic_ip", false) != false ? local.hdb_vms[count.index].db_nic_ip : cidrhost(local.sub_db_exists ? data.azurerm_subnet.subnet-sap-db[0].address_prefixes[0] : azurerm_subnet.subnet-sap-db[0].address_prefixes[0], tonumber(count.index) + 10)
     private_ip_address_allocation = "static"
   }
 }
