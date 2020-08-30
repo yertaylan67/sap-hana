@@ -75,13 +75,14 @@ locals {
   vnet_nr_parts   = length(split("-", local.vnet_sap_name))
   // Default naming of vnet has multiple parts. Taking the second-last part as the name 
   vnet_sap_name_prefix = local.vnet_nr_parts >= 3 ? split("-", upper(local.vnet_sap_name))[local.vnet_nr_parts - 1] == "VNET" ? split("-", local.vnet_sap_name)[local.vnet_nr_parts - 2] : local.vnet_sap_name : local.vnet_sap_name
+  vnet_subnet_prefix  = try(substr(upper(local.vnet_sap_name),-5,5),"") == "-VNET" ? substr(local.vnet_sap_name,0,length(local.vnet_sap_name)-5) : local.vnet_sap_name
 
   // DB subnet
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
   sub_db_exists = try(local.var_sub_db.is_existing, false)
   sub_db_arm_id = local.sub_db_exists ? try(local.var_sub_db.arm_id, "") : ""
-  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s_db-subnet", local.prefix))
-  sub_db_prefix = local.sub_db_exists && local.enable_deployment ? data.azurerm_subnet.anydb[0].address_prefixes[0] : try(local.var_sub_db.prefix, "")
+  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s_db-subnet", local.vnet_subnet_prefix))
+  sub_db_prefix = try(local.var_sub_db.prefix, "")
 
   // DB NSG
   var_sub_db_nsg    = try(var.infrastructure.vnets.sap.subnet_db.nsg, {})

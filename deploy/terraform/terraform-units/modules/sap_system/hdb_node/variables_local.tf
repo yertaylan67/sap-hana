@@ -80,19 +80,18 @@ locals {
   var_vnet_sap    = try(local.var_infra.vnets.sap, {})
   vnet_sap_exists = try(local.var_vnet_sap.is_existing, false)
   vnet_sap_arm_id = local.vnet_sap_exists ? try(local.var_vnet_sap.arm_id, "") : ""
-  vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, "sap")
+  vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, "")
   vnet_nr_parts   = length(split("-", local.vnet_sap_name))
   // Default naming of vnet has multiple parts. Taking the second-last part as the name 
   vnet_sap_name_prefix = local.vnet_nr_parts >= 3 ? split("-", upper(local.vnet_sap_name))[local.vnet_nr_parts - 1] == "VNET" ? split("-", local.vnet_sap_name)[local.vnet_nr_parts - 2] : local.vnet_sap_name : local.vnet_sap_name
-
-
+  vnet_subnet_prefix  = try(substr(upper(local.vnet_sap_name),-5,5),"") == "-VNET" ? substr(local.vnet_sap_name,0,length(local.vnet_sap_name)-5) : local.vnet_sap_name
 
   // Admin subnet
   var_sub_admin    = try(var.infrastructure.vnets.sap.subnet_admin, {})
   sub_admin_exists = try(local.var_sub_admin.is_existing, false)
   sub_admin_arm_id = local.sub_admin_exists ? try(local.var_sub_admin.arm_id, "") : ""
-  sub_admin_name   = local.sub_admin_exists ? try(split("/", local.sub_admin_arm_id)[10], "") : try(local.var_sub_admin.name, format("%s_admin-subnet", local.prefix))
-  sub_admin_prefix = local.sub_admin_exists ? "" : try(local.var_sub_admin.prefix, "")
+  sub_admin_name   = local.sub_admin_exists ? try(split("/", local.sub_admin_arm_id)[10], "") : try(local.var_sub_admin.name, format("%s_admin-subnet", local.vnet_subnet_prefix))
+  sub_admin_prefix = try(local.var_sub_admin.prefix, "")
 
   // Admin NSG
   var_sub_admin_nsg    = try(var.infrastructure.vnets.sap.subnet_admin.nsg, {})
@@ -104,8 +103,8 @@ locals {
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
   sub_db_exists = try(local.var_sub_db.is_existing, false)
   sub_db_arm_id = local.sub_db_exists ? try(local.var_sub_db.arm_id, "") : ""
-  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s_db-subnet", local.prefix))
-  sub_db_prefix = local.sub_db_exists ? "" : try(local.var_sub_db.prefix, "")
+  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s_db-subnet", local.vnet_subnet_prefix))
+  sub_db_prefix = try(local.var_sub_db.prefix, "")
 
   // DB NSG
   var_sub_db_nsg    = try(var.infrastructure.vnets.sap.subnet_db.nsg, {})
