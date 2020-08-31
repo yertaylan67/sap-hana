@@ -31,10 +31,6 @@
       }
     }
   },
-  "jumpboxes": {
-    "windows": [],
-    "linux": []
-  },
   "databases": [
     {
       "platform": "HANA",
@@ -90,8 +86,8 @@
     }
   },
   "sshkey": {
-    "path_to_public_key": "~/.ssh/id_rsa.pub",
-    "path_to_private_key": "~/.ssh/id_rsa"
+    "path_to_public_key": "sshkey.pub",
+    "path_to_private_key": "sshkey"
   },
   "options": {
     "enable_secure_transfer": true,
