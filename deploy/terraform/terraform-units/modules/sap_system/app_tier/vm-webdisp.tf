@@ -7,7 +7,7 @@ resource "azurerm_network_interface" "web" {
   enable_accelerated_networking = local.web_sizing.compute.accelerated_networking
 
   ip_configuration {
-    name                          = "IPConfig1"
+    name                          = "ipconfig1"
     subnet_id                     = local.sub_web_deployed.id
     private_ip_address            = cidrhost(local.sub_web_deployed.address_prefixes[0], tonumber(count.index) + local.ip_offsets.web_vm)
     private_ip_address_allocation = "static"
