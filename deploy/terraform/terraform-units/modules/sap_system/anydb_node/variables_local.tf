@@ -81,7 +81,7 @@ locals {
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
   sub_db_exists = try(local.var_sub_db.is_existing, false)
   sub_db_arm_id = local.sub_db_exists ? try(local.var_sub_db.arm_id, "") : ""
-  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s_db-subnet", local.vnet_subnet_prefix))
+  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s_db-subnet", local.prefix))
   sub_db_prefix = try(local.var_sub_db.prefix, "")
 
   // DB NSG

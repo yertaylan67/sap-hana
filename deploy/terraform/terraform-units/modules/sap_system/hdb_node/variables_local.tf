@@ -90,7 +90,7 @@ locals {
   var_sub_admin    = try(var.infrastructure.vnets.sap.subnet_admin, {})
   sub_admin_exists = try(local.var_sub_admin.is_existing, false)
   sub_admin_arm_id = local.sub_admin_exists ? try(local.var_sub_admin.arm_id, "") : ""
-  sub_admin_name   = local.sub_admin_exists ? try(split("/", local.sub_admin_arm_id)[10], "") : try(local.var_sub_admin.name, format("%s_admin-subnet", local.vnet_subnet_prefix))
+  sub_admin_name   = local.sub_admin_exists ? try(split("/", local.sub_admin_arm_id)[10], "") : try(local.var_sub_admin.name, format("%s_admin-subnet", local.prefix))
   sub_admin_prefix = try(local.var_sub_admin.prefix, "")
 
   // Admin NSG
@@ -103,7 +103,7 @@ locals {
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
   sub_db_exists = try(local.var_sub_db.is_existing, false)
   sub_db_arm_id = local.sub_db_exists ? try(local.var_sub_db.arm_id, "") : ""
-  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s_db-subnet", local.vnet_subnet_prefix))
+  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s_db-subnet", local.prefix))
   sub_db_prefix = try(local.var_sub_db.prefix, "")
 
   // DB NSG
