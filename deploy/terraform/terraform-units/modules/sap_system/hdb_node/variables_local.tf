@@ -84,7 +84,7 @@ locals {
   vnet_nr_parts   = length(split("-", local.vnet_sap_name))
   // Default naming of vnet has multiple parts. Taking the second-last part as the name 
   vnet_sap_name_prefix = local.vnet_nr_parts >= 3 ? split("-", upper(local.vnet_sap_name))[local.vnet_nr_parts - 1] == "VNET" ? split("-", local.vnet_sap_name)[local.vnet_nr_parts - 2] : local.vnet_sap_name : local.vnet_sap_name
-  vnet_subnet_prefix  = try(substr(upper(local.vnet_sap_name),-5,5),"") == "-VNET" ? substr(local.vnet_sap_name,0,length(local.vnet_sap_name)-5) : local.vnet_sap_name
+  vnet_subnet_prefix   = try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? substr(local.vnet_sap_name, 0, length(local.vnet_sap_name) - 5) : local.vnet_sap_name
 
   // Admin subnet
   var_sub_admin    = try(var.infrastructure.vnets.sap.subnet_admin, {})
@@ -160,7 +160,7 @@ locals {
     }
   ]
 
-  dbnodes = [for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
+  dbnodes = [for idx, dbnode in try(local.hdb.dbnodes, (local.hdb_ha ? [{}, {}] : [{}])) : {
     "name" = try(dbnode.name, format("%sd%s%02dl%d%s", lower(local.sap_sid), lower(local.hdb_sid), idx, idx, substr(var.random-id.hex, 0, 3))),
     "role" = try(dbnode.role, "worker")
     }
@@ -207,18 +207,18 @@ locals {
   // Numerically indexed Hash of HANA DB nodes to be created
   hdb_vms = flatten([
     [
-      for dbnode in local.hana_database.dbnodes : {
+      for idx, dbnode in local.hana_database.dbnodes : {
         platform       = local.hana_database.platform,
-        name           = lookup(dbnode, "name", local.defaultdbnodenames[0].name)
-        admin_nic_ip   = lookup(dbnode, "admin_nic_ips", [false, false])[0],
-        db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[0],
+        name           = lookup(dbnode, "name", local.defaultdbnodenames[idx].name)
+        admin_nic_ip   = lookup(dbnode, "admin_nic_ips", [false, false])[idx],
+        db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[idx],
         size           = local.hana_database.size,
         os             = local.hana_database.os,
         authentication = local.hana_database.authentication
         sid            = local.hana_database.instance.sid
       }
     ],
-    [
+    /*    [
       for dbnode in local.hana_database.dbnodes : {
         platform       = local.hana_database.platform,
         name           = length(local.hana_database.dbnodes) > 1 ? lookup(dbnode, "name", local.defaultdbnodenames[1].name) : local.defaultdbnodenames[1].name
@@ -230,7 +230,7 @@ locals {
         sid            = local.hana_database.instance.sid
       }
       if local.hana_database.high_availability
-    ]
+    ] */
   ])
   // Ports used for specific HANA Versions
   lb_ports = {

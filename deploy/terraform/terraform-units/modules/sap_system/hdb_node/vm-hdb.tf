@@ -12,7 +12,7 @@ HANA DB Linux Server private IP range: .10 -
 
 # Creates the admin traffic NIC and private IP address for database nodes
 resource "azurerm_network_interface" "nics-dbnodes-admin" {
-  count                         = local.enable_deployment ? (local.hdb_ha ? 2 : 1) : 0
+  count                         = local.enable_deployment ? length(local.hdb_vms) : 0
   name                          = format("%s_%s-admin-nic", local.prefix,local.hdb_vms[count.index].name)
   
   location                      = var.resource-group[0].location
@@ -29,7 +29,7 @@ resource "azurerm_network_interface" "nics-dbnodes-admin" {
 
 # Creates the DB traffic NIC and private IP address for database nodes
 resource "azurerm_network_interface" "nics-dbnodes-db" {
-  count                         = local.enable_deployment ? (local.hdb_ha ? 2 : 1) : 0
+  count                         = local.enable_deployment ? length(local.hdb_vms) : 0
   name                          = format("%s_%s-db-nic", local.prefix,local.hdb_vms[count.index].name)
   location                      = var.resource-group[0].location
   resource_group_name           = var.resource-group[0].name
@@ -135,7 +135,7 @@ resource "azurerm_managed_disk" "data-disk" {
 
 # Manages Linux Virtual Machine for HANA DB servers
 resource "azurerm_linux_virtual_machine" "vm-dbnode" {
-  count                        = local.enable_deployment ? (local.hdb_ha ? 2 : 1) : 0
+  count                        = local.enable_deployment ? length(local.hdb_vms) : 0
   name                         = format("%s_%s", local.prefix,local.hdb_vms[count.index].name)
   computer_name                = replace(local.hdb_vms[count.index].name, "_", "")
   location                     = var.resource-group[0].location
