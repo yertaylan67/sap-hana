@@ -132,6 +132,7 @@ locals {
   web_nic_ips              = try(var.application.web_nic_ips, [])
 
   app_ostype = try(var.application.os.os_type, "Linux")
+  app_oscode = upper(local.app_ostype) == "LINUX" ? "l" : "w"
 
   authentication = try(var.application.authentication,
     {
@@ -248,7 +249,7 @@ locals {
     for vm_count in range(local.application_server_count) : [
       for disk_spec in local.app_sizing.storage : {
         vm_index          = vm_count
-        name              = format("-%s" ,disk_spec.name)
+        suffix            = format("-%s" ,disk_spec.name)
         disk_type         = lookup(disk_spec, "disk_type", "Premium_LRS")
         size_gb           = lookup(disk_spec, "size_gb", 512)
         caching           = lookup(disk_spec, "caching", false)
@@ -261,7 +262,7 @@ locals {
     for vm_count in(local.scs_high_availability ? range(2) : range(1)) : [
       for disk_spec in local.scs_sizing.storage : {
         vm_index          = vm_count
-        name              = format("-%s" ,disk_spec.name)
+        suffix            = format("-%s" ,disk_spec.name)
         disk_type         = lookup(disk_spec, "disk_type", "Premium_LRS")
         size_gb           = lookup(disk_spec, "size_gb", 512)
         caching           = lookup(disk_spec, "caching", false)
@@ -274,7 +275,7 @@ locals {
     for vm_count in range(local.webdispatcher_count) : [
       for disk_spec in local.web_sizing.storage : {
         vm_index          = vm_count
-        name              = format("-%s" ,disk_spec.name)
+        suffix            = format("-%s" ,disk_spec.name)
         disk_type         = lookup(disk_spec, "disk_type", "Premium_LRS")
         size_gb           = lookup(disk_spec, "size_gb", 512)
         caching           = lookup(disk_spec, "caching", false)

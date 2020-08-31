@@ -63,6 +63,7 @@ variable "region_mapping" {
     koreasouth         = "koso"
   }
 }
+
 // Set defaults
 locals {
   region         = try(var.infrastructure.region, "")
@@ -150,10 +151,10 @@ locals {
   cockpit_admin_password = try(local.hdb_cred.cockpit_admin_password, "")
   ha_cluster_password    = try(local.hdb_cred.ha_cluster_password, "")
   components             = merge({ hana_database = [] }, try(local.hdb.components, {}))
-  xsa                    = try(local.hdb.xsa, "")
-  shine                  = try(local.hdb.shine, "")
+  xsa                    = try(local.hdb.xsa, {})
+  shine                  = try(local.hdb.shine, {})
 
-  defaultdbnodenames = [for idx in range(local.hdb_ha ? 2 : 1) :
+  default_dbnode_names = [for idx in range(local.hdb_ha ? 2 : 1) :
     {
       "name" = format("%sd%s%02dl%d%s", lower(local.sap_sid), lower(local.hdb_sid), idx, idx, substr(var.random-id.hex, 0, 3)),
       "role" = "worker"
@@ -194,7 +195,7 @@ locals {
     { components = local.components },
     { xsa = local.xsa },
     { shine = local.shine },
-    { dbnodes = local.hdb_ha && length(local.dbnodes) == 1 ? local.defaultdbnodenames : local.dbnodes },
+    { dbnodes = local.hdb_ha && length(local.dbnodes) == 1 ? local.default_dbnode_names : local.dbnodes },
     { loadbalancer = local.loadbalancer }
   )
 
@@ -209,7 +210,7 @@ locals {
     [
       for idx, dbnode in local.hana_database.dbnodes : {
         platform       = local.hana_database.platform,
-        name           = lookup(dbnode, "name", local.defaultdbnodenames[idx].name)
+        name           = lookup(dbnode, "name", local.default_dbnode_names[idx].name)
         admin_nic_ip   = lookup(dbnode, "admin_nic_ips", [false, false])[idx],
         db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[idx],
         size           = local.hana_database.size,
@@ -221,7 +222,7 @@ locals {
     /*    [
       for dbnode in local.hana_database.dbnodes : {
         platform       = local.hana_database.platform,
-        name           = length(local.hana_database.dbnodes) > 1 ? lookup(dbnode, "name", local.defaultdbnodenames[1].name) : local.defaultdbnodenames[1].name
+        name           = length(local.hana_database.dbnodes) > 1 ? lookup(dbnode, "name", local.default_dbnode_names[1].name) : local.default_dbnode_names[1].name
         admin_nic_ip   = lookup(dbnode, "admin_nic_ips", [false, false])[1],
         db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[1],
         size           = local.hana_database.size,
@@ -261,7 +262,7 @@ locals {
     [
       for storage_type in lookup(local.sizes, local.hdb_vms[0].size).storage : [
         for disk_count in range(storage_type.count) : {
-          name                      = format("%s%02d", storage_type.name, disk_count)
+          suffix                      = format("%s%02d", storage_type.name, disk_count)
           storage_account_type      = storage_type.disk_type,
           disk_size_gb              = storage_type.size_gb,
           caching                   = storage_type.caching,
@@ -275,7 +276,7 @@ locals {
   data-disk-list = flatten([
     for hdb_vm in local.hdb_vms : [
       for datadisk in local.data-disk-per-dbnode : {
-        name                      = format("%s_%s-%s", local.prefix, hdb_vm.name, datadisk.name)
+        name                      = format("%s_%s-%s", local.prefix, hdb_vm.name, datadisk.suffix)
         caching                   = datadisk.caching
         storage_account_type      = datadisk.storage_account_type
         disk_size_gb              = datadisk.disk_size_gb
@@ -283,5 +284,4 @@ locals {
       }
     ]
   ])
-
 }

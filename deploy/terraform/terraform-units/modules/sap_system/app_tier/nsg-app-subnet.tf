@@ -1,6 +1,6 @@
 # Creates SAP app subnet nsg
 resource "azurerm_network_security_group" "nsg-app" {
-  count               = local.sub_app_nsg_exists ? 0 : 1
+  count               = local.enable_deployment ? (local.sub_app_nsg_exists ? 0 : 1) : 0
   name                = local.sub_app_nsg_name
   location            = var.resource-group[0].location
   resource_group_name = var.resource-group[0].name
@@ -8,7 +8,7 @@ resource "azurerm_network_security_group" "nsg-app" {
 
 # Imports the SAP app subnet nsg data
 data "azurerm_network_security_group" "nsg-app" {
-  count               = local.sub_app_nsg_exists ? 1 : 0
+  count               = local.enable_deployment ? (local.sub_app_nsg_exists ? 1 : 0) : 0
   name                = split("/", local.sub_app_nsg_arm_id)[8]
   resource_group_name = split("/", local.sub_app_nsg_arm_id)[4]
 }

@@ -187,11 +187,11 @@ locals {
       db_systemdb_password = local.db_systemdb_password
       }
     },
-    { dbnodes = local.anydb_ha && length(local.dbnodes) == 1 ? local.defaultdbnodenames : local.dbnodes },
+    { dbnodes = local.anydb_ha && length(local.dbnodes) == 1 ? local.default_dbnode_names : local.dbnodes },
     { loadbalancer = local.loadbalancer }
   )
 
-  defaultdbnodenames = [for idx in range(local.anydb_ha ? 2 : 1) :
+  default_dbnode_names = [for idx in range(local.anydb_ha ? 2 : 1) :
     {
       "name" = lower(format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx, local.anydb_oscode, idx, substr(var.random-id.hex, 0, 3))),
       "role" = "worker"
@@ -208,7 +208,7 @@ locals {
     [
       for idx, dbnode in local.dbnodes : {
         platform       = local.anydb_platform,
-        name           = lookup(dbnode, "name", local.defaultdbnodenames[0].name)
+        name           = lookup(dbnode, "name", local.default_dbnode_names[0].name)
         db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[0],
         size           = local.anydb_sku
         os             = local.anydb_ostype,
@@ -219,7 +219,7 @@ locals {
     [
       for idx, dbnode in local.dbnodes : {
         platform       = local.anydb_platform,
-        name           = length(local.dbnodes) > 1 ? lookup(dbnode, "name", local.defaultdbnodenames[1].name) : local.defaultdbnodenames[1].name
+        name           = length(local.dbnodes) > 1 ? lookup(dbnode, "name", local.default_dbnode_names[1].name) : local.default_dbnode_names[1].name
         db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[1],
         size           = local.anydb_sku
         os             = local.anydb_ostype,

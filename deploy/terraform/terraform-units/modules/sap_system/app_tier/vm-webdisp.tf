@@ -100,7 +100,7 @@ resource "azurerm_windows_virtual_machine" "web" {
 # Creates managed data disk
 resource "azurerm_managed_disk" "web" {
   count                = local.enable_deployment ? length(local.web-data-disks) : 0
-  name                 = format("%s_%s%s", local.prefix, format("%sweb%02d%s%s", lower(local.sid), count.index, upper(local.app_ostype) == "LINUX" ? "l": "w", substr(var.random-id.hex,0,3)),local.web-data-disks[count.index].name)
+  name                 = format("%s_%s%s", local.prefix, format("%sweb%02d%s%s", lower(local.sid), count.index, upper(local.app_ostype) == "LINUX" ? "l": "w", substr(var.random-id.hex,0,3)),local.web-data-disks[count.index].suffix)
   location             = var.resource-group[0].location
   resource_group_name  = var.resource-group[0].name
   create_option        = "Empty"
