@@ -72,7 +72,7 @@ locals {
   codename       = lower(try(var.infrastructure.codename, ""))
   location_short = lower(try(var.region_mapping[local.region], "unkn"))
   // Using replace "--" with "-"  in case of one of the components like codename is empty
-  prefix    = try(local.var_infra.resource_group.name, upper(replace(format("%s-%s-%s_%s-%s", local.landscape, local.location_short, local.vnet_sap_name_prefix, local.codename, local.sid), "_-", "-")))
+  prefix    = try(local.var_infra.resource_group.name, upper(replace(replace(format("%s-%s-%s_%s-%s", local.landscape, local.location_short, local.vnet_sap_name_prefix, local.codename, local.sid), "_-", "-"), "--", "-")))
   sa_prefix = lower(replace(format("%s%s%sdiag", substr(local.landscape, 0, 5), local.location_short, substr(local.codename, 0, 7)), "--", "-"))
   rg_name   = local.prefix
 
@@ -262,7 +262,7 @@ locals {
     [
       for storage_type in lookup(local.sizes, local.hdb_vms[0].size).storage : [
         for disk_count in range(storage_type.count) : {
-          suffix                      = format("%s%02d", storage_type.name, disk_count)
+          suffix                    = format("%s%02d", storage_type.name, disk_count)
           storage_account_type      = storage_type.disk_type,
           disk_size_gb              = storage_type.size_gb,
           caching                   = storage_type.caching,
