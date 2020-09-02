@@ -121,7 +121,7 @@ locals {
 
   // Filter the list of databases to only HANA platform entries
   hdb          = try(local.hdb_list[0], {})
-  hdb_platform = try(local.hdb.platform, "NONE")
+  hdb_platform = try(local.hdb.platform, "HANA")
   hdb_version  = try(local.hdb.db_version, "2.00.043")
   // If custom image is used, we do not overwrite os reference with default value
   hdb_custom_image = try(local.hdb.os.source_image_id, "") != "" ? true : false
@@ -209,14 +209,14 @@ locals {
   hdb_vms = flatten([
     [
       for idx, dbnode in local.hana_database.dbnodes : {
-        platform       = local.hana_database.platform,
+        platform       = local.hdb_platform,
         name           = lookup(dbnode, "name", local.default_dbnode_names[idx].name)
         admin_nic_ip   = lookup(dbnode, "admin_nic_ips", [false, false])[idx],
         db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[idx],
-        size           = local.hana_database.size,
-        os             = local.hana_database.os,
-        authentication = local.hana_database.authentication
-        sid            = local.hana_database.instance.sid
+        size           = local.hdb_size,
+        os             = local.hdb_os,
+        authentication = local.hdb_auth
+        sid            = local.hdb_sid
       }
     ],
     /*    [
@@ -260,7 +260,7 @@ locals {
   // List of data disks to be created for HANA DB nodes
   data-disk-per-dbnode = (length(local.hdb_vms) > 0) ? flatten(
     [
-      for storage_type in lookup(local.sizes, local.hdb_vms[0].size).storage : [
+      for storage_type in lookup(local.sizes, local.hdb_size).storage : [
         for disk_count in range(storage_type.count) : {
           suffix                    = format("%s%02d", storage_type.name, disk_count)
           storage_account_type      = storage_type.disk_type,
