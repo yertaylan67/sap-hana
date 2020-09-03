@@ -62,7 +62,7 @@ locals {
   sid            = upper(try(var.application.sid, local.anydb_sid))
   codename       = lower(try(var.infrastructure.codename, ""))
   location_short = lower(try(var.region_mapping[local.region], "unkn"))
-  // Using replace "--" with "-"  in case of one of the components like codename is empty
+  // Using replace "--" with "-" and "_-" with "-" in case of one of the components like codename is empty
   prefix    = try(local.var_infra.resource_group.name, upper(replace(replace(format("%s-%s-%s_%s-%s", local.landscape, local.location_short, local.vnet_sap_name_prefix, local.codename, local.sid), "_-", "-"), "--", "-")))
   sa_prefix = lower(replace(format("%s%s%sdiag", substr(local.landscape, 0, 5), local.location_short, substr(local.codename, 0, 7)), "--", "-"))
 
@@ -187,7 +187,7 @@ locals {
       db_systemdb_password = local.db_systemdb_password
       }
     },
-    { dbnodes = local.anydb_ha && length(local.dbnodes) == 1 ? local.default_dbnode_names : local.dbnodes },
+    { dbnodes = local.dbnodes },
     { loadbalancer = local.loadbalancer }
   )
 
@@ -198,11 +198,18 @@ locals {
     }
   ]
 
-  dbnodes = [for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
-    "name" = try(dbnode.name, lower(format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx, local.anydb_oscode, idx, substr(var.random-id.hex, 0, 3)))),
+dbnodes = flatten([[for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
+    "name" = local.anydb_ha ? format("%s-0", try(dbnode.name, format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx, local.anydb_oscode, idx, substr(var.random-id.hex, 0, 3)))) : try(dbnode.name, format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx, local.anydb_oscode, idx, substr(var.random-id.hex, 0, 3)))
     "role" = try(dbnode.role, "worker")
     }
-  ]
+    ],
+    [for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
+      "name" = local.anydb_ha ? format("%s-1", try(dbnode.name, format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx + 1, local.anydb_oscode, idx + 1, substr(var.random-id.hex, 0, 3)))) : try(dbnode.name, format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx + 1, local.anydb_oscode, idx + 1, substr(var.random-id.hex, 0, 3)))
+      "role" = try(dbnode.role, "worker")
+      } if local.anydb_ha
+    ]
+    ]
+  )
 
   anydb_vms = flatten([
     [
