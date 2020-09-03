@@ -2,7 +2,7 @@
   Description:
   Set up infrastructure for sap library 
 */
-
+// TODO: the provider needs to be defined in this child module
 resource "azurerm_resource_group" "library" {
   count    = local.rg_exists ? 0 : 1
   name     = local.rg_name

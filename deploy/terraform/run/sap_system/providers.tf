@@ -15,6 +15,36 @@ Description:
 provider "azurerm" {
   version = "~> 2.10"
   features {}
+  alias = "deployer"
+}
+
+locals {
+  kv_id = "/subscriptions/c4106f40-4f28-442e-b67f-a24d892bf7ad/resourceGroups/azure-test-saplandscape-rg/providers/Microsoft.KeyVault/vaults/saplandscapekv01"
+}
+
+data "azurerm_key_vault_secret" "example" {
+  provider     = azurerm.deployer
+  name         = "clientsecret"
+  key_vault_id = local.kv_id
+}
+
+provider "azurerm" {
+  version = "~> 2.10"
+  features {}
+  alias = "saplandscape"
+  subscription_id = "91a338db-aa0d-4a34-aed0-dbbbc698de30"
+  client_id       = "3c92fc23-f20b-4f10-995f-69b851e0452a"
+  client_secret   = data.azurerm_key_vault_secret.example.value
+  tenant_id       = "72f988bf-86f1-41af-91ab-2d7cd011db47"
+}
+
+provider "azurerm" {
+  version = "~> 2.10"
+  features {}
+  subscription_id = "91a338db-aa0d-4a34-aed0-dbbbc698de30"
+  client_id       = "3c92fc23-f20b-4f10-995f-69b851e0452a"
+  client_secret   = data.azurerm_key_vault_secret.example.value
+  tenant_id       = "72f988bf-86f1-41af-91ab-2d7cd011db47"
 }
 
 terraform {

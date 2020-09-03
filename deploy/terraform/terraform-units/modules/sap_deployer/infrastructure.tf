@@ -4,6 +4,8 @@ Description:
   Define infrastructure resources for deployer(s).
 */
 
+// TODO: the provider needs to be defined in this child module
+
 // Random 8 char identifier for sap deployer resources
 resource "random_id" "deployer" {
   byte_length = 4

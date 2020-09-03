@@ -13,6 +13,9 @@ module "deployer" {
   software       = var.software
   ssh-timeout    = var.ssh-timeout
   sshkey         = var.sshkey
+  providers = {
+    azurerm.deployer = azurerm.deployer
+  }
 }
 
 module "saplibrary" {
@@ -25,6 +28,9 @@ module "saplibrary" {
   software       = var.software
   ssh-timeout    = var.ssh-timeout
   sshkey         = var.sshkey
+  providers = {
+    azurerm.deployer = azurerm.deployer
+  }
 }
 
 module "common_infrastructure" {
@@ -42,6 +48,24 @@ module "common_infrastructure" {
   vnet-mgmt           = module.deployer.vnet-mgmt
   subnet-mgmt         = module.deployer.subnet-mgmt
   nsg-mgmt            = module.deployer.nsg-mgmt
+}
+
+module "connectivity" {
+  source              = "../../terraform-units/modules/sap_system/connectivity"
+  vnet-mgmt           = module.deployer.vnet-mgmt
+  vnet-sap            = module.common_infrastructure.vnet-sap
+  application         = var.application
+  databases           = var.databases
+  infrastructure      = var.infrastructure
+  jumpboxes           = var.jumpboxes
+  options             = local.options
+  software            = var.software
+  ssh-timeout         = var.ssh-timeout
+  sshkey              = var.sshkey
+  providers = {
+    azurerm.deployer = azurerm.deployer
+    azurerm.saplandscape = azurerm.saplandscape
+  }
 }
 
 // Create Jumpboxes
