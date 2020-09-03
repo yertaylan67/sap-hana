@@ -151,8 +151,8 @@ locals {
   cockpit_admin_password = try(local.hdb_cred.cockpit_admin_password, "")
   ha_cluster_password    = try(local.hdb_cred.ha_cluster_password, "")
   components             = merge({ hana_database = [] }, try(local.hdb.components, {}))
-  xsa                    = try(local.hdb.xsa, {})
-  shine                  = try(local.hdb.shine, {})
+  xsa                    = try(local.hdb.xsa, { routing = "ports" })
+  shine                  = try(local.hdb.shine, { email = "shinedemo@microsoft.com" })
 
   default_dbnode_names = [for idx in range(local.hdb_ha ? 2 : 1) :
     {
