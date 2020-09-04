@@ -80,13 +80,12 @@ locals {
   vnet_sap_name        = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, "sap")
   vnet_nr_parts        = length(split("-",local.vnet_sap_name))
   // Default naming of vnet has multiple parts. Taking the second-last part as the name 
-  vnet_sap_name_prefix = local.vnet_nr_parts >= 3 ? split("-",upper(local.vnet_sap_name))[local.vnet_nr_parts - 1]=="VNET" ? split("-",local.vnet_sap_name)[local.vnet_nr_parts - 2] : local.vnet_sap_name : local.vnet_sap_name
-  vnet_subnet_prefix  = try(substr(upper(local.vnet_sap_name),-5,5),"") == "-VNET" ? substr(local.vnet_sap_name,0,length(local.vnet_sap_name)-5) : local.vnet_sap_name
+  vnet_sap_name_prefix = substr(try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? substr(local.vnet_sap_name, 0, length(local.vnet_sap_name) - 5) : local.vnet_sap_name, 0, 7)
 
   // APP subnet
   var_sub_app    = try(var.infrastructure.vnets.sap.subnet_app, {})
-  sub_app_exists = try(local.var_sub_app.is_existing, false)
-  sub_app_arm_id = local.sub_app_exists ? try(local.var_sub_app.arm_id, "") : ""
+  sub_app_arm_id = try(local.var_sub_app.arm_id, "")
+  sub_app_exists = length(local.sub_app_arm_id) > 0 ? true : false
   sub_app_name   = local.sub_app_exists ?  try(split("/", local.sub_app_arm_id)[10], "") : try(local.var_sub_app.name, format("%s_app-subnet", local.prefix))
   sub_app_prefix = try(local.var_sub_app.prefix, "")
 
@@ -100,8 +99,8 @@ locals {
   #If subnet_web is not specified deploy into app subnet
   sub_web_defined = try(var.infrastructure.vnets.sap.subnet_web, null) == null ? false : true
   sub_web         = try(var.infrastructure.vnets.sap.subnet_web, {})
-  sub_web_exists  = try(local.sub_web.is_existing, false)
   sub_web_arm_id  = try(local.sub_web.arm_id, "") 
+  sub_web_exists = length(local.sub_web_arm_id) > 0 ? true : false
   sub_web_name    = local.sub_web_exists ?  try(split("/", local.sub_web_arm_id)[10], "") : try(local.sub_web.name, format("%s_web-subnet", local.prefix))
   sub_web_prefix  = try(local.sub_web.prefix, "")
   sub_web_deployed = try(local.sub_web_defined ? (

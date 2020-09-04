@@ -74,13 +74,12 @@ locals {
   vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, "sap")
   vnet_nr_parts   = length(split("-", local.vnet_sap_name))
   // Default naming of vnet has multiple parts. Taking the second-last part as the name 
-  vnet_sap_name_prefix = local.vnet_nr_parts >= 3 ? split("-", upper(local.vnet_sap_name))[local.vnet_nr_parts - 1] == "VNET" ? split("-", local.vnet_sap_name)[local.vnet_nr_parts - 2] : local.vnet_sap_name : local.vnet_sap_name
-  vnet_subnet_prefix  = try(substr(upper(local.vnet_sap_name),-5,5),"") == "-VNET" ? substr(local.vnet_sap_name,0,length(local.vnet_sap_name)-5) : local.vnet_sap_name
+  vnet_sap_name_prefix = substr(try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? substr(local.vnet_sap_name, 0, length(local.vnet_sap_name) - 5) : local.vnet_sap_name, 0, 7)
 
   // DB subnet
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
-  sub_db_exists = try(local.var_sub_db.is_existing, false)
-  sub_db_arm_id = local.sub_db_exists ? try(local.var_sub_db.arm_id, "") : ""
+  sub_db_arm_id = try(local.var_sub_db.arm_id, "") 
+  sub_db_exists = length(local.sub_db_arm_id) > 0 ? true : false
   sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s_db-subnet", local.prefix))
   sub_db_prefix = try(local.var_sub_db.prefix, "")
 
@@ -191,20 +190,15 @@ locals {
     { loadbalancer = local.loadbalancer }
   )
 
-  default_dbnode_names = [for idx in range(local.anydb_ha ? 2 : 1) :
-    {
-      "name" = lower(format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx, local.anydb_oscode, idx, substr(var.random-id.hex, 0, 3))),
-      "role" = "worker"
-    }
-  ]
-
-dbnodes = flatten([[for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
-    "name" = local.anydb_ha ? format("%s-0", try(dbnode.name, format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx, local.anydb_oscode, idx, substr(var.random-id.hex, 0, 3)))) : try(dbnode.name, format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx, local.anydb_oscode, idx, substr(var.random-id.hex, 0, 3)))
+  customer_provided_names = local.enable_deployment ? (try(length(local.anydb.dbnodes),0) == 0 ? false : length(try(local.anydb.dbnodes[0].name,"")) == 0 ? false : true) : false
+  
+  dbnodes = flatten([[for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
+    "name" = try("${dbnode.name}-0", format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx, local.anydb_oscode, idx, substr(var.random-id.hex, 0, 3)))
     "role" = try(dbnode.role, "worker")
     }
     ],
     [for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
-      "name" = local.anydb_ha ? format("%s-1", try(dbnode.name, format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx + 1, local.anydb_oscode, idx + 1, substr(var.random-id.hex, 0, 3)))) : try(dbnode.name, format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx + 1, local.anydb_oscode, idx + 1, substr(var.random-id.hex, 0, 3)))
+      "name" = try("${dbnode.name}-1", format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx + try(length(local.anydb.dbnodes),1), local.anydb_oscode, idx + try(length(local.anydb.dbnodes),1), substr(var.random-id.hex, 0, 3)))
       "role" = try(dbnode.role, "worker")
       } if local.anydb_ha
     ]
@@ -215,14 +209,14 @@ dbnodes = flatten([[for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
     [
       for idx, dbnode in local.dbnodes : {
         platform       = local.anydb_platform,
-        name           = lookup(dbnode, "name", local.default_dbnode_names[0].name)
+        name           = dbnode.name
         db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[0],
         size           = local.anydb_sku
         os             = local.anydb_ostype,
         authentication = local.authentication
         sid            = local.anydb_sid
       }
-    ],
+    ] /*,
     [
       for idx, dbnode in local.dbnodes : {
         platform       = local.anydb_platform,
@@ -234,7 +228,7 @@ dbnodes = flatten([[for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
         sid            = local.anydb_sid
       }
       if local.anydb_ha
-    ]
+    ] */
   ])
 
   // Ports used for specific DB Versions
@@ -267,7 +261,7 @@ dbnodes = flatten([[for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
       for storage_type in lookup(local.sizes, local.anydb_size).storage : [
         for disk_count in range(storage_type.count) : {
           vm_index                  = vm_counter
-          name                      = format("%s_%s-%s%02d", local.prefix, anydb_vm.name, storage_type.name, (disk_count))
+          name                      = local.customer_provided_names ? format("%s-%s%02d", anydb_vm.name, storage_type.name, (disk_count)) : format("%s_%s-%s%02d", local.prefix, anydb_vm.name, storage_type.name, (disk_count))
           storage_account_type      = storage_type.disk_type
           disk_size_gb              = storage_type.size_gb
           caching                   = storage_type.caching

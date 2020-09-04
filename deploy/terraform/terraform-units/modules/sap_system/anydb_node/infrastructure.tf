@@ -13,7 +13,7 @@ resource "azurerm_lb" "anydb" {
     name                          = format("%s_db-feip", local.prefix)
     subnet_id                     = local.sub_db_exists ? data.azurerm_subnet.anydb[0].id : azurerm_subnet.anydb[0].id
     private_ip_address_allocation = "Static"
-    private_ip_address            =  try(local.loadbalancer.frontend_ip , cidrhost(local.sub_db_prefix, 0 + 5))
+    private_ip_address            = local.sub_db_exists ? try(local.anydb.loadbalancer.frontend_ip, cidrhost(local.sub_db_prefix, tonumber(count.index) + 4)) : cidrhost(local.sub_db_prefix, tonumber(count.index) + 4)
   }
 }
 

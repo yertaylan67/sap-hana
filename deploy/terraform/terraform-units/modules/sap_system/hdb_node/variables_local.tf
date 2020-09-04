@@ -79,18 +79,17 @@ locals {
   # SAP vnet
   var_infra       = try(var.infrastructure, {})
   var_vnet_sap    = try(local.var_infra.vnets.sap, {})
-  vnet_sap_exists = try(local.var_vnet_sap.is_existing, false)
-  vnet_sap_arm_id = local.vnet_sap_exists ? try(local.var_vnet_sap.arm_id, "") : ""
+  vnet_sap_arm_id = try(local.var_vnet_sap.arm_id, "") 
+  vnet_sap_exists = length(local.vnet_sap_arm_id) > 0 ? true : false
   vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, "")
   vnet_nr_parts   = length(split("-", local.vnet_sap_name))
   // Default naming of vnet has multiple parts. Taking the second-last part as the name 
   vnet_sap_name_prefix = local.vnet_nr_parts >= 3 ? split("-", upper(local.vnet_sap_name))[local.vnet_nr_parts - 1] == "VNET" ? split("-", local.vnet_sap_name)[local.vnet_nr_parts - 2] : local.vnet_sap_name : local.vnet_sap_name
-  vnet_subnet_prefix   = try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? substr(local.vnet_sap_name, 0, length(local.vnet_sap_name) - 5) : local.vnet_sap_name
-
+  
   // Admin subnet
   var_sub_admin    = try(var.infrastructure.vnets.sap.subnet_admin, {})
-  sub_admin_exists = try(local.var_sub_admin.is_existing, false)
-  sub_admin_arm_id = local.sub_admin_exists ? try(local.var_sub_admin.arm_id, "") : ""
+  sub_admin_arm_id = try(local.var_sub_admin.arm_id, "") 
+  sub_admin_exists = length(local.sub_admin_arm_id) > 0 ? true : false
   sub_admin_name   = local.sub_admin_exists ? try(split("/", local.sub_admin_arm_id)[10], "") : try(local.var_sub_admin.name, format("%s_admin-subnet", local.prefix))
   sub_admin_prefix = try(local.var_sub_admin.prefix, "")
 
@@ -102,8 +101,8 @@ locals {
 
   // DB subnet
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
-  sub_db_exists = try(local.var_sub_db.is_existing, false)
-  sub_db_arm_id = local.sub_db_exists ? try(local.var_sub_db.arm_id, "") : ""
+  sub_db_arm_id = try(local.var_sub_db.arm_id, "") 
+  sub_db_exists = length(local.sub_db_arm_id) > 0 ? true : false
   sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s_db-subnet", local.prefix))
   sub_db_prefix = try(local.var_sub_db.prefix, "")
 
@@ -117,11 +116,12 @@ locals {
     for db in var.databases : db
     if try(db.platform, "NONE") == "HANA"
   ]
+  
   enable_deployment = (length(local.hdb_list) > 0) ? true : false
 
   // Filter the list of databases to only HANA platform entries
   hdb          = try(local.hdb_list[0], {})
-  hdb_platform = try(local.hdb.platform, "HANA")
+  hdb_platform = try(local.hdb.platform, "NONE")
   hdb_version  = try(local.hdb.db_version, "2.00.043")
   // If custom image is used, we do not overwrite os reference with default value
   hdb_custom_image = try(local.hdb.os.source_image_id, "") != "" ? true : false
@@ -154,20 +154,15 @@ locals {
   xsa                    = try(local.hdb.xsa, { routing = "ports" })
   shine                  = try(local.hdb.shine, { email = "shinedemo@microsoft.com" })
 
-  default_dbnode_names = [for idx in range(local.hdb_ha ? 2 : 1) :
-    {
-      "name" = format("%sd%s%02dl%d%s", lower(local.sap_sid), lower(local.hdb_sid), idx, idx, substr(var.random-id.hex, 0, 3)),
-      "role" = "worker"
-    }
-  ]
+  customer_provided_names = local.enable_deployment ? (try(length(local.hdb.dbnodes),0) == 0 ? false : length(try(local.hdb.dbnodes[0].name,"")) == 0 ? false : true) : false
 
   dbnodes = flatten([[for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
-    "name" = local.hdb_ha ? format("%s-0", try(dbnode.name, format("%sd%s%02dl%d%s", lower(local.sap_sid), lower(local.hdb_sid), idx, idx, substr(var.random-id.hex, 0, 3)))) : try(dbnode.name, format("%sd%s%02dl%d%s", lower(local.sap_sid), lower(local.hdb_sid), idx, idx, substr(var.random-id.hex, 0, 3)))
+    "name" = try("${dbnode.name}-0", format("%sd%s%02dl%d%s", lower(local.sap_sid), lower(local.hdb_sid), idx, idx, substr(var.random-id.hex, 0, 3)))
     "role" = try(dbnode.role, "worker")
     }
     ],
     [for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
-      "name" = local.hdb_ha ? format("%s-1", try(dbnode.name, format("%sd%s%02dl%d%s", lower(local.sap_sid), lower(local.hdb_sid), idx + 1, idx + 1, substr(var.random-id.hex, 0, 3)))) : try(dbnode.name, format("%sd%s%02dl%d%s", lower(local.sap_sid), lower(local.hdb_sid), idx + 1, idx + 1, substr(var.random-id.hex, 0, 3)))
+      "name" = try("${dbnode.name}-1", format("%sd%s%02dl%d%s", lower(local.sap_sid), lower(local.hdb_sid), idx + try(length(local.hdb.dbnodes),1) , idx + try(length(local.hdb.dbnodes),1) , substr(var.random-id.hex, 0, 3)))
       "role" = try(dbnode.role, "worker")
       } if local.hdb_ha
     ]
@@ -217,9 +212,9 @@ locals {
     [
       for idx, dbnode in local.hana_database.dbnodes : {
         platform       = local.hdb_platform,
-        name           = lookup(dbnode, "name", local.default_dbnode_names[idx].name)
-        admin_nic_ip   = lookup(dbnode, "admin_nic_ips", [false, false])[idx],
-        db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[idx],
+        name           = dbnode.name
+        admin_nic_ip   = try(lookup(dbnode, "admin_nic_ips", [false, false])[idx],false),
+        db_nic_ip      = try(lookup(dbnode, "db_nic_ips", [false, false])[idx],false),
         size           = local.hdb_size,
         os             = local.hdb_os,
         authentication = local.hdb_auth
@@ -283,7 +278,7 @@ locals {
   data-disk-list = flatten([
     for hdb_vm in local.hdb_vms : [
       for datadisk in local.data-disk-per-dbnode : {
-        name                      = format("%s_%s-%s", local.prefix, hdb_vm.name, datadisk.suffix)
+        name                      = local.customer_provided_names ? format("%s-%s", hdb_vm.name, datadisk.suffix) : format("%s_%s-%s", local.prefix, hdb_vm.name, datadisk.suffix)
         caching                   = datadisk.caching
         storage_account_type      = datadisk.storage_account_type
         disk_size_gb              = datadisk.disk_size_gb
