@@ -193,31 +193,31 @@ locals {
   customer_provided_names = try(local.anydb.dbnodes[0].name, "") == "" ? false : true
 
   dbnodes = flatten([[for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
-    "name" = try("${dbnode.name}-0", format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx, local.anydb_oscode, idx, substr(var.random-id.hex, 0, 3))),
-    "role" = try(dbnode.role, "worker"),
-    db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[0]
+    name      = try("${dbnode.name}-0", format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx, local.anydb_oscode, idx, substr(var.random-id.hex, 0, 3))),
+    role      = try(dbnode.role, "worker"),
+    db_nic_ip = lookup(dbnode, "db_nic_ips", [false, false])[0]
     }
     ],
     [for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
-      "name" = try("${dbnode.name}-1", format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx + try(length(local.anydb.dbnodes), 1), local.anydb_oscode, idx + try(length(local.anydb.dbnodes), 1), substr(var.random-id.hex, 0, 3)))
-      "role" = try(dbnode.role, "worker"),
-      db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[1],
+      name      = try("${dbnode.name}-1", format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx + try(length(local.anydb.dbnodes), 1), local.anydb_oscode, idx + try(length(local.anydb.dbnodes), 1), substr(var.random-id.hex, 0, 3)))
+      role      = try(dbnode.role, "worker"),
+      db_nic_ip = lookup(dbnode, "db_nic_ips", [false, false])[1],
       } if local.anydb_ha
     ]
     ]
   )
 
-  anydb_vms =   [
-      for idx, dbnode in local.dbnodes : {
-        platform       = local.anydb_platform,
-        name           = dbnode.name
-        db_nic_ip      = dbnode.db_nic_ip
-        size           = local.anydb_sku
-        os             = local.anydb_ostype,
-        authentication = local.authentication
-        sid            = local.anydb_sid
-      }
-    ] 
+  anydb_vms = [
+    for idx, dbnode in local.dbnodes : {
+      platform       = local.anydb_platform,
+      name           = dbnode.name
+      db_nic_ip      = dbnode.db_nic_ip
+      size           = local.anydb_sku
+      os             = local.anydb_ostype,
+      authentication = local.authentication
+      sid            = local.anydb_sid
+    }
+  ]
 
   // Ports used for specific DB Versions
   lb_ports = {
