@@ -61,24 +61,24 @@ variable "region_mapping" {
 }
 // Set defaults
 locals {
-  region             = try(var.infrastructure.region, "")
-  landscape          = lower(try(var.infrastructure.landscape, ""))
-  sid                = upper(try(var.application.sid, ""))
-  codename           = lower(try(var.infrastructure.codename, ""))
-  location_short     = lower(try(var.region_mapping[local.region], "unkn"))
+  region         = try(var.infrastructure.region, "")
+  landscape      = lower(try(var.infrastructure.landscape, ""))
+  sid            = upper(try(var.application.sid, ""))
+  codename       = lower(try(var.infrastructure.codename, ""))
+  location_short = lower(try(var.region_mapping[local.region], "unkn"))
 
   // Using replace "--" with "-" and "_-" with "-" in case of one of the components like codename is empty
-  prefix             = try(local.var_infra.resource_group.name, upper(replace(replace(format("%s-%s-%s_%s-%s", local.landscape, local.location_short, local.vnet_sap_name_prefix, local.codename, local.sid),"_-","-"), "--", "-")))
-  sa_prefix          = lower(replace(format("%s%s%sdiag", substr(local.landscape,0,5), local.location_short, substr(local.codename,0,7)),"--","-"))
-  vnet_prefix        = try(local.var_infra.resource_group.name, format("%s-%s", local.landscape, local.location_short))
+  prefix      = try(local.var_infra.resource_group.name, upper(replace(replace(format("%s-%s-%s_%s-%s", local.landscape, local.location_short, substr(local.vnet_sap_name_prefix, 0, 7), local.codename, local.sid), "_-", "-"), "--", "-")))
+  sa_prefix   = lower(replace(format("%s%s%sdiag", substr(local.landscape, 0, 5), local.location_short, substr(local.codename, 0, 7)), "--", "-"))
+  vnet_prefix = try(local.var_infra.resource_group.name, format("%s-%s", local.landscape, local.location_short))
 
   # SAP vnet
-  var_infra            = try(var.infrastructure, {})  
-  var_vnet_sap         = try(local.var_infra.vnets.sap, {})
-  vnet_sap_exists      = try(local.var_vnet_sap.is_existing, false)
-  vnet_sap_arm_id      = local.vnet_sap_exists ? try(local.var_vnet_sap.arm_id, "") : ""
-  vnet_sap_name        = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, "sap")
-  vnet_nr_parts        = length(split("-",local.vnet_sap_name))
+  var_infra       = try(var.infrastructure, {})
+  var_vnet_sap    = try(local.var_infra.vnets.sap, {})
+  vnet_sap_exists = try(local.var_vnet_sap.is_existing, false)
+  vnet_sap_arm_id = local.vnet_sap_exists ? try(local.var_vnet_sap.arm_id, "") : ""
+  vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, "sap")
+  vnet_nr_parts   = length(split("-", local.vnet_sap_name))
   // Default naming of vnet has multiple parts. Taking the second-last part as the name 
   vnet_sap_name_prefix = substr(try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? substr(local.vnet_sap_name, 0, length(local.vnet_sap_name) - 5) : local.vnet_sap_name, 0, 7)
 
@@ -86,7 +86,7 @@ locals {
   var_sub_app    = try(var.infrastructure.vnets.sap.subnet_app, {})
   sub_app_arm_id = try(local.var_sub_app.arm_id, "")
   sub_app_exists = length(local.sub_app_arm_id) > 0 ? true : false
-  sub_app_name   = local.sub_app_exists ?  try(split("/", local.sub_app_arm_id)[10], "") : try(local.var_sub_app.name, format("%s_app-subnet", local.prefix))
+  sub_app_name   = local.sub_app_exists ? try(split("/", local.sub_app_arm_id)[10], "") : try(local.var_sub_app.name, format("%s_app-subnet", local.prefix))
   sub_app_prefix = try(local.var_sub_app.prefix, "")
 
   // APP NSG
@@ -99,19 +99,19 @@ locals {
   #If subnet_web is not specified deploy into app subnet
   sub_web_defined = try(var.infrastructure.vnets.sap.subnet_web, null) == null ? false : true
   sub_web         = try(var.infrastructure.vnets.sap.subnet_web, {})
-  sub_web_arm_id  = try(local.sub_web.arm_id, "") 
-  sub_web_exists = length(local.sub_web_arm_id) > 0 ? true : false
-  sub_web_name    = local.sub_web_exists ?  try(split("/", local.sub_web_arm_id)[10], "") : try(local.sub_web.name, format("%s_web-subnet", local.prefix))
+  sub_web_arm_id  = try(local.sub_web.arm_id, "")
+  sub_web_exists  = length(local.sub_web_arm_id) > 0 ? true : false
+  sub_web_name    = local.sub_web_exists ? try(split("/", local.sub_web_arm_id)[10], "") : try(local.sub_web.name, format("%s_web-subnet", local.prefix))
   sub_web_prefix  = try(local.sub_web.prefix, "")
   sub_web_deployed = try(local.sub_web_defined ? (
-    length(local.sub_web_arm_id) > 0 ? data.azurerm_subnet.subnet-sap-web[0] : azurerm_subnet.subnet-sap-web[0]) : (
-  length(local.sub_app_arm_id) ? data.azurerm_subnet.subnet-sap-app[0] : azurerm_subnet.subnet-sap-app[0]), null)
+    local.sub_web_exists ? data.azurerm_subnet.subnet-sap-web[0] : azurerm_subnet.subnet-sap-web[0]) : (
+  local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0] : azurerm_subnet.subnet-sap-app[0]), null)
 
   // WEB NSG
   sub_web_nsg        = try(local.sub_web.nsg, {})
   sub_web_nsg_exists = try(local.sub_web_nsg.is_existing, false)
   sub_web_nsg_arm_id = local.sub_web_nsg_exists ? try(local.sub_web_nsg.arm_id, "") : ""
-  sub_web_nsg_name   = local.sub_web_nsg_exists ?  try(split("/", local.sub_web_nsg_arm_id)[8], "") : try(local.sub_web_nsg.name, format("%s_webSubnet-nsg", local.prefix))
+  sub_web_nsg_name   = local.sub_web_nsg_exists ? try(split("/", local.sub_web_nsg_arm_id)[8], "") : try(local.sub_web_nsg.name, format("%s_webSubnet-nsg", local.prefix))
   sub_web_nsg_deployed = try(local.sub_web_defined ? (
     local.sub_web_nsg_exists ? data.azurerm_network_security_group.nsg-web[0] : azurerm_network_security_group.nsg-web[0]) : (
   local.sub_app_nsg_exists ? data.azurerm_network_security_group.nsg-app[0] : azurerm_network_security_group.nsg-app[0]), null)
@@ -242,13 +242,13 @@ locals {
     62000 + tonumber(local.scs_instance_number),
     62100 + tonumber(local.ers_instance_number)
   ]
-  
+
   // Create list of disks per VM
   app-data-disks = flatten([
     for vm_count in range(local.application_server_count) : [
       for disk_spec in local.app_sizing.storage : {
         vm_index          = vm_count
-        suffix            = format("-%s" ,disk_spec.name)
+        suffix            = format("-%s", disk_spec.name)
         disk_type         = lookup(disk_spec, "disk_type", "Premium_LRS")
         size_gb           = lookup(disk_spec, "size_gb", 512)
         caching           = lookup(disk_spec, "caching", false)
@@ -261,7 +261,7 @@ locals {
     for vm_count in(local.scs_high_availability ? range(2) : range(1)) : [
       for disk_spec in local.scs_sizing.storage : {
         vm_index          = vm_count
-        suffix            = format("-%s" ,disk_spec.name)
+        suffix            = format("-%s", disk_spec.name)
         disk_type         = lookup(disk_spec, "disk_type", "Premium_LRS")
         size_gb           = lookup(disk_spec, "size_gb", 512)
         caching           = lookup(disk_spec, "caching", false)
@@ -274,7 +274,7 @@ locals {
     for vm_count in range(local.webdispatcher_count) : [
       for disk_spec in local.web_sizing.storage : {
         vm_index          = vm_count
-        suffix            = format("-%s" ,disk_spec.name)
+        suffix            = format("-%s", disk_spec.name)
         disk_type         = lookup(disk_spec, "disk_type", "Premium_LRS")
         size_gb           = lookup(disk_spec, "size_gb", 512)
         caching           = lookup(disk_spec, "caching", false)

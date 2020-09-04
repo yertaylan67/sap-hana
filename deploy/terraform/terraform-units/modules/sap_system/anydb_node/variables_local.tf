@@ -63,7 +63,7 @@ locals {
   codename       = lower(try(var.infrastructure.codename, ""))
   location_short = lower(try(var.region_mapping[local.region], "unkn"))
   // Using replace "--" with "-" and "_-" with "-" in case of one of the components like codename is empty
-  prefix    = try(local.var_infra.resource_group.name, upper(replace(replace(format("%s-%s-%s_%s-%s", local.landscape, local.location_short, local.vnet_sap_name_prefix, local.codename, local.sid), "_-", "-"), "--", "-")))
+  prefix    = try(local.var_infra.resource_group.name, upper(replace(replace(format("%s-%s-%s_%s-%s", local.landscape, local.location_short, substr(local.vnet_sap_name_prefix, 0, 7), local.codename, local.sid), "_-", "-"), "--", "-")))
   sa_prefix = lower(replace(format("%s%s%sdiag", substr(local.landscape, 0, 5), local.location_short, substr(local.codename, 0, 7)), "--", "-"))
 
   # SAP vnet
@@ -74,11 +74,11 @@ locals {
   vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, "sap")
   vnet_nr_parts   = length(split("-", local.vnet_sap_name))
   // Default naming of vnet has multiple parts. Taking the second-last part as the name 
-  vnet_sap_name_prefix = substr(try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? substr(local.vnet_sap_name, 0, length(local.vnet_sap_name) - 5) : local.vnet_sap_name, 0, 7)
+  vnet_sap_name_prefix = try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? substr(local.vnet_sap_name, 0, length(local.vnet_sap_name) - 5) : local.vnet_sap_name
 
   // DB subnet
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
-  sub_db_arm_id = try(local.var_sub_db.arm_id, "") 
+  sub_db_arm_id = try(local.var_sub_db.arm_id, "")
   sub_db_exists = length(local.sub_db_arm_id) > 0 ? true : false
   sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s_db-subnet", local.prefix))
   sub_db_prefix = try(local.var_sub_db.prefix, "")
@@ -190,23 +190,22 @@ locals {
     { loadbalancer = local.loadbalancer }
   )
 
-  customer_provided_names = local.enable_deployment ? (try(length(local.anydb.dbnodes),0) == 0 ? false : length(try(local.anydb.dbnodes[0].name,"")) == 0 ? false : true) : false
-  
+  customer_provided_names = try(local.anydb.dbnodes[0].name, "") == "" ? false : true
+
   dbnodes = flatten([[for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
     "name" = try("${dbnode.name}-0", format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx, local.anydb_oscode, idx, substr(var.random-id.hex, 0, 3)))
     "role" = try(dbnode.role, "worker")
     }
     ],
     [for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
-      "name" = try("${dbnode.name}-1", format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx + try(length(local.anydb.dbnodes),1), local.anydb_oscode, idx + try(length(local.anydb.dbnodes),1), substr(var.random-id.hex, 0, 3)))
+      "name" = try("${dbnode.name}-1", format("%sd%s%03d%s%d%s", local.sid, local.anydb_sid, idx + try(length(local.anydb.dbnodes), 1), local.anydb_oscode, idx + try(length(local.anydb.dbnodes), 1), substr(var.random-id.hex, 0, 3)))
       "role" = try(dbnode.role, "worker")
       } if local.anydb_ha
     ]
     ]
   )
 
-  anydb_vms = flatten([
-    [
+  anydb_vms =   [
       for idx, dbnode in local.dbnodes : {
         platform       = local.anydb_platform,
         name           = dbnode.name
@@ -216,20 +215,7 @@ locals {
         authentication = local.authentication
         sid            = local.anydb_sid
       }
-    ] /*,
-    [
-      for idx, dbnode in local.dbnodes : {
-        platform       = local.anydb_platform,
-        name           = length(local.dbnodes) > 1 ? lookup(dbnode, "name", local.default_dbnode_names[1].name) : local.default_dbnode_names[1].name
-        db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[1],
-        size           = local.anydb_sku
-        os             = local.anydb_ostype,
-        authentication = local.authentication
-        sid            = local.anydb_sid
-      }
-      if local.anydb_ha
-    ] */
-  ])
+    ] 
 
   // Ports used for specific DB Versions
   lb_ports = {
