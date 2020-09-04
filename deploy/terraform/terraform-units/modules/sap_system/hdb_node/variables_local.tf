@@ -157,13 +157,17 @@ locals {
   customer_provided_names = try(local.hdb.dbnodes[0].name, "") == "" ? false : true
 
   dbnodes = flatten([[for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
-    "name" = try("${dbnode.name}-0", format("%sd%s%02dl%d%s", lower(local.sap_sid), lower(local.hdb_sid), idx, 0, substr(var.random-id.hex, 0, 3)))
-    "role" = try(dbnode.role, "worker")
+    "name"         = try("${dbnode.name}-0", format("%sd%s%02dl%d%s", lower(local.sap_sid), lower(local.hdb_sid), idx, 0, substr(var.random-id.hex, 0, 3))),
+    "role"         = try(dbnode.role, "worker"),
+    "admin_nic_ip" = lookup(dbnode, "admin_nic_ips", [false, false])[0],
+    "db_nic_ip"    = lookup(dbnode, "db_nic_ips", [false, false])[0]
     }
     ],
     [for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
-      "name" = try("${dbnode.name}-1", format("%sd%s%02dl%d%s", lower(local.sap_sid), lower(local.hdb_sid), idx, 1, substr(var.random-id.hex, 0, 3)))
-      "role" = try(dbnode.role, "worker")
+      "name"         = try("${dbnode.name}-1", format("%sd%s%02dl%d%s", lower(local.sap_sid), lower(local.hdb_sid), idx, 1, substr(var.random-id.hex, 0, 3)))
+      "role"         = try(dbnode.role, "worker")
+      "admin_nic_ip" = lookup(dbnode, "admin_nic_ips", [false, false])[1],
+      "db_nic_ip"    = lookup(dbnode, "db_nic_ips", [false, false])[1]
       } if local.hdb_ha
     ]
     ]
@@ -209,18 +213,18 @@ locals {
 
   // Numerically indexed Hash of HANA DB nodes to be created
   hdb_vms = [
-    for idx, dbnode in local.hana_database.dbnodes : {
+    for idx, dbnode in local.dbnodes : {
       platform       = local.hdb_platform,
       name           = dbnode.name
-      admin_nic_ip   = try(lookup(dbnode, "admin_nic_ips", [false, false])[idx], false),
-      db_nic_ip      = try(lookup(dbnode, "db_nic_ips", [false, false])[idx], false),
+      admin_nic_ip   = dbnode.admin_nic_ip,
+      db_nic_ip      = dbnode.db_nic_ip,
       size           = local.hdb_size,
       os             = local.hdb_os,
       authentication = local.hdb_auth
       sid            = local.hdb_sid
     }
   ]
-  
+
   // Ports used for specific HANA Versions
   lb_ports = {
     "1" = [
