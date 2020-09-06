@@ -155,7 +155,7 @@ variable resource-extension {
     "deployer-rg"         = "-INFRASTRUCTURE"
     "deployer-subnet"     = "_deployment-subnet"
     "deployer-subnet-nsg" = "_deployment-subnet-nsg"
-    "library-rg"          = "-_SAP-LIBRARY"
+    "library-rg"          = "_SAP-LIBRARY"
     "msi"                 = "-msi"
     "nic"                 = "-nic"
     "osdisk"              = "-osdisk"
@@ -164,7 +164,7 @@ variable resource-extension {
     "scs-alb"             = "_scs-alb"
     "sdu-rg"              = ""
     "scs-avset"           = "_scs-avset"
-    "vm"                = ""
+    "vm"                  = ""
     "vnet"                = "-vnet"
     "vnet-rg"             = "-INFRASTRUCTURE"
     "web-alb"             = "_web-alb"
@@ -180,9 +180,10 @@ locals {
   environment_length = 5
   sap_vnet_length    = 7
 
-  env_verified      = substr(var.environment, 0, local.environment_length)
-  vnet_verified     = substr(var.sap_vnet_name, 0, local.sap_vnet_length)
-  dep_vnet_verified = substr(var.deployer_vnet_name, 0, local.sap_vnet_length)
+  env_verified       = substr(var.environment, 0, local.environment_length)
+  vnet_verified      = substr(var.sap_vnet_name, 0, local.sap_vnet_length)
+  dep_vnet_verified  = substr(var.deployer_vnet_name, 0, local.sap_vnet_length)
+  random-id_verified = substr(var.random-id, 0, 4)
 
 }
 

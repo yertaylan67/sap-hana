@@ -2,8 +2,8 @@ output prefixes {
   value = tomap({ "SDU" = local.sdu_name, "DEPLOYER" = local.deployer_name, "VNET" = local.vnet_name, "LIBRARY" = local.library_name })
 }
 
-output sa_prefix {
-  value = local.sa_prefix
+output sa_name {
+  value = tomap({ "SDU" = [local.sdu_sa_name], "DEPLOYER" = [local.deployer_sa_name], "VNET" = [local.vnet_sa_name], "LIBRARY" = [local.library_sa_name,local.state_sa_name] })
 }
 
 output resource_extensions {
