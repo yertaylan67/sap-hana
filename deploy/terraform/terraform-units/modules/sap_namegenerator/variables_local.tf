@@ -1,0 +1,188 @@
+
+variable environment {
+  description = "Environment type (Prod, Test, Sand, QA)"
+}
+
+variable location {
+  description = "Azure region"
+}
+
+variable codename {
+  description = "Code name of application (optional)"
+  default     = ""
+}
+
+variable deployer_vnet_name {
+  description = "Name of Deployer VNet"
+}
+
+variable sap_vnet_name {
+  description = "Name of SAP VNet"
+}
+
+variable sap_sid {
+  description = "SAP SID"
+}
+
+variable hdb_sid {
+  description = "Database SID"
+}
+
+variable random-id {
+  type        = string
+  description = "Random hex string"
+}
+
+variable db_ostype {
+  description = "Database operating system"
+  default     = "LINUX"
+}
+
+variable app_ostype {
+  description = "Application Server operating system"
+  default     = "LINUX"
+}
+
+variable db_platform {
+  description = "AnyDB platform type (Oracle, DB2, SQLServer, ASE)"
+  default     = "LINUX"
+}
+
+variable app_server_max_count {
+  type    = number
+  default = 25
+}
+
+variable db_server_max_count {
+  type    = number
+  default = 10
+}
+
+variable azlimits {
+  description = "Name length for resources"
+  default = {
+    asr         = 50
+    aaa         = 50
+    acr         = 49
+    afw         = 50
+    rg          = 80
+    kv          = 24
+    st          = 24
+    vnet        = 38
+    nsg         = 80
+    snet        = 80
+    nic         = 80
+    vml         = 64
+    vmw         = 15
+    vm          = 80
+    functionapp = 60
+    lb          = 80
+    lbrule      = 80
+    evh         = 50
+    la          = 63
+    pip         = 80
+    peer        = 80
+    gen         = 24
+    sdu         = 80
+  }
+}
+
+variable region_mapping {
+  type        = map(string)
+  description = "Region Mapping: Full = Single CHAR, 4-CHAR"
+  # 42 Regions 
+  default = {
+    "australiacentral"   = "auce"
+    "australiacentral2"  = "auc2"
+    "australiaeast"      = "auea"
+    "australiasoutheast" = "ause"
+    "brazilsouth"        = "brso"
+    "brazilsoutheast"    = "brse"
+    "brazilus"           = "brus"
+    "canadacentral"      = "cace"
+    "canadaeast"         = "caea"
+    "centralindia"       = "cein"
+    "centralus"          = "ceus"
+    "eastasia"           = "eaas"
+    "eastus"             = "eaus"
+    "eastus2"            = "eau2"
+    "francecentral"      = "frce"
+    "francesouth"        = "frso"
+    "germanynorth"       = "geno"
+    "germanywestcentral" = "gewc"
+    "japaneast"          = "jaea"
+    "japanwest"          = "jawe"
+    "koreacentral"       = "koce"
+    "koreasouth"         = "koso"
+    "northcentralus"     = "ncus"
+    "northeurope"        = "noeu"
+    "norwayeast"         = "noea"
+    "norwaywest"         = "nowe"
+    "southafricanorth"   = "sano"
+    "southafricawest"    = "sawe"
+    "southcentralus"     = "scus"
+    "southeastasia"      = "soea"
+    "southindia"         = "soin"
+    "switzerlandnorth"   = "swno"
+    "switzerlandwest"    = "swwe"
+    "uaecentral"         = "uace"
+    "uaenorth"           = "uano"
+    "uksouth"            = "ukso"
+    "ukwest"             = "ukwe"
+    "westcentralus"      = "wcus"
+    "westeurope"         = "weeu"
+    "westindia"          = "wein"
+    "westus"             = "weus"
+    "westus2"            = "wus2"
+  }
+}
+
+variable resource-extension {
+  type        = map(string)
+  description = "Extension of resource name"
+
+  default = {
+    "admin-subnet"        = "_admin-subnet"
+    "admin-subnet-nsg"    = "_adminSubnet-nsg"
+    "app-alb"             = "_app-alb"
+    "app-avset"           = "_app-avset"
+    "app-subnet"          = "_app-subnet"
+    "app-subnet-nsg"      = "_appSubnet-nsg"
+    "db-alb"              = "_db-alb"
+    "db-avset"            = "_db-avset"
+    "db-subnet"           = "_db-subnet"
+    "db-subnet-nsg"       = "_dbSubnet-nsg"
+    "deployer-rg"         = "-INFRASTRUCTURE"
+    "deployer-subnet"     = "_deployment-subnet"
+    "deployer-subnet-nsg" = "_deployment-subnet-nsg"
+    "library-rg"          = "-_SAP-LIBRARY"
+    "msi"                 = "-msi"
+    "nic"                 = "-nic"
+    "osdisk"              = "-osdisk"
+    "pip"                 = "-pip"
+    "ppg"                 = "-ppg"
+    "scs-alb"             = "_scs-alb"
+    "sdu-rg"              = ""
+    "scs-avset"           = "_scs-avset"
+    "vm"                = ""
+    "vnet"                = "-vnet"
+    "vnet-rg"             = "-INFRASTRUCTURE"
+    "web-alb"             = "_web-alb"
+    "web-avset"           = "_web-avset"
+    "web-subnet"          = "_web-subnet"
+    "web-subnet-nsg"      = "_webSubnet-nsg"
+  }
+}
+
+locals {
+  location_short = lower(try(var.region_mapping[var.location], "unkn"))
+
+  environment_length = 5
+  sap_vnet_length    = 7
+
+  env_verified      = substr(var.environment, 0, local.environment_length)
+  vnet_verified     = substr(var.sap_vnet_name, 0, local.sap_vnet_length)
+  dep_vnet_verified = substr(var.deployer_vnet_name, 0, local.sap_vnet_length)
+
+}
+
