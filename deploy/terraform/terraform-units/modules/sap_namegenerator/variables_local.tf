@@ -163,6 +163,7 @@ variable resource-extension {
     "iscsi-subnet"        = "_iscsi-subnet"
     "iscsi-subnet-nsg"    = "_iscsiSubnet-nsg"
     "library-rg"          = "_SAP-LIBRARY"
+    "kv"                  = ""
     "msi"                 = "-msi"
     "nic"                 = "-nic"
     "osdisk"              = "-osdisk"
