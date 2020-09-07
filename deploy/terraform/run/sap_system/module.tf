@@ -45,7 +45,7 @@ module "common_infrastructure" {
   prefix              = module.sap_namegenerator.prefixes["SDU"]
   vnet_prefix         = module.sap_namegenerator.prefixes["VNET"]
   sa_name             = module.sap_namegenerator.sa_name["SDU"][0]
-  kv_names          = module.sap_namegenerator.kv_names["SDU"]
+  kv_names            = module.sap_namegenerator.kv_names["SDU"]
   resource_suffixes   = module.sap_namegenerator.resource_extensions
 }
 
@@ -57,7 +57,7 @@ module "sap_namegenerator" {
   random-id     = random_id.deploy-random-id.hex
   sap_vnet_name = local.vnet_sap_name_part
   sap_sid       = local.sap_sid
-  db_sid       =  local.db_sid
+  db_sid        = local.db_sid
   app_ostype    = local.app_ostype
   db_ostype     = local.db_ostype
   // The naming module creates a list of servers names that is app_server_max_count
@@ -146,20 +146,27 @@ module "app_tier" {
 
 // Create anydb database nodes
 module "anydb_node" {
-  source           = "../../terraform-units/modules/sap_system/anydb_node"
-  application      = var.application
-  databases        = var.databases
-  infrastructure   = var.infrastructure
-  jumpboxes        = var.jumpboxes
-  options          = var.options
-  software         = var.software
-  ssh-timeout      = var.ssh-timeout
-  sshkey           = var.sshkey
-  resource-group   = module.common_infrastructure.resource-group
-  vnet-sap         = module.common_infrastructure.vnet-sap
-  storage-bootdiag = module.common_infrastructure.storage-bootdiag
-  ppg              = module.common_infrastructure.ppg
-  random-id        = random_id.deploy-random-id
+  source              = "../../terraform-units/modules/sap_system/anydb_node"
+  application         = var.application
+  databases           = var.databases
+  infrastructure      = var.infrastructure
+  jumpboxes           = var.jumpboxes
+  options             = var.options
+  software            = var.software
+  ssh-timeout         = var.ssh-timeout
+  sshkey              = var.sshkey
+  resource-group      = module.common_infrastructure.resource-group
+  vnet-sap            = module.common_infrastructure.vnet-sap
+  storage-bootdiag    = module.common_infrastructure.storage-bootdiag
+  ppg                 = module.common_infrastructure.ppg
+  random-id           = random_id.deploy-random-id
+  prefix              = module.sap_namegenerator.prefixes["SDU"]
+  sa_name             = module.sap_namegenerator.sa_name["SDU"]
+  db_server_max_count = local.db_server_max_count
+  vm_names            = module.sap_namegenerator.vm_names["ANYDB"]
+  kv_names            = module.sap_namegenerator.kv_names["SDU"]
+  resource_suffixes   = module.sap_namegenerator.resource_extensions
+
 }
 
 // Generate output files

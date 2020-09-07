@@ -4,13 +4,13 @@
 
 resource azurerm_network_interface "anydb" {
   count               = local.enable_deployment ? length(local.anydb_vms) : 0
-  name                = local.customer_provided_names ? format("%s-db-nic", local.anydb_vms[count.index].name) : format("%s_%s-db-nic", local.prefix, local.anydb_vms[count.index].name)
+  name                = format("%s%s", local.anydb_vms[count.index].name, var.resource_suffixes["db-nic"])
   location            = var.resource-group[0].location
   resource_group_name = var.resource-group[0].name
 
   ip_configuration {
     primary                       = true
-    name                          = "${local.anydb_vms[count.index].name}-nic-ip"
+    name                          = "ipconfig1"
     subnet_id                     = local.sub_db_exists ? data.azurerm_subnet.anydb[0].id : azurerm_subnet.anydb[0].id
     private_ip_address            = try(local.anydb_vms[count.index].db_nic_ip, false) == false ? cidrhost(length(local.sub_db_arm_id) > 0 ? data.azurerm_subnet.anydb[0].address_prefixes[0] : azurerm_subnet.anydb[0].address_prefixes[0], tonumber(count.index) + 10) : local.anydb_vms[count.index].db_nic_ip
     private_ip_address_allocation = "static"
@@ -20,9 +20,10 @@ resource azurerm_network_interface "anydb" {
 # Section for Linux Virtual machine 
 resource azurerm_linux_virtual_machine "dbserver" {
   count                        = local.enable_deployment ? ((upper(local.anydb_ostype) == "LINUX") ? length(local.anydb_vms) : 0) : 0
-  name                         = local.customer_provided_names ? format("%s", local.anydb_vms[count.index].name) :format("%s_%s", local.prefix, local.anydb_vms[count.index].name)
-  location                     = var.resource-group[0].location
+  name                         = local.anydb_vms[count.index].name
+  computer_name                = local.anydb_vms[count.index].computername
   resource_group_name          = var.resource-group[0].name
+  location                     = var.resource-group[0].location
   availability_set_id          = azurerm_availability_set.anydb[0].id
   proximity_placement_group_id = local.ppgId
   network_interface_ids        = [azurerm_network_interface.anydb[count.index].id]
@@ -44,14 +45,13 @@ resource azurerm_linux_virtual_machine "dbserver" {
     iterator = disk
     for_each = flatten([for storage_type in lookup(local.sizes, local.anydb_size).storage : [for disk_count in range(storage_type.count) : { name = storage_type.name, id = disk_count, disk_type = storage_type.disk_type, size_gb = storage_type.size_gb, caching = storage_type.caching }] if storage_type.name == "os"])
     content {
-      name                 = local.customer_provided_names ? format("%s-osdisk", local.anydb_vms[count.index].name) : format("%s_%s-osdisk", local.prefix, local.anydb_vms[count.index].name)
+      name                 = format("%s%s",local.anydb_vms[count.index].name, var.resource_suffixes["osdisk"])
       caching              = disk.value.caching
       storage_account_type = disk.value.disk_type
       disk_size_gb         = disk.value.size_gb
     }
   }
 
-  computer_name                   = substr(lower(local.anydb_vms[count.index].name), 0, 13)
   admin_username                  = local.authentication.username
   admin_password                  = local.authentication.type == "password" ? try(local.authentication.password, null) : null
   disable_password_authentication = local.authentication.type != "password" ? true : false
@@ -66,16 +66,17 @@ resource azurerm_linux_virtual_machine "dbserver" {
   }
   tags = {
     environment = "SAP"
-    SID         = upper(local.anydb_sid)
+    SID         = upper(local.sap_sid)
   }
 }
 
 # Section for Windows Virtual machine based on a marketplace image 
 resource azurerm_windows_virtual_machine "dbserver" {
   count                        = local.enable_deployment ? ((upper(local.anydb_ostype) == "WINDOWS") ? length(local.anydb_vms) : 0) : 0
-  name                         = local.customer_provided_names ? format("%s", local.anydb_vms[count.index].name) : format("%s_%s", local.prefix, local.anydb_vms[count.index].name)
-  location                     = var.resource-group[0].location
+  name                         = local.anydb_vms[count.index].name
+  computer_name                = local.anydb_vms[count.index].computername
   resource_group_name          = var.resource-group[0].name
+  location                     = var.resource-group[0].location
   availability_set_id          = azurerm_availability_set.anydb[0].id
   proximity_placement_group_id = local.ppgId
   network_interface_ids        = [azurerm_network_interface.anydb[count.index].id]
@@ -97,14 +98,13 @@ resource azurerm_windows_virtual_machine "dbserver" {
     iterator = disk
     for_each = flatten([for storage_type in lookup(local.sizes, local.anydb_size).storage : [for disk_count in range(storage_type.count) : { name = storage_type.name, id = disk_count, disk_type = storage_type.disk_type, size_gb = storage_type.size_gb, caching = storage_type.caching }] if storage_type.name == "os"])
     content {
-      name                 = local.customer_provided_names ? format("%s-osdisk", local.anydb_vms[count.index].name) : format("%s_%s-osdisk", local.prefix, local.anydb_vms[count.index].name)
+      name                 = format("%s%s",local.anydb_vms[count.index].name, var.resource_suffixes["osdisk"])
       caching              = disk.value.caching
       storage_account_type = disk.value.disk_type
       disk_size_gb         = disk.value.size_gb
     }
   }
 
-  computer_name  = substr(lower(local.anydb_vms[count.index].name), 0, 13)
   admin_username = local.authentication.username
   admin_password = try(local.authentication.password, null)
 
@@ -113,7 +113,7 @@ resource azurerm_windows_virtual_machine "dbserver" {
   }
   tags = {
     environment = "SAP"
-    SID         = upper(local.anydb_sid)
+    SID         = upper(local.sap_sid)
   }
 }
 
