@@ -24,7 +24,7 @@ variable sap_sid {
   description = "SAP SID"
 }
 
-variable hdb_sid {
+variable db_sid {
   description = "Database SID"
 }
 
@@ -142,6 +142,7 @@ variable resource-extension {
   description = "Extension of resource name"
 
   default = {
+    "admin-nic"           = "-admin-nic"
     "admin-subnet"        = "_admin-subnet"
     "admin-subnet-nsg"    = "_adminSubnet-nsg"
     "app-alb"             = "_app-alb"
@@ -149,12 +150,18 @@ variable resource-extension {
     "app-subnet"          = "_app-subnet"
     "app-subnet-nsg"      = "_appSubnet-nsg"
     "db-alb"              = "_db-alb"
+    "db-alb-feip"         = "_db-alb-feip"
+    "db-alb-bepool"       = "_db-alb-bepool"
+    "db-alb-hp"           = "_db-alb-hp"
     "db-avset"            = "_db-avset"
+    "db-nic"              = "-db-nic"
     "db-subnet"           = "_db-subnet"
     "db-subnet-nsg"       = "_dbSubnet-nsg"
     "deployer-rg"         = "-INFRASTRUCTURE"
     "deployer-subnet"     = "_deployment-subnet"
     "deployer-subnet-nsg" = "_deployment-subnet-nsg"
+    "iscsi-subnet"        = "_iscsi-subnet"
+    "iscsi-subnet-nsg"    = "_iscsiSubnet-nsg"
     "library-rg"          = "_SAP-LIBRARY"
     "msi"                 = "-msi"
     "nic"                 = "-nic"
@@ -162,12 +169,19 @@ variable resource-extension {
     "pip"                 = "-pip"
     "ppg"                 = "-ppg"
     "scs-alb"             = "_scs-alb"
+    "scs-alb-bepool"      = "_scs-alb-bepool"
+    "scs-alb-feip"        = "_scs-alb-feip"
+    "scs-alb-hp"          = "_scs-alb-hp"
+    "scs-ers-feip"        = "_scs-ers-feip"
+    "scs-ers-hp"          = "_scs-ers-hp"
     "sdu-rg"              = ""
     "scs-avset"           = "_scs-avset"
     "vm"                  = ""
     "vnet"                = "-vnet"
     "vnet-rg"             = "-INFRASTRUCTURE"
     "web-alb"             = "_web-alb"
+    "web-alb-feip"        = "_web-alb-feip"
+    "web-alb-bepool"      = "_web-alb-bepool"
     "web-avset"           = "_web-avset"
     "web-subnet"          = "_web-subnet"
     "web-subnet-nsg"      = "_webSubnet-nsg"
