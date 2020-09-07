@@ -51,7 +51,7 @@ locals {
   vnet_mgmt_arm_id = try(local.vnet_mgmt.arm_id, "") 
   vnet_mgmt_exists = length(local.vnet_mgmt_arm_id) > 0 ? true : false
   
-  vnet_mgmt_name   = local.vnet_mgmt_exists ? split("/", local.vnet_mgmt_arm_id)[8] : local.vnet_mgmt_tempname
+  vnet_mgmt_name   = local.vnet_mgmt_exists ? split("/", local.vnet_mgmt_arm_id)[8] : format("%s%s", local.prefix, var.resource_suffixes["vnet"])
   vnet_mgmt_addr   = local.vnet_mgmt_exists ? "" : try(local.vnet_mgmt.address_space, "10.0.0.16/28")
 
   // Management subnet

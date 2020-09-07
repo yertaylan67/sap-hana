@@ -22,7 +22,7 @@ module "sap_namegenerator" {
   environment        = lower(try(var.infrastructure.landscape, ""))
   location           = try(var.infrastructure.region, "")
   codename           = lower(try(var.infrastructure.codename, ""))
-  deployer_vnet_name = try(var.infrastructure.vnets.management.name, "DEPLOYER")
+  deployer_vnet_name = local.vnet_mgmt_name_part
   random-id          = random_id.deploy-random-id.hex
 
   //These are not needed for the deployer
