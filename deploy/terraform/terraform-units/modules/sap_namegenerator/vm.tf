@@ -24,10 +24,10 @@ locals {
   ]
 
   hana_server_names = flatten([[for idx in range(var.db_server_max_count) :
-    lower(format("%sd%s%02dl%d%s", lower(var.sap_sid), lower(var.hdb_sid), idx, idx, substr(var.random-id, 0, 3)))
+    lower(format("%sd%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), idx, idx, substr(var.random-id, 0, 3)))
     ],
     [for idx in range(var.db_server_max_count) :
-      lower(format("%sd%s%02dl%d%s", lower(var.sap_sid), lower(var.hdb_sid), idx + var.db_server_max_count, 1, substr(var.random-id, 0, 3)))
+      lower(format("%sd%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), idx + var.db_server_max_count, 1, substr(var.random-id, 0, 3)))
     ]
   ])
 

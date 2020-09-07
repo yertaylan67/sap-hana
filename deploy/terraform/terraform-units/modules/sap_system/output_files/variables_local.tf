@@ -112,7 +112,7 @@ locals {
           role           = dbnode.role,
           platform       = database.platform,
           authentication = database.authentication,
-          name           = dbnode.name
+          name           = dbnode.computername
         }
         if try(database.platform, "NONE") == "HANA"
       ],
@@ -121,7 +121,7 @@ locals {
           role           = dbnode.role,
           platform       = database.platform,
           authentication = database.authentication,
-          name           = dbnode.name
+          name           = dbnode.computername
         }
         if try(database.platform, "NONE") == "HANA" && database.high_availability
       ]

@@ -19,42 +19,29 @@ variable "nsg-mgmt" {
   description = "Details about management nsg of deployer(s)"
 }
 
-variable "region_mapping" {
-  type        = map(string)
-  description = "Region Mapping: Full = Single CHAR, 4-CHAR"
+variable prefix {
+  type        = string
+  description = "Resource naming prefix"
+}
 
-  //28 Regions 
+variable vnet_prefix {
+  type        = string
+  description = "VNet naming prefix"
+}
 
-  default = {
-    westus             = "weus"
-    westus2            = "wus2"
-    centralus          = "ceus"
-    eastus             = "eaus"
-    eastus2            = "eus2"
-    northcentralus     = "ncus"
-    southcentralus     = "scus"
-    westcentralus      = "wcus"
-    northeurope        = "noeu"
-    westeurope         = "weeu"
-    eastasia           = "eaas"
-    southeastasia      = "seas"
-    brazilsouth        = "brso"
-    japaneast          = "jpea"
-    japanwest          = "jpwe"
-    centralindia       = "cein"
-    southindia         = "soin"
-    westindia          = "wein"
-    uksouth2           = "uks2"
-    uknorth            = "ukno"
-    canadacentral      = "cace"
-    canadaeast         = "caea"
-    australiaeast      = "auea"
-    australiasoutheast = "ause"
-    uksouth            = "ukso"
-    ukwest             = "ukwe"
-    koreacentral       = "koce"
-    koreasouth         = "koso"
-  }
+variable kv_names {
+  type        = list
+  description = "Keyvault name list"
+}
+
+variable sa_name {
+  type        = string
+  description = "Storage account name"
+}
+
+variable resource_suffixes {
+  type        = map
+  description = "List of resource suffixes"
 }
 
 //Set defaults
@@ -83,24 +70,22 @@ locals {
   region         = try(local.var_infra.region, "")
   landscape      = lower(try(local.var_infra.landscape, ""))
   sid            = upper(try(var.application.sid, ""))
-  codename       = lower(try(local.var_infra.codename, ""))
-  location_short = lower(try(var.region_mapping[local.region], "unkn"))
-  // Using replace "--" with "-" and "_-" with "-" in case of one of the components like codename is empty
-  prefix      = try(local.var_infra.resource_group.name, upper(replace(replace(format("%s-%s-%s_%s-%s", local.landscape, local.location_short, substr(local.vnet_sap_name_prefix, 0, 7), local.codename, local.sid), "_-", "-"), "--", "-")))
-  sa_prefix   = lower(format("%s%s%s%sdiag", substr(local.landscape, 0, 5), local.location_short, substr(local.codename, 0, 7), local.sid))
-  vnet_prefix = try(local.var_infra.resource_group.name, upper(format("%s-%s-%s", local.landscape, local.location_short, local.vnet_sap_name_prefix)))
+  
+  prefix      = try(var.infrastructure.resource_group.name, var.prefix)
+  vnet_prefix = var.vnet_prefix
 
   //Resource group
   var_rg    = try(local.var_infra.resource_group, {})
-  rg_exists = try(local.var_rg.is_existing, false)
-  rg_arm_id = local.rg_exists ? try(local.var_rg.arm_id, "") : ""
-  rg_name   = local.rg_exists ? try(split("/", local.rg_arm_id)[4], "") : try(local.var_rg.name, local.prefix)
+  rg_arm_id = try(local.var_rg.arm_id, "") 
+  rg_exists = length(local.rg_arm_id) > 0 ? true : false
+  rg_name   = local.rg_exists ? try(split("/", local.rg_arm_id)[4], "") : try(local.var_rg.name, format("%s%s", local.prefix, var.resource_suffixes["sdu-rg"]))
 
   //PPG
   var_ppg    = try(local.var_infra.ppg, {})
-  ppg_exists = try(local.var_ppg.is_existing, false)
-  ppg_arm_id = local.ppg_exists ? try(local.var_ppg.arm_id, "") : ""
-  ppg_name   = local.ppg_exists ? try(split("/", local.ppg_arm_id)[8], "") : try(local.var_ppg.name, format("%s_ppg", local.prefix))
+  ppg_arm_id = try(local.var_ppg.arm_id, "")
+  ppg_exists = length(local.ppg_arm_id) > 0 ? true : false
+  
+  ppg_name   = local.ppg_exists ? try(split("/", local.ppg_arm_id)[8], "") : try(local.var_ppg.name, format("%s%s", local.prefix, var.resource_suffixes["ppg"]))
 
   //iSCSI
   var_iscsi = try(local.var_infra.iscsi, {})
@@ -137,66 +122,63 @@ locals {
 
   //SAP vnet
   var_vnet_sap    = try(local.var_infra.vnets.sap, {})
-  vnet_sap_exists = try(local.var_vnet_sap.is_existing, false)
-  vnet_sap_arm_id = local.vnet_sap_exists ? try(local.var_vnet_sap.arm_id, "") : ""
-  vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, format("%s-%s-SAP-vnet", upper(local.landscape), upper(local.location_short)))
-  vnet_nr_parts   = length(split("-", local.vnet_sap_name))
-  // Default naming of vnet has multiple parts. Taking the second-last part as the name 
-  vnet_sap_name_prefix = local.vnet_nr_parts >= 3 ? split("-", upper(local.vnet_sap_name))[local.vnet_nr_parts - 1] == "VNET" ? split("-", local.vnet_sap_name)[local.vnet_nr_parts - 2] : local.vnet_sap_name : local.vnet_sap_name
+  vnet_sap_arm_id = try(local.var_vnet_sap.arm_id, "")
+  vnet_sap_exists = length(local.vnet_sap_arm_id) > 0 ? true : false
+  vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, format("%s%s", var.vnet_prefix, var.resource_suffixes["vnet"]))
   vnet_sap_addr        = local.vnet_sap_exists ? "" : try(local.var_vnet_sap.address_space, "")
-
 
   //Admin subnet
   var_sub_admin    = try(local.var_vnet_sap.subnet_admin, {})
-  sub_admin_exists = try(local.var_sub_admin.is_existing, false)
-  sub_admin_arm_id = local.sub_admin_exists ? try(local.var_sub_admin.arm_id, "") : ""
-  sub_admin_name   = local.sub_admin_exists ? try(split("/", local.sub_admin_arm_id)[10], "") : try(local.var_sub_admin.name, format("%s-sap-vnet_admin-subnet", local.vnet_prefix))
+  sub_admin_arm_id = try(local.var_sub_admin.arm_id, "")
+  sub_admin_exists = length(local.sub_admin_arm_id) > 0 ? true : false
+  
+  sub_admin_name   = local.sub_admin_exists ? try(split("/", local.sub_admin_arm_id)[10], "") : try(local.var_sub_admin.name, format("%s%s", local.prefix, var.resource_suffixes["admin-subnet"]))
   sub_admin_prefix = local.sub_admin_exists ? "" : try(local.var_sub_admin.prefix, "")
 
   //Admin NSG
   var_sub_admin_nsg    = try(local.var_sub_admin.nsg, {})
-  sub_admin_nsg_exists = try(local.var_sub_admin_nsg.is_existing, false)
-  sub_admin_nsg_arm_id = local.sub_admin_nsg_exists ? try(local.var_sub_admin_nsg.arm_id, "") : ""
-  sub_admin_nsg_name   = local.sub_admin_nsg_exists ? try(split("/", local.sub_admin_nsg_arm_id)[8], "") : try(local.var_sub_admin_nsg.name, format("%s_adminSubnet-nsg", local.vnet_prefix))
+  sub_admin_nsg_arm_id = try(local.var_sub_admin_nsg.arm_id, "") 
+  sub_admin_nsg_exists = length(local.sub_admin_nsg_arm_id) > 0 ? true : false
+  sub_admin_nsg_name   = local.sub_admin_nsg_exists ? try(split("/", local.sub_admin_nsg_arm_id)[8], "") : try(local.var_sub_admin_nsg.name, format("%s%s", local.prefix, var.resource_suffixes["admin-subnet-nsg"]))
 
   //DB subnet
   var_sub_db    = try(local.var_vnet_sap.subnet_db, {})
-  sub_db_exists = try(local.var_sub_db.is_existing, false)
-  sub_db_arm_id = local.sub_db_exists ? try(local.var_sub_db.arm_id, "") : ""
-  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s_db-subnet", local.vnet_prefix))
+  sub_db_arm_id = try(local.var_sub_db.arm_id, "") 
+  sub_db_exists = length(local.sub_db_arm_id) > 0 ? true : false
+  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s%s", local.prefix, var.resource_suffixes["db-subnet"]))
   sub_db_prefix = local.sub_db_exists ? "" : try(local.var_sub_db.prefix, "")
 
   //DB NSG
   var_sub_db_nsg    = try(local.var_sub_db.nsg, {})
-  sub_db_nsg_exists = try(local.var_sub_db_nsg.is_existing, false)
-  sub_db_nsg_arm_id = local.sub_db_nsg_exists ? try(local.var_sub_db_nsg.arm_id, "") : ""
-  sub_db_nsg_name   = local.sub_db_nsg_exists ? try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s_dbSubnet-nsg", local.vnet_prefix))
+  sub_db_nsg_arm_id = try(local.var_sub_db_nsg.arm_id, "") 
+  sub_db_nsg_exists = length(local.sub_db_nsg_arm_id) > 0 ? true : false
+  sub_db_nsg_name   = local.sub_db_nsg_exists ? try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s%s", local.prefix, var.resource_suffixes["db-subnet-nsg"]))
 
   //iSCSI subnet
   var_sub_iscsi    = try(local.var_vnet_sap.subnet_iscsi, {})
-  sub_iscsi_exists = try(local.var_sub_iscsi.is_existing, false)
-  sub_iscsi_arm_id = local.sub_iscsi_exists ? try(local.var_sub_iscsi.arm_id, "") : ""
-  sub_iscsi_name   = local.sub_iscsi_exists ? try(split("/", local.sub_iscsi_arm_id)[10], "") : try(local.var_sub_iscsi.name, format("%s-_iscsi-subnet", local.vnet_prefix))
+  sub_iscsi_arm_id = try(local.var_sub_iscsi.arm_id, "") 
+  sub_iscsi_exists = length(local.sub_iscsi_arm_id) > 0 ? true : false
+  sub_iscsi_name   = local.sub_iscsi_exists ? try(split("/", local.sub_iscsi_arm_id)[10], "") : try(local.var_sub_iscsi.name, format("%s%s", local.prefix, var.resource_suffixes["iscsi-subnet"]))
   sub_iscsi_prefix = local.sub_iscsi_exists ? "" : try(local.var_sub_iscsi.prefix, "")
 
   //iSCSI NSG
   var_sub_iscsi_nsg    = try(local.var_sub_iscsi.nsg, {})
-  sub_iscsi_nsg_exists = try(local.var_sub_iscsi_nsg.is_existing, false)
-  sub_iscsi_nsg_arm_id = local.sub_iscsi_nsg_exists ? try(local.var_sub_iscsi_nsg.arm_id, "") : ""
-  sub_iscsi_nsg_name   = local.sub_iscsi_nsg_exists ? try(split("/", local.sub_iscsi_nsg_arm_id)[8], "") : try(local.var_sub_iscsi_nsg.name, format("%s-_iscsiSubnet-nsg", local.vnet_prefix))
+  sub_iscsi_nsg_arm_id = try(local.var_sub_iscsi_nsg.arm_id, "") 
+  sub_iscsi_nsg_exists = length(local.sub_iscsi_nsg_arm_id) > 0 ? true : false
+  sub_iscsi_nsg_name   = local.sub_iscsi_nsg_exists ? try(split("/", local.sub_iscsi_nsg_arm_id)[8], "") : try(local.var_sub_iscsi_nsg.name, format("%s%s", local.prefix, var.resource_suffixes["iscsi-subnet-nsg"]))
 
   //APP subnet
   var_sub_app    = try(local.var_vnet_sap.subnet_app, {})
-  sub_app_exists = try(local.var_sub_app.is_existing, false)
-  sub_app_arm_id = local.sub_app_exists ? try(local.var_sub_app.arm_id, "") : ""
-  sub_app_name   = local.sub_app_exists ? "" : try(local.var_sub_app.name, format("%s_app-subnet", local.vnet_prefix))
+  sub_app_arm_id = try(local.var_sub_app.arm_id, "") 
+  sub_app_exists = length(local.sub_app_arm_id) > 0 ? true : false
+  sub_app_name   = local.sub_app_exists ? "" : try(local.var_sub_app.name, format("%s%s", local.prefix, var.resource_suffixes["app-subnet"]))
   sub_app_prefix = local.sub_app_exists ? "" : try(local.var_sub_app.prefix, "")
 
   //APP NSG
   var_sub_app_nsg    = try(local.var_sub_app.nsg, {})
-  sub_app_nsg_exists = try(local.var_sub_app_nsg.is_existing, false)
-  sub_app_nsg_arm_id = local.sub_app_nsg_exists ? try(local.var_sub_app_nsg.arm_id, "") : ""
-  sub_app_nsg_name   = local.sub_app_nsg_exists ? try(split("/", local.sub_app_nsg_arm_id)[8], "") : try(local.var_sub_app_nsg.name, format("%s_appSubnet-nsg", local.vnet_prefix))
+  sub_app_nsg_arm_id = try(local.var_sub_app_nsg.arm_id, "") 
+  sub_app_nsg_exists = length(local.sub_app_nsg_arm_id) > 0 ? true : false
+  sub_app_nsg_name   = local.sub_app_nsg_exists ? try(split("/", local.sub_app_nsg_arm_id)[8], "") : try(local.var_sub_app_nsg.name, format("%s%s", local.prefix, var.resource_suffixes["app-subnet-nsg"]))
 
   //---- Update infrastructure with defaults ----//
   infrastructure = {

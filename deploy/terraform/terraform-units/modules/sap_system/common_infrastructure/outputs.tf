@@ -18,10 +18,6 @@ output "storage-bootdiag" {
   value = azurerm_storage_account.storage-bootdiag
 }
 
-output "random-id" {
-  value = random_id.random-id
-}
-
 output "nics-iscsi" {
   value = azurerm_network_interface.iscsi
 }
