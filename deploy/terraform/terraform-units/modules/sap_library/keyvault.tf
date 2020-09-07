@@ -3,7 +3,7 @@ data "azurerm_client_config" "current" {}
 
 
 resource "azurerm_key_vault" "prvt" {
-  name                        = var.kv_names[0]
+  name                        = format("%s%s",var.kv_names[1], var.resource_suffixes["kv"])
   location                    = azurerm_resource_group.library[0].location
   resource_group_name         = azurerm_resource_group.library[0].name
   enabled_for_disk_encryption = true
