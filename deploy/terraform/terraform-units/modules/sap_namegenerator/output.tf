@@ -11,7 +11,7 @@ output resource_extensions {
 }
 
 output vm_names {
-  value = tomap({ "ANYDB" = local.anydb_server_names, "APP" = local.app_server_names, "DEPLOYER" = local.deployer_names, "HANA" = local.hana_server_names, "SCS" = local.scs_server_names, "WEB" = local.scs_server_names })
+  value = tomap({ "ANYDB" = local.anydb_server_names, "APP" = local.app_server_names, "DEPLOYER" = local.deployer_names, "HANA" = local.hana_server_names, "SCS" = local.scs_server_names, "WEB" = local.web_server_names })
 }
 
 output kv_names {
