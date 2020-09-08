@@ -190,15 +190,16 @@ variable resource-extension {
 }
 
 locals {
-  location_short = lower(try(var.region_mapping[var.location], "unkn"))
+  location_short = upper(try(var.region_mapping[var.location], "unkn"))
 
   environment_length = 5
   sap_vnet_length    = 7
 
-  env_verified       = substr(var.environment, 0, local.environment_length)
-  vnet_verified      = substr(var.sap_vnet_name, 0, local.sap_vnet_length)
-  dep_vnet_verified  = substr(var.deployer_vnet_name, 0, local.sap_vnet_length)
-  random-id_verified = substr(var.random-id, 0, 4)
+  env_verified         = upper(substr(var.environment, 0, local.environment_length))
+  vnet_verified        = upper(substr(var.sap_vnet_name, 0, local.sap_vnet_length))
+  dep_vnet_verified    = upper(substr(var.deployer_vnet_name, 0, local.sap_vnet_length))
+  random-id_verified   = upper(substr(var.random-id, 0, 4))
+  random-id_verifiedvm = lower(substr(var.random-id, 0, 3))
 
 }
 
