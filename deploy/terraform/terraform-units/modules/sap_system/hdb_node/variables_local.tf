@@ -58,8 +58,19 @@ variable "db_server_max_count" {
   description = "The number of items in the server name list"
 }
 
-// Set defaults
+variable "disk_sizes" {
+  type        = string
+  description = "Disk size json file"
+  default     = "anydb_sizes.json"
+
+}
+
 locals {
+  // Imports database sizing information
+
+  disk_sizes = "${path.module}/../../../../../configs/hdb_sizes.json"
+  sizes      = jsondecode(file(length(var.disk_sizes) > 0 ? var.disk_sizes : local.disk_sizes))
+
   region  = try(var.infrastructure.region, "")
   sid     = upper(try(var.application.sid, ""))
   prefix  = try(var.infrastructure.resource_group.name, var.prefix)
@@ -198,9 +209,6 @@ locals {
 
   // SAP SID used in HDB resource naming convention
   sap_sid = try(var.application.sid, local.sid)
-
-  // Imports HANA database sizing information
-  sizes = jsondecode(file("${path.module}/../../../../../configs/hdb_sizes.json"))
 
   // Numerically indexed Hash of HANA DB nodes to be created
   hdb_vms = [

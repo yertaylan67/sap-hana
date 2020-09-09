@@ -49,7 +49,18 @@ variable "db_server_max_count" {
   description = "The number of items in the server name list"
 }
 
+variable "disk_sizes" {
+  type        = string
+  description = "Disk size json file"
+  default     = ""
+}
+
 locals {
+  // Imports database sizing information
+
+  disk_sizes = "${path.module}/../../../../../configs/anydb_sizes.json"
+  sizes      = jsondecode(file(length(var.disk_sizes) > 0 ? var.disk_sizes : local.disk_sizes))
+
   region  = try(var.infrastructure.region, "")
   sap_sid = upper(try(var.application.sid, ""))
   prefix  = try(var.infrastructure.resource_group.name, var.prefix)
@@ -77,9 +88,6 @@ locals {
   sub_db_nsg_exists = try(local.var_sub_db_nsg.is_existing, false)
   sub_db_nsg_arm_id = local.sub_db_nsg_exists ? try(local.var_sub_db_nsg.arm_id, "") : ""
   sub_db_nsg_name   = local.sub_db_nsg_exists ? try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s%s", local.prefix, var.resource_suffixes["db-subnet-nsg"]))
-
-  // Imports database sizing information
-  sizes = jsondecode(file("${path.module}/../../../../../configs/anydb_sizes.json"))
 
   // PPG Information
   ppgId = lookup(var.infrastructure, "ppg", false) != false ? (var.ppg[0].id) : null
@@ -221,7 +229,7 @@ locals {
     "DB2" = [
       "62500"
     ]
-    "SQLServer" = [
+    "SQLSERVER" = [
       "59999"
     ]
     "NONE" = [

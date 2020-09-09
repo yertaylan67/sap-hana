@@ -117,6 +117,7 @@ module "hdb_node" {
   vm_names            = module.sap_namegenerator.vm_names["HANA"]
   kv_names            = module.sap_namegenerator.kv_names["SDU"]
   resource_suffixes   = module.sap_namegenerator.resource_extensions
+  disk_sizes          = var.disk_sizes
 
 }
 
@@ -166,6 +167,7 @@ module "anydb_node" {
   vm_names            = module.sap_namegenerator.vm_names["ANYDB"]
   kv_names            = module.sap_namegenerator.kv_names["SDU"]
   resource_suffixes   = module.sap_namegenerator.resource_extensions
+  disk_sizes          = var.disk_sizes
 }
 
 // Generate output files
