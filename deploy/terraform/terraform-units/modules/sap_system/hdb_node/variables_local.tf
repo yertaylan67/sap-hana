@@ -61,7 +61,7 @@ variable "db_server_max_count" {
 variable "disk_sizes" {
   type        = string
   description = "Disk size json file"
-  default     = "anydb_sizes.json"
+  default     = ""
 
 }
 
