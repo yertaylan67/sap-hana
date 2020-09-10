@@ -27,7 +27,7 @@ module "sap_namegenerator" {
   //These are not needed for the deployer
   sap_vnet_name = try(var.infrastructure.vnets.sap.name, "")
   sap_sid       = ""
-  hdb_sid       = ""
+  db_sid       = ""
 
 }
 
