@@ -7,7 +7,7 @@ locals {
 
   //Deployer
   deployer_names = [for idx in range(var.app_server_max_count) :
-    format("%s%s%sdeploy%02d", lower(local.env_verified), local.location_short, local.dep_vnet_verified, idx)
+    lower(format("%s%s%sdeploy%02d", local.env_verified, local.location_short, local.dep_vnet_verified, idx))
   ]
 
   anydb_server_names = [for idx in range(var.db_server_max_count) :
@@ -23,7 +23,7 @@ locals {
   ]
 
   iscsi_server_names = [for idx in range(var.app_server_max_count) :
-    format("%s%s%siscsi%02d", lower(local.env_verified), local.vnet_verified, local.location_short , idx)
+    lower(format("%s%s%siscsi%02d", lower(local.env_verified), local.vnet_verified, local.location_short , idx))
   ]
 
   hana_server_names = [for idx in range(var.db_server_max_count) :
