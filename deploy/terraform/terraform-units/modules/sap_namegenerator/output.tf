@@ -17,7 +17,3 @@ output vm_names {
 output kv_names {
   value = tomap({ "SDU" = local.sdu_kvname, "DEPLOYER" = local.deployer_kvname, "VNET" = local.vnet_kvname, "LIBRARY" = local.library_kvname })
 }
-
-output db_server_max_count {
-  value = var.db_server_max_count
-}
