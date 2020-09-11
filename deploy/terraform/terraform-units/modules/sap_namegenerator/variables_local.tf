@@ -69,6 +69,11 @@ variable db_server_count {
   default = 1
 }
 
+variable iscsi_server_count {
+  type    = number
+  default = 1
+}
+
 variable sapautomation_name_limits {
   description = "Name length for automation resources"
   default = {
@@ -77,7 +82,7 @@ variable sapautomation_name_limits {
     random-id_vm_length = 3
     random-id_length = 4
     sdu_name_length = 80
-
+    
   }
 
 
@@ -106,7 +111,6 @@ variable azlimits {
     pip         = 80
     peer        = 80
     gen         = 24
-    sdu         = 80
   }
 }
 
