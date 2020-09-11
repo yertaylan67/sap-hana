@@ -1,7 +1,11 @@
 # Create Web dispatcher NICs
 resource "azurerm_network_interface" "web" {
   count                         = local.enable_deployment ? local.webdispatcher_count : 0
+<<<<<<< HEAD
   name                          = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.web_vm_names[count.index], var.resource_suffixes["nic"]) : format("%s%s", var.web_vm_names[count.index], var.resource_suffixes["nic"])
+=======
+  name                          = format("%s_%s-web-nic", local.prefix, format("%sweb%02d%s%s", lower(local.sid), count.index, upper(local.app_ostype) == "LINUX" ? "l" : "w", substr(var.random-id.hex, 0, 3)))
+>>>>>>> 58676615fcf5678a187d599629a9c7c6b121a966
   location                      = var.resource-group[0].location
   resource_group_name           = var.resource-group[0].name
   enable_accelerated_networking = local.web_sizing.compute.accelerated_networking
@@ -17,8 +21,13 @@ resource "azurerm_network_interface" "web" {
 # Create the Linux Web dispatcher VM(s)
 resource "azurerm_linux_virtual_machine" "web" {
   count                        = local.enable_deployment ? (upper(local.app_ostype) == "LINUX" ? local.webdispatcher_count : 0) : 0
+<<<<<<< HEAD
   name                         = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.web_vm_names[count.index], var.resource_suffixes["vm"]) : format("%s%s", var.web_vm_names[count.index], var.resource_suffixes["vm"])
   computer_name                = var.web_vm_names[count.index]
+=======
+  name                         = format("%s_%s", local.prefix, format("%sweb%02dl%s", lower(local.sid), count.index, substr(var.random-id.hex, 0, 3)))
+  computer_name                = format("%sweb%02dl%s", lower(local.sid), count.index, substr(var.random-id.hex, 0, 3))
+>>>>>>> 58676615fcf5678a187d599629a9c7c6b121a966
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
   availability_set_id          = azurerm_availability_set.web[0].id
@@ -31,7 +40,11 @@ resource "azurerm_linux_virtual_machine" "web" {
   disable_password_authentication = true
 
   os_disk {
+<<<<<<< HEAD
     name                 = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.web_vm_names[count.index], var.resource_suffixes["osdisk"]) : format("%s%s", var.web_vm_names[count.index], var.resource_suffixes["osdisk"])
+=======
+    name                 = format("%s_%sweb%02dl%s-osdisk", local.prefix, lower(local.sid), count.index, substr(var.random-id.hex, 0, 3))
+>>>>>>> 58676615fcf5678a187d599629a9c7c6b121a966
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
@@ -61,8 +74,13 @@ resource "azurerm_linux_virtual_machine" "web" {
 # Create the Windows Web dispatcher VM(s)
 resource "azurerm_windows_virtual_machine" "web" {
   count                        = local.enable_deployment ? (upper(local.app_ostype) == "WINDOWS" ? local.webdispatcher_count : 0) : 0
+<<<<<<< HEAD
   name                         = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.web_vm_names[count.index], var.resource_suffixes["vm"]) : format("%s%s", var.web_vm_names[count.index], var.resource_suffixes["vm"])
   computer_name                = var.web_vm_names[count.index]
+=======
+  name                         = format("%s_%s", local.prefix, format("%sweb%02dw%s", lower(local.sid), count.index, substr(var.random-id.hex, 0, 3)))
+  computer_name                = format("%sweb%02dw%s", lower(local.sid), count.index, substr(var.random-id.hex, 0, 3))
+>>>>>>> 58676615fcf5678a187d599629a9c7c6b121a966
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
   availability_set_id          = azurerm_availability_set.web[0].id
@@ -75,7 +93,11 @@ resource "azurerm_windows_virtual_machine" "web" {
   admin_password = local.authentication.password
 
   os_disk {
+<<<<<<< HEAD
     name                 = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.web_vm_names[count.index], var.resource_suffixes["osdisk"]) : format("%s%s", var.web_vm_names[count.index], var.resource_suffixes["osdisk"])
+=======
+    name                 = format("%s_%sweb%02dw%s-osdisk", local.prefix, lower(local.sid), count.index, substr(var.random-id.hex, 0, 3))
+>>>>>>> 58676615fcf5678a187d599629a9c7c6b121a966
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
@@ -100,7 +122,11 @@ resource "azurerm_windows_virtual_machine" "web" {
 # Creates managed data disk
 resource "azurerm_managed_disk" "web" {
   count                = local.enable_deployment ? length(local.web-data-disks) : 0
+<<<<<<< HEAD
   name                 = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.web_vm_names[count.index], local.web-data-disks[count.index].suffix) : format("%s%s", var.web_vm_names[count.index], local.web-data-disks[count.index].suffix)
+=======
+  name                 = format("%s_%s%s", local.prefix, format("%sweb%02d%s%s", lower(local.sid), count.index, upper(local.app_ostype) == "LINUX" ? "l" : "w", substr(var.random-id.hex, 0, 3)), local.web-data-disks[count.index].suffix)
+>>>>>>> 58676615fcf5678a187d599629a9c7c6b121a966
   location             = var.resource-group[0].location
   resource_group_name  = var.resource-group[0].name
   create_option        = "Empty"
