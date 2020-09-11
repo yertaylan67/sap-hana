@@ -6,7 +6,7 @@ locals {
 
 
   //Deployer
-  deployer_names = [for idx in range(var.app_server_max_count) :
+  deployer_names = [for idx in range(var.app_server_count) :
     lower(format("%s%s%sdeploy%02d", local.env_verified, local.location_short, local.dep_vnet_verified, idx))
   ]
 
