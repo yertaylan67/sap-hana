@@ -4,27 +4,31 @@
 */
 
 module "deployer" {
-  source         = "../../terraform-units/modules/sap_system/deployer"
-  application    = var.application
-  databases      = var.databases
-  infrastructure = var.infrastructure
-  jumpboxes      = var.jumpboxes
-  options        = var.options
-  software       = var.software
-  ssh-timeout    = var.ssh-timeout
-  sshkey         = var.sshkey
+  source            = "../../terraform-units/modules/sap_system/deployer"
+  application       = var.application
+  databases         = var.databases
+  infrastructure    = var.infrastructure
+  jumpboxes         = var.jumpboxes
+  options           = var.options
+  software          = var.software
+  ssh-timeout       = var.ssh-timeout
+  sshkey            = var.sshkey
+  library_prefix    = module.sap_namegenerator.prefixes["LIBRARY"]
+  resource_suffixes = module.sap_namegenerator.resource_extensions
 }
 
 module "saplibrary" {
-  source         = "../../terraform-units/modules/sap_system/saplibrary"
-  application    = var.application
-  databases      = var.databases
-  infrastructure = var.infrastructure
-  jumpboxes      = var.jumpboxes
-  options        = var.options
-  software       = var.software
-  ssh-timeout    = var.ssh-timeout
-  sshkey         = var.sshkey
+  source            = "../../terraform-units/modules/sap_system/saplibrary"
+  application       = var.application
+  databases         = var.databases
+  infrastructure    = var.infrastructure
+  jumpboxes         = var.jumpboxes
+  options           = var.options
+  software          = var.software
+  ssh-timeout       = var.ssh-timeout
+  sshkey            = var.sshkey
+  library_prefix    = module.sap_namegenerator.prefixes["LIBRARY"]
+  resource_suffixes = module.sap_namegenerator.resource_extensions
 }
 
 module "common_infrastructure" {
@@ -114,7 +118,7 @@ module "hdb_node" {
   prefix            = module.sap_namegenerator.prefixes["SDU"]
   sa_name           = module.sap_namegenerator.sa_name["SDU"]
   db_server_count   = length(module.sap_namegenerator.vm_names["HANA"])
-  vm_names          = concat(module.sap_namegenerator.vm_names["HANA"],module.sap_namegenerator.vm_names["HANA_HA"])
+  vm_names          = concat(module.sap_namegenerator.vm_names["HANA"], module.sap_namegenerator.vm_names["HANA_HA"])
   kv_names          = module.sap_namegenerator.kv_names["SDU"]
   resource_suffixes = module.sap_namegenerator.resource_extensions
 
@@ -138,8 +142,6 @@ module "app_tier" {
   ppg               = module.common_infrastructure.ppg
   random-id         = random_id.deploy-random-id
   prefix            = module.sap_namegenerator.prefixes["SDU"]
-  library_prefix    = module.sap_namegenerator.prefixes["LIBRARY"]
-  deployer_prefix   = module.sap_namegenerator.prefixes["DEPLOYER"]
   app_vm_names      = module.sap_namegenerator.vm_names["APP"]
   scs_vm_names      = module.sap_namegenerator.vm_names["SCS"]
   web_vm_names      = module.sap_namegenerator.vm_names["WEB"]
