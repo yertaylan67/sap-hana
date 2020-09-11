@@ -58,13 +58,13 @@ variable "region_mapping" {
 
 locals {
   region         = try(var.infrastructure.region, "")
-  landscape      = lower(try(var.infrastructure.landscape, ""))
+  environment    = lower(try(var.infrastructure.environment, ""))
   sid            = upper(try(var.application.sid, local.anydb_sid))
   codename       = lower(try(var.infrastructure.codename, ""))
   location_short = lower(try(var.region_mapping[local.region], "unkn"))
   // Using replace "--" with "-" and "_-" with "-" in case of one of the components like codename is empty
-  prefix    = try(local.var_infra.resource_group.name, upper(replace(replace(format("%s-%s-%s_%s-%s", local.landscape, local.location_short, substr(local.vnet_sap_name_prefix, 0, 7), local.codename, local.sid), "_-", "-"), "--", "-")))
-  sa_prefix = lower(replace(format("%s%s%sdiag", substr(local.landscape, 0, 5), local.location_short, substr(local.codename, 0, 7)), "--", "-"))
+  prefix    = try(local.var_infra.resource_group.name, upper(replace(replace(format("%s-%s-%s_%s-%s", local.environment, local.location_short, substr(local.vnet_sap_name_prefix, 0, 7), local.codename, local.sid), "_-", "-"), "--", "-")))
+  sa_prefix = lower(replace(format("%s%s%sdiag", substr(local.environment, 0, 5), local.location_short, substr(local.codename, 0, 7)), "--", "-"))
 
   # SAP vnet
   var_infra       = try(var.infrastructure, {})
@@ -74,7 +74,7 @@ locals {
   vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, "sap")
   vnet_nr_parts   = length(split("-", local.vnet_sap_name))
   // Default naming of vnet has multiple parts. Taking the second-last part as the name 
-  vnet_sap_name_prefix = try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? substr(local.vnet_sap_name, 0, length(local.vnet_sap_name) - 5) : local.vnet_sap_name
+  vnet_sap_name_prefix = try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? split("-", local.vnet_sap_name)[(local.vnet_nr_parts -2)] : local.vnet_sap_name
 
   // DB subnet
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
