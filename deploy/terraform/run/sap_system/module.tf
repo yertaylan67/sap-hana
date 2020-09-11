@@ -64,11 +64,11 @@ module "sap_namegenerator" {
   // for database servers the list is 2 * db_server_max_count. 
   // The first db_server_max_count items are for single node
   // The the second db_server_max_count items are for ha
-  db_server_max_count  = local.db_server_max_count
-  app_server_max_count = local.app_server_max_count
+  db_server_count  = local.db_server_count
+  app_server_count = local.app_server_count
 
   //These are not needed for the SDU
-  deployer_vnet_name = ""
+  management_vnet_name = ""
 
 }
 

@@ -68,7 +68,7 @@ locals {
 
   //Region and metadata
   region         = try(local.var_infra.region, "")
-  landscape      = lower(try(local.var_infra.landscape, ""))
+  environment    = lower(try(local.var_infra.environment, ""))
   sid            = upper(try(var.application.sid, ""))
   
   prefix      = try(var.infrastructure.resource_group.name, var.prefix)

@@ -44,7 +44,7 @@ variable resource_suffixes {
   description = "List of resource suffixes"
 }
 
-variable "db_server_max_count" {
+variable "db_server_count" {
   type        = number
   description = "The number of items in the server name list"
 }
@@ -196,8 +196,8 @@ locals {
     }
     ],
     [for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
-      name         = try("${dbnode.name}-1", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.vm_names[idx + var.db_server_max_count], var.resource_suffixes["vm"]) : format("%s%s", var.vm_names[idx + var.db_server_max_count], var.resource_suffixes["vm"])))
-      computername = try("${dbnode.name}-1", format("%s%s", var.vm_names[idx + var.db_server_max_count], var.resource_suffixes["vm"]))
+      name         = try("${dbnode.name}-1", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.vm_names[idx + var.db_server_count], var.resource_suffixes["vm"]) : format("%s%s", var.vm_names[idx + var.db_server_count], var.resource_suffixes["vm"])))
+      computername = try("${dbnode.name}-1", format("%s%s", var.vm_names[idx + var.db_server_count], var.resource_suffixes["vm"]))
       role         = try(dbnode.role, "worker"),
       db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[1],
       } if local.anydb_ha

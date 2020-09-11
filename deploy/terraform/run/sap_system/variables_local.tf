@@ -21,7 +21,7 @@ variable "disk_sizes" {
 # Set defaults
 locals {
 
-  ansible_path = "${module.saplibrary.landscape}_${module.saplibrary.sid}"
+  ansible_path = "${module.saplibrary.environment}_${module.saplibrary.sid}"
 
   # Options
   enable_secure_transfer = try(var.options.enable_secure_transfer, true)
@@ -78,10 +78,10 @@ locals {
 
   db_sid = length(local.hdb_list) > 0 ? local.hanadb_sid : local.anydb_sid
 
-  app_ostype           = try(var.application.os.os_type, "LINUX")
-  db_ostype            = try(var.databases[0].os.os_type, "LINUX")
-  db_server_max_count  = 10
-  app_server_max_count = 20
+  app_ostype       = try(var.application.os.os_type, "LINUX")
+  db_ostype        = try(var.databases[0].os.os_type, "LINUX")
+  db_server_count  = 10
+  app_server_count = 20
 
 
 }
