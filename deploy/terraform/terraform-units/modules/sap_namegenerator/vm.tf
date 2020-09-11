@@ -10,15 +10,15 @@ locals {
     lower(format("%s%s%sdeploy%02d", local.env_verified, local.location_short, local.dep_vnet_verified, idx))
   ]
 
-  anydb_server_names = [for idx in range(var.db_server_max_count) :
+  anydb_server_names = [for idx in range(var.db_server_count) :
     format("%sd%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), idx, 0, local.random-id_verifiedvm)
     ]
 
-  anydb_server_names_ha =  [for idx in range(var.db_server_max_count) :
+  anydb_server_names_ha =  [for idx in range(var.db_server_count) :
       format("%sd%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), idx, 1, local.random-id_verifiedvm)
     ]
 
-  app_server_names = [for idx in range(var.app_server_max_count) :
+  app_server_names = [for idx in range(var.app_server_count) :
     format("%sapp%02d%s%s", lower(var.sap_sid), idx, local.app_oscode, local.random-id_verifiedvm)
   ]
 
