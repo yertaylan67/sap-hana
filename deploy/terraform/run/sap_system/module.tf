@@ -4,27 +4,31 @@
 */
 
 module "deployer" {
-  source         = "../../terraform-units/modules/sap_system/deployer"
-  application    = var.application
-  databases      = var.databases
-  infrastructure = var.infrastructure
-  jumpboxes      = var.jumpboxes
-  options        = var.options
-  software       = var.software
-  ssh-timeout    = var.ssh-timeout
-  sshkey         = var.sshkey
+  source            = "../../terraform-units/modules/sap_system/deployer"
+  application       = var.application
+  databases         = var.databases
+  infrastructure    = var.infrastructure
+  jumpboxes         = var.jumpboxes
+  options           = var.options
+  software          = var.software
+  ssh-timeout       = var.ssh-timeout
+  sshkey            = var.sshkey
+  library_prefix    = module.sap_namegenerator.prefixes["LIBRARY"]
+  resource_suffixes = module.sap_namegenerator.resource_extensions
 }
 
 module "saplibrary" {
-  source         = "../../terraform-units/modules/sap_system/saplibrary"
-  application    = var.application
-  databases      = var.databases
-  infrastructure = var.infrastructure
-  jumpboxes      = var.jumpboxes
-  options        = var.options
-  software       = var.software
-  ssh-timeout    = var.ssh-timeout
-  sshkey         = var.sshkey
+  source            = "../../terraform-units/modules/sap_system/saplibrary"
+  application       = var.application
+  databases         = var.databases
+  infrastructure    = var.infrastructure
+  jumpboxes         = var.jumpboxes
+  options           = var.options
+  software          = var.software
+  ssh-timeout       = var.ssh-timeout
+  sshkey            = var.sshkey
+  library_prefix    = module.sap_namegenerator.prefixes["LIBRARY"]
+  resource_suffixes = module.sap_namegenerator.resource_extensions
 }
 
 module "common_infrastructure" {
