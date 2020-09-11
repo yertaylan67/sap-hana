@@ -138,6 +138,8 @@ module "app_tier" {
   ppg               = module.common_infrastructure.ppg
   random-id         = random_id.deploy-random-id
   prefix            = module.sap_namegenerator.prefixes["SDU"]
+  library_prefix    = module.sap_namegenerator.prefixes["LIBRARY"]
+  deployer_prefix   = module.sap_namegenerator.prefixes["DEPLOYER"]
   app_vm_names      = module.sap_namegenerator.vm_names["APP"]
   scs_vm_names      = module.sap_namegenerator.vm_names["SCS"]
   web_vm_names      = module.sap_namegenerator.vm_names["WEB"]

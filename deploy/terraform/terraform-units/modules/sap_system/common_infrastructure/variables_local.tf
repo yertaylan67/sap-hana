@@ -70,7 +70,6 @@ locals {
   region         = try(local.var_infra.region, "")
   environment    = lower(try(local.var_infra.environment, ""))
   sid            = upper(try(var.application.sid, ""))
-  
   prefix      = try(var.infrastructure.resource_group.name, var.prefix)
   vnet_prefix = var.vnet_prefix
 
@@ -125,6 +124,12 @@ locals {
   vnet_sap_arm_id = try(local.var_vnet_sap.arm_id, "")
   vnet_sap_exists = length(local.vnet_sap_arm_id) > 0 ? true : false
   vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, format("%s%s", var.vnet_prefix, var.resource_suffixes["vnet"]))
+  vnet_sap_exists = try(local.var_vnet_sap.is_existing, false)
+  vnet_sap_arm_id = local.vnet_sap_exists ? try(local.var_vnet_sap.arm_id, "") : ""
+  vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, format("%s-%s-SAP-vnet", upper(local.environment), upper(local.location_short)))
+  vnet_nr_parts   = length(split("-", local.vnet_sap_name))
+  // Default naming of vnet has multiple parts. Taking the second-last part as the name 
+  vnet_sap_name_prefix = local.vnet_nr_parts >= 3 ? split("-", upper(local.vnet_sap_name))[local.vnet_nr_parts - 1] == "VNET" ? split("-", local.vnet_sap_name)[local.vnet_nr_parts - 2] : local.vnet_sap_name : local.vnet_sap_name
   vnet_sap_addr        = local.vnet_sap_exists ? "" : try(local.var_vnet_sap.address_space, "")
 
   //Admin subnet
