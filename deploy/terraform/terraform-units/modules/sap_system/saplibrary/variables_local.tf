@@ -1,12 +1,12 @@
 
-variable prefix {
-  type        = string
-  description = "Resource naming prefix"
-}
-
 variable library_prefix {
   type        = string
   description = "SAP Library resource naming prefix"
+}
+
+variable resource_suffixes {
+  type        = map
+  description = "List of resource suffixes"
 }
 
 // Imports from saplibrary tfstate
@@ -14,18 +14,14 @@ locals {
   // Get saplib remote tfstate info
   sapbits_config = try(var.software.storage_account_sapbits, {})
 
-  // Get info required for naming convention
-  environment    = lower(substr(try(var.infrastructure.environment, ""), 0, 5))
-  region         = lower(try(var.infrastructure.region, ""))
-  location_short = lower(try(var.region_mapping[local.region], "unkn"))
+  environment = lower(substr(try(var.infrastructure.environment, ""), 0, 5))
 
   // Default value follows naming convention
-  prefix  = try(var.infrastructure.resource_group.name, var.prefix)
 
-  saplib_resource_group_name   = try(local.deployer_config.saplib_resource_group_name, format("%s%s",var.library_prefix,var.resource_suffixes["library-rg"]))
+  saplib_resource_group_name   = try(local.sapbits_config.saplib_resource_group_name, format("%s%s", var.library_prefix, var.resource_suffixes["library-rg"]))
   tfstate_storage_account_name = try(local.sapbits_config.tfstate_storage_account_name, "")
   tfstate_container_name       = try(local.sapbits_config.tfstate_container_name, "tfstate")
-  saplib_tfstate_key           = try(local.deployer_config.deployer_tfstate_key, format("%s%s",var.library_prefix,var.resource_suffixes["library-state"]))
+  saplib_tfstate_key           = try(local.sapbits_config.saplib_tfstate_key, format("%s%s", var.library_prefix, var.resource_suffixes["library-state"]))
 
 }
 
