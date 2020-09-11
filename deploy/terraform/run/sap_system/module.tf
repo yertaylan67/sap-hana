@@ -54,20 +54,16 @@ module "common_infrastructure" {
 }
 
 module "sap_namegenerator" {
-  source        = "../../terraform-units/modules/sap_namegenerator"
-  environment   = lower(try(var.infrastructure.landscape, ""))
-  location      = try(var.infrastructure.region, "")
-  codename      = lower(try(var.infrastructure.codename, ""))
-  random-id     = random_id.deploy-random-id.hex
-  sap_vnet_name = local.vnet_sap_name_part
-  sap_sid       = local.sap_sid
-  db_sid        = local.db_sid
-  app_ostype    = local.app_ostype
-  db_ostype     = local.db_ostype
-  // The naming module creates a list of servers names that is app_server_max_count
-  // for database servers the list is 2 * db_server_max_count. 
-  // The first db_server_max_count items are for single node
-  // The the second db_server_max_count items are for ha
+  source           = "../../terraform-units/modules/sap_namegenerator"
+  environment      = lower(try(var.infrastructure.landscape, ""))
+  location         = try(var.infrastructure.region, "")
+  codename         = lower(try(var.infrastructure.codename, ""))
+  random-id        = random_id.deploy-random-id.hex
+  sap_vnet_name    = local.vnet_sap_name_part
+  sap_sid          = local.sap_sid
+  db_sid           = local.db_sid
+  app_ostype       = local.app_ostype
+  db_ostype        = local.db_ostype
   db_server_count  = local.db_server_count
   app_server_count = local.app_server_count
 
