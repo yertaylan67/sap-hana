@@ -18,16 +18,16 @@ module "sap_deployer" {
 }
 
 module "sap_namegenerator" {
-  source             = "../../terraform-units/modules/sap_namegenerator"
-  environment        = lower(try(var.infrastructure.landscape, ""))
-  location           = try(var.infrastructure.region, "")
-  codename           = lower(try(var.infrastructure.codename, ""))
-  deployer_vnet_name = try(var.infrastructure.vnets.management.name, "DEPLOYER")
-  random-id          = random_id.deploy-random-id.hex
+  source               = "../../terraform-units/modules/sap_namegenerator"
+  environment          = lower(try(var.infrastructure.landscape, ""))
+  location             = try(var.infrastructure.region, "")
+  codename             = lower(try(var.infrastructure.codename, ""))
+  management_vnet_name = try(var.infrastructure.vnets.management.name, "MGMT")
+  random-id            = random_id.deploy-random-id.hex
   //These are not needed for the deployer
-  sap_vnet_name = try(var.infrastructure.vnets.sap.name, "")
-  sap_sid       = ""
-  db_sid       = ""
+  sap_vnet_name        = try(var.infrastructure.vnets.sap.name, "")
+  sap_sid              = ""
+  db_sid               = ""
 
 }
 
