@@ -78,12 +78,12 @@ variable sapautomation_name_limits {
   description = "Name length for automation resources"
   default = {
     environment_variable_length = 5
-    sap_vnet_length    = 7
-    random-id_vm_length = 3
-    random-id_length = 4
-    sdu_name_length = 80
-    
+    sap_vnet_length             = 7
+    random-id_vm_length         = 3
+    random-id_length            = 4
+    sdu_name_length             = 80
   }
+}
 
 
 variable azlimits {
@@ -221,11 +221,11 @@ variable resource_extension {
 locals {
   location_short = upper(try(var.region_mapping[var.location], "unkn"))
 
-  env_verified         = upper(substr(var.environment, 0, var.sapautomation_name_limits.environment_variable_length))
-  vnet_verified        = upper(substr(var.sap_vnet_name, 0, var.sapautomation_name_limits.sap_vnet_length))
-  dep_vnet_verified    = upper(substr(var.deployer_vnet_name, 0, var.sapautomation_name_limits.sap_vnet_length))
-  
-  random-id_verified   = upper(substr(var.random-id, 0, var.sapautomation_name_limits.random-id_length))
+  env_verified      = upper(substr(var.environment, 0, var.sapautomation_name_limits.environment_variable_length))
+  vnet_verified     = upper(substr(var.sap_vnet_name, 0, var.sapautomation_name_limits.sap_vnet_length))
+  dep_vnet_verified = upper(substr(var.deployer_vnet_name, 0, var.sapautomation_name_limits.sap_vnet_length))
+
+  random-id_verified    = upper(substr(var.random-id, 0, var.sapautomation_name_limits.random-id_length))
   random-id_vm_verified = lower(substr(var.random-id, 0, random-id_vm_length))
 
 }
