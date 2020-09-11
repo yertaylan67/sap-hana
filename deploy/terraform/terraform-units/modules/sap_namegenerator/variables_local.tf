@@ -226,7 +226,7 @@ locals {
   dep_vnet_verified = upper(substr(var.management_vnet_name, 0, var.sapautomation_name_limits.sap_vnet_length))
 
   random-id_verified    = upper(substr(var.random-id, 0, var.sapautomation_name_limits.random-id_length))
-  random-id_vm_verified = lower(substr(var.random-id, 0, random-id_vm_length))
+  random-id_vm_verified = lower(substr(var.random-id, 0, var.sapautomation_name_limits.random-id_vm_length))
 
 }
 
