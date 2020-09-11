@@ -1,40 +1,12 @@
-// TODO: consolidate shared mapping during naming modular project
-variable "region_mapping" {
-  type        = map(string)
-  description = "Region Mapping: Full = Single CHAR, 4-CHAR"
 
-  # 28 Regions 
+variable prefix {
+  type        = string
+  description = "Resource naming prefix"
+}
 
-  default = {
-    westus             = "weus"
-    westus2            = "wus2"
-    centralus          = "ceus"
-    eastus             = "eaus"
-    eastus2            = "eus2"
-    northcentralus     = "ncus"
-    southcentralus     = "scus"
-    westcentralus      = "wcus"
-    northeurope        = "noeu"
-    westeurope         = "weeu"
-    eastasia           = "eaas"
-    southeastasia      = "seas"
-    brazilsouth        = "brso"
-    japaneast          = "jpea"
-    japanwest          = "jpwe"
-    centralindia       = "cein"
-    southindia         = "soin"
-    westindia          = "wein"
-    uksouth2           = "uks2"
-    uknorth            = "ukno"
-    canadacentral      = "cace"
-    canadaeast         = "caea"
-    australiaeast      = "auea"
-    australiasoutheast = "ause"
-    uksouth            = "ukso"
-    ukwest             = "ukwe"
-    koreacentral       = "koce"
-    koreasouth         = "koso"
-  }
+variable library_prefix {
+  type        = string
+  description = "SAP Library resource naming prefix"
 }
 
 // Imports from saplibrary tfstate
@@ -48,10 +20,12 @@ locals {
   location_short = lower(try(var.region_mapping[local.region], "unkn"))
 
   // Default value follows naming convention
-  saplib_resource_group_name   = try(local.sapbits_config.saplib_resource_group_name, "${local.environment}-${local.location_short}-sap_library")
+  prefix  = try(var.infrastructure.resource_group.name, var.prefix)
+
+  saplib_resource_group_name   = try(local.deployer_config.saplib_resource_group_name, format("%s%s",var.library_prefix,var.resource_suffixes["library-rg"]))
   tfstate_storage_account_name = try(local.sapbits_config.tfstate_storage_account_name, "")
   tfstate_container_name       = try(local.sapbits_config.tfstate_container_name, "tfstate")
-  saplib_tfstate_key           = try(local.sapbits_config.saplib_tfstate_key, "${local.environment}-${local.location_short}-sap_library.terraform.tfstate")
+  saplib_tfstate_key           = try(local.deployer_config.deployer_tfstate_key, format("%s%s",var.library_prefix,var.resource_suffixes["library-state"]))
 
 }
 

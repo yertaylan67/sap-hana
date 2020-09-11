@@ -19,11 +19,6 @@ locals {
   // Get deployer remote tfstate info
   deployer_config = try(var.infrastructure.vnets.management, {})
 
-  // Get info required for naming convention
-  environment    = lower(try(var.infrastructure.environment, ""))
-
-  region  = try(var.infrastructure.region, "")
-  sid     = upper(try(var.application.sid, ""))
   prefix  = try(var.infrastructure.resource_group.name, var.prefix)
 
   // Default value follows naming convention
