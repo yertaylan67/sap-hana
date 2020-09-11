@@ -1,10 +1,22 @@
 steps:
   - script: |
       repo_path=$(pwd)
-      deployer_rg=${{parameters.deployer_rg_name}}
+
+      # Modify environment value so it starts with u and with length of 5
+      deployer_env=${{parameters.deployer_env}}
+      buildId=$(Build.BuildId)
+      isRelease=${deployer_env%%$buildId*}
+      if [ -z "${isRelease}" ]
+      then 
+        deployer_prefix="U$(echo $(Build.BuildId) | rev | cut -c1-4 | rev)"
+      else
+        deployer_prefix=${deployer_env}
+      fi
+
+      deployer_rg="${deployer_prefix}-EAUS-MGMT-INFRASTRUCTURE"
       ws_dir=$(Agent.BuildDirectory)/Azure_SAP_Automated_Deployment/WORKSPACES/LOCAL/${deployer_rg}
       input=${ws_dir}/${deployer_rg}.json
-
+      
       git checkout ${{parameters.branch_name}}
 
       mkdir -p ${ws_dir}; cd $_
@@ -12,27 +24,21 @@ steps:
       cp $HOME/.ssh/id_rsa.pub sshkey.pub
 
       cp ${repo_path}/deploy/terraform/bootstrap/sap_deployer/deployer.json deployer.json
-      cat deployer.json | jq --arg allowed_ip "$(agent_ip)" --arg rg_name "${deployer_rg}" '.infrastructure += {
-        landscape: $(Build.BuildId),
-        resource_group: {
-          name: $rg_name
-        },
-        vnets: {
-          management: {
-            subnet_mgmt: {
-              nsg: {
-                allowed_ips: ["67.160.0.0/16", $allowed_ip]
-                }
-              }
-            }
-          }
-        }' > ${input}
+
+      [[ -f ${input} ]] ||
+      cat deployer.json \
+      | jq --arg environment "${deployer_prefix}" .infrastructure.environment\ =\ \$environment \
+      | jq --arg allowed_ip "$(agent_ip)" '.infrastructure.vnets.management.subnet_mgmt += {
+        nsg: {
+          allowed_ips: ["67.160.0.0/16", $allowed_ip]
+        }
+      }' > ${input}
 
       cat ${input}
       
       echo "=== Start terraform apply for new deployer ==="
       terraform -version
-      terraform init ${repo_path}/deploy/terraform/bootstrap/sap_deployer/
+      terraform init -upgrade=true ${repo_path}/deploy/terraform/bootstrap/sap_deployer/
       terraform apply -auto-approve -var-file=${input} ${repo_path}/deploy/terraform/bootstrap/sap_deployer/ 
     displayName: "Deploy deployer: Branch ${{parameters.branch_name}}"
     condition: or(succeededOrFailed(), always())
