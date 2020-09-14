@@ -85,8 +85,8 @@ locals {
 
   // DB NSG
   var_sub_db_nsg    = try(var.infrastructure.vnets.sap.subnet_db.nsg, {})
-  sub_db_nsg_exists = try(local.var_sub_db_nsg.is_existing, false)
-  sub_db_nsg_arm_id = local.sub_db_nsg_exists ? try(local.var_sub_db_nsg.arm_id, "") : ""
+  sub_db_nsg_arm_id = try(local.var_sub_db_nsg.arm_id, "") 
+  sub_db_nsg_exists = length(local.sub_db_nsg_arm_id) > 0 ? true : false
   sub_db_nsg_name   = local.sub_db_nsg_exists ? try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s%s", local.prefix, var.resource_suffixes["db-subnet-nsg"]))
 
   // PPG Information
@@ -111,7 +111,7 @@ locals {
 
   anydb_ostype = try(local.anydb.os.os_type, "Linux")
   anydb_oscode = upper(local.anydb_ostype) == "LINUX" ? "l" : "w"
-  anydb_size   = try(local.anydb.size, "500")
+  anydb_size   = try(local.anydb.size, "Demo")
   anydb_sku    = try(lookup(local.sizes, local.anydb_size).compute.vmsize, "Standard_E4s_v3")
   anydb_fs     = try(local.anydb.filesystem, "xfs")
   anydb_ha     = try(local.anydb.high_availability, false)
@@ -189,8 +189,8 @@ locals {
   customer_provided_names = try(local.anydb.dbnodes[0].name, "") == "" ? false : true
 
   dbnodes = flatten([[for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
-    name         = try("${dbnode.name}-0", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.vm_names[idx], var.resource_suffixes["vm"]) : format("%s%s", var.vm_names[idx], var.resource_suffixes["vm"])))
-    computername = try("${dbnode.name}-0", format("%s%s", var.vm_names[idx], var.resource_suffixes["vm"]))
+    name         = try(local.hdb_ha ? "${dbnode.name}-0" : "${dbnode.name}", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.vm_names[idx], var.resource_suffixes["vm"]) : format("%s%s", var.vm_names[idx], var.resource_suffixes["vm"])))
+    computername = try(local.hdb_ha ? "${dbnode.name}-0" : "${dbnode.name}", format("%s%s", var.vm_names[idx], var.resource_suffixes["vm"]))
     role         = try(dbnode.role, "worker"),
     db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[0]
     }

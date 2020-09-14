@@ -95,8 +95,8 @@ locals {
 
   // Admin NSG
   var_sub_admin_nsg    = try(var.infrastructure.vnets.sap.subnet_admin.nsg, {})
-  sub_admin_nsg_exists = try(local.var_sub_admin_nsg.is_existing, false)
-  sub_admin_nsg_arm_id = local.sub_admin_nsg_exists ? try(local.var_sub_admin_nsg.arm_id, "") : ""
+  sub_admin_nsg_arm_id = try(local.var_sub_admin_nsg.arm_id, "") 
+  sub_admin_nsg_exists = length(local.sub_admin_nsg_arm_id) > 0 ? true : false
   sub_admin_nsg_name   = local.sub_admin_nsg_exists ? try(split("/", local.sub_admin_nsg_arm_id)[8], "") : try(local.var_sub_admin_nsg.name, format("%s%s", local.prefix, var.resource_suffixes["admin-subnet-nsg"]))
 
   // DB subnet
@@ -108,8 +108,8 @@ locals {
 
   // DB NSG
   var_sub_db_nsg    = try(var.infrastructure.vnets.sap.subnet_db.nsg, {})
-  sub_db_nsg_exists = try(local.var_sub_db_nsg.is_existing, false)
-  sub_db_nsg_arm_id = local.sub_db_nsg_exists ? try(local.var_sub_db_nsg.arm_id, "") : ""
+  sub_db_nsg_arm_id = try(local.var_sub_db_nsg.arm_id, "") 
+  sub_db_nsg_exists = length(local.sub_db_nsg_arm_id) > 0 ? true : false
   sub_db_nsg_name   = local.sub_db_nsg_exists ? try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s%s", local.prefix, var.resource_suffixes["db-subnet-nsg"]))
 
   hdb_list = [
@@ -157,8 +157,8 @@ locals {
   customer_provided_names = try(local.hdb.dbnodes[0].name, "") == "" ? false : true
 
   dbnodes = flatten([[for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
-    name         = try(if local.hdb_ha ? "${dbnode.name}-0" : "${dbnode.name}", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.vm_names[idx], var.resource_suffixes["vm"]) : format("%s%s", var.vm_names[idx], var.resource_suffixes["vm"])))
-    computername = try("${dbnode.name}-0", format("%s%s", var.vm_names[idx], var.resource_suffixes["vm"]))
+    name         = try(local.hdb_ha ? "${dbnode.name}-0" : "${dbnode.name}", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.vm_names[idx], var.resource_suffixes["vm"]) : format("%s%s", var.vm_names[idx], var.resource_suffixes["vm"])))
+    computername = try(local.hdb_ha ? "${dbnode.name}-0" : "${dbnode.name}", format("%s%s", var.vm_names[idx], var.resource_suffixes["vm"]))
     role         = try(dbnode.role, "worker")
     admin_nic_ip = lookup(dbnode, "admin_nic_ips", [false, false])[0]
     db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[0]
