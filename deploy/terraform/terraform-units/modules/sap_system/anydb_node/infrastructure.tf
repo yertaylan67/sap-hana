@@ -13,7 +13,7 @@ resource "azurerm_lb" "anydb" {
     name                = format("%s%s", local.prefix,  var.resource_suffixes["db-alb-feip"])
     subnet_id                     = local.sub_db_exists ? data.azurerm_subnet.anydb[0].id : azurerm_subnet.anydb[0].id
     private_ip_address_allocation = "Static"
-    private_ip_address            = local.sub_db_exists ? try(local.anydb.loadbalancer.frontend_ip, cidrhost(local.sub_db_prefix, tonumber(count.index) + 4)) : cidrhost(local.sub_db_prefix, tonumber(count.index) + 4)
+    private_ip_address            = local.sub_db_exists ? try(local.anydb.loadbalancer.frontend_ip, cidrhost(local.sub_db_exists ?  data.azurerm_subnet.anydb[0].address_prefixes[0] : azurerm_subnet.anydb[0].address_prefixes[0], tonumber(count.index) + 4)) : cidrhost(local.sub_db_exists ?  data.azurerm_subnet.anydb[0].address_prefixes[0] : azurerm_subnet.anydb[0].address_prefixes[0], tonumber(count.index) + 4)
   }
 }
 
@@ -76,8 +76,8 @@ data "azurerm_subnet" "anydb" {
 resource "azurerm_network_security_group" "anydb" {
   count               = local.enable_deployment ? (local.sub_db_nsg_exists ? 0 : 1) : 0
   name                = local.sub_db_nsg_name
-  resource_group_name = var.vnet-sap[0].resource_group_name
-  location            = var.vnet-sap[0].location
+  resource_group_name = var.resource-group[0].name
+  location            = var.resource-group[0].location
 }
 
 # Imports the SAP db subnet nsg data
