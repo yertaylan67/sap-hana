@@ -189,8 +189,8 @@ locals {
   customer_provided_names = try(local.anydb.dbnodes[0].name, "") == "" ? false : true
 
   dbnodes = flatten([[for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
-    name         = try(local.hdb_ha ? "${dbnode.name}-0" : "${dbnode.name}", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.vm_names[idx], var.resource_suffixes["vm"]) : format("%s%s", var.vm_names[idx], var.resource_suffixes["vm"])))
-    computername = try(local.hdb_ha ? "${dbnode.name}-0" : "${dbnode.name}", format("%s%s", var.vm_names[idx], var.resource_suffixes["vm"]))
+    name         = try(local.anydb_ha ? "${dbnode.name}-0" : "${dbnode.name}", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.vm_names[idx], var.resource_suffixes["vm"]) : format("%s%s", var.vm_names[idx], var.resource_suffixes["vm"])))
+    computername = try(local.anydb_ha ? "${dbnode.name}-0" : "${dbnode.name}", format("%s%s", var.vm_names[idx], var.resource_suffixes["vm"]))
     role         = try(dbnode.role, "worker"),
     db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[0]
     }
