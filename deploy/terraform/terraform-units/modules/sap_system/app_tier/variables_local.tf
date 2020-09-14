@@ -47,8 +47,19 @@ variable resource_suffixes {
   description = "List of resource suffixes"
 }
 
-// Set defaults
+
+variable "disk_sizes" {
+  type        = string
+  description = "Disk size json file"
+  default     = ""
+}
+
 locals {
+// Imports Disk sizing sizing information
+  disk_sizes = "${path.module}/../../../../../configs/app_sizes.json"
+  sizes      = jsondecode(file(length(var.disk_sizes) > 0 ? var.disk_sizes : local.disk_sizes))
+
+
   region  = try(var.infrastructure.region, "")
   sid     = upper(try(var.application.sid, ""))
   prefix  = try(var.infrastructure.resource_group.name, var.prefix)
@@ -136,10 +147,6 @@ locals {
 
 }
 
-// Imports Disk sizing sizing information
-locals {
-  sizes = jsondecode(file("${path.module}/../../../../../configs/app_sizes.json"))
-}
 
 locals {
   // Subnet IP Offsets
