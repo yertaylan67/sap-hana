@@ -27,7 +27,7 @@ locals {
 
   // Region
   region = try(local.var_infra.region, "")
-  prefix = try(var.infrastructure.resource_group.name, var.prefix)
+  prefix = try(local.var_infra.resource_group.name, var.prefix)
 
   // Resource group
   var_rg    = try(local.var_infra.resource_group, {})
