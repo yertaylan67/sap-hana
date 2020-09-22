@@ -1,6 +1,6 @@
 
 output names {
-  value = tomap({
+  value = {
     "kv_names" : {
       "SDU"      = local.sdu_kvname,
       "DEPLOYER" = local.deployer_kvname,
@@ -14,7 +14,7 @@ output names {
       "LIBRARY"  = local.library_name
     },
     "resource_extensions" = var.resource_extension,
-    "sa_name" : {
+    "sa_names" : {
       "SDU"      = [local.sdu_sa_name],
       "DEPLOYER" = [local.deployer_sa_name],
       "VNET"     = [local.vnet_sa_name],
@@ -30,6 +30,6 @@ output names {
       "SCS"      = local.scs_server_names,
       "WEB"      = local.web_server_names
     },
-    }
-  )
+  }
+
 }
