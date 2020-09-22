@@ -50,7 +50,7 @@ variable db_platform {
 
 variable app_server_count {
   type    = number
-  default = 0
+  default = 1
 }
 
 variable scs_server_count {
