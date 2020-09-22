@@ -8,13 +8,10 @@ output names {
       "LIBRARY"  = local.library_kvname
     },
     "prefix" : {
-      "SDU"      = local.sdu_name,
-      "DEPLOYER" = local.deployer_name,
-      "VNET"     = local.vnet_name,
-      "LIBRARY"  = local.library_name
-    },
-    "resource_extensions" = {
-      "ALL" = var.resource_extension
+      "SDU"      = [local.sdu_name],
+      "DEPLOYER" = [local.deployer_name],
+      "VNET"     = [local.vnet_name],
+      "LIBRARY"  = [local.library_name]
     },
     "storageaccount_names" : {
       "SDU"      = [local.sdu_sa_name],
@@ -33,4 +30,8 @@ output names {
       "WEB"      = local.web_server_names
     },
   }
+}
+
+output resource_extensions {
+  value = var.resource_extension
 }
