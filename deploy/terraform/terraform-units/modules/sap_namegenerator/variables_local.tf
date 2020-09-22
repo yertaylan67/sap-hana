@@ -12,12 +12,12 @@ variable codename {
   default     = ""
 }
 
-variable deployer_vnet_name {
-  description = "Name of Deployer VNet"
+variable management_vnet_name {
+  description = "Name of Management vnet"
 }
 
 variable sap_vnet_name {
-  description = "Name of SAP VNet"
+  description = "Name of SAP vnet"
 }
 
 variable sap_sid {
@@ -48,16 +48,45 @@ variable db_platform {
   default     = "LINUX"
 }
 
-variable app_server_max_count {
+variable app_server_count {
   type    = number
-  default = 25
+  default = 0
 }
 
-variable db_server_max_count {
+variable scs_server_count {
   type    = number
-  default = 10
+  default = 0
 }
 
+variable web_server_count {
+  type    = number
+  default = 0
+}
+
+
+variable db_server_count {
+  type    = number
+  default = 1
+}
+
+variable iscsi_server_count {
+  type    = number
+  default = 1
+}
+
+//Todo: Add to documentation
+variable sapautomation_name_limits {
+  description = "Name length for automation resources"
+  default = {
+    environment_variable_length = 5
+    sap_vnet_length             = 7
+    random-id_vm_length         = 3
+    random-id_length            = 4
+    sdu_name_length             = 80
+  }
+}
+
+//Todo: Add to documentation
 variable azlimits {
   description = "Name length for resources"
   default = {
@@ -83,7 +112,6 @@ variable azlimits {
     pip         = 80
     peer        = 80
     gen         = 24
-    sdu         = 80
   }
 }
 
@@ -137,7 +165,8 @@ variable region_mapping {
   }
 }
 
-variable resource-extension {
+//Todo: Add to documentation
+variable resource_extension {
   type        = map(string)
   description = "Extension of resource name"
 
@@ -158,11 +187,13 @@ variable resource-extension {
     "db-subnet"           = "_db-subnet"
     "db-subnet-nsg"       = "_dbSubnet-nsg"
     "deployer-rg"         = "-INFRASTRUCTURE"
+    "deployer-state"      = "_DEPLOYER.terraform.tfstate"
     "deployer-subnet"     = "_deployment-subnet"
     "deployer-subnet-nsg" = "_deployment-subnet-nsg"
     "iscsi-subnet"        = "_iscsi-subnet"
     "iscsi-subnet-nsg"    = "_iscsiSubnet-nsg"
     "library-rg"          = "_SAP-LIBRARY"
+    "library-state"       = "_SAP-LIBRARY.terraform.tfstate"
     "kv"                  = ""
     "msi"                 = "-msi"
     "nic"                 = "-nic"
@@ -192,14 +223,12 @@ variable resource-extension {
 locals {
   location_short = upper(try(var.region_mapping[var.location], "unkn"))
 
-  environment_length = 5
-  sap_vnet_length    = 7
+  env_verified      = upper(substr(var.environment, 0, var.sapautomation_name_limits.environment_variable_length))
+  vnet_verified     = upper(substr(var.sap_vnet_name, 0, var.sapautomation_name_limits.sap_vnet_length))
+  dep_vnet_verified = upper(substr(var.management_vnet_name, 0, var.sapautomation_name_limits.sap_vnet_length))
 
-  env_verified         = upper(substr(var.environment, 0, local.environment_length))
-  vnet_verified        = upper(substr(var.sap_vnet_name, 0, local.sap_vnet_length))
-  dep_vnet_verified    = upper(substr(var.deployer_vnet_name, 0, local.sap_vnet_length))
-  random-id_verified   = upper(substr(var.random-id, 0, 4))
-  random-id_verifiedvm = lower(substr(var.random-id, 0, 3))
+  random-id_verified    = upper(substr(var.random-id, 0, var.sapautomation_name_limits.random-id_length))
+  random-id_vm_verified = lower(substr(var.random-id, 0, var.sapautomation_name_limits.random-id_vm_length))
 
 }
 
