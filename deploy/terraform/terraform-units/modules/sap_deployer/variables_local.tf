@@ -4,15 +4,26 @@ Description:
   Define local variables.
 */
 
-variable names {
-  type        = map
-  description = "Resource naming"
-}
-
 variable resource_suffixes {
   type        = map
   description = "List of resource suffixes"
 }
+
+variable storageaccount_names {
+  type        = list
+  description = "Storage account naming prefix"
+}
+
+variable virtualmachine_names {
+  type        = list
+  description = "Virtual machine name list"
+}
+
+variable keyvault_names {
+  type        = list
+  description = "Keyvault name list"
+}
+
 
 // Set defaults
 locals {
@@ -21,12 +32,6 @@ locals {
   // Post fix for all deployed resources
   postfix = random_id.deployer.hex
 
-  sa_names          = var.names["storageaccount_names"]["DEPLOYER"]
-  vm_names          = var.names["virtualmachine_names"]["DEPLOYER"]
-  kv_names          = var.names["keyvault_names"]["DEPLOYER"]
-  resource_suffixes = var.names["resource_extensions"]
-
-
   // Default option(s):
   enable_secure_transfer = try(var.options.enable_secure_transfer, true)
 
@@ -34,7 +39,7 @@ locals {
 
   region             = try(var.infrastructure.region, "")
   vnet_mgmt_tempname = try(local.vnet_mgmt.name, "")
-  prefix             = try(var.infrastructure.resource_group.name, var.names["prefixes"]["DEPLOYER"])
+  prefix             = try(var.infrastructure.resource_group.name, var.prefix)
   rg_name            = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, var.resource_suffixes["deployer-rg"]))
 
   // Management vnet
