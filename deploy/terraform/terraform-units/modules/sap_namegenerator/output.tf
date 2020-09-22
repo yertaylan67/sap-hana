@@ -17,8 +17,3 @@ output virtualmachine_names {
 output keyvault_names {
   value = tomap({ "SDU" = local.sdu_kvname, "DEPLOYER" = local.deployer_kvname, "VNET" = local.vnet_kvname, "LIBRARY" = local.library_kvname })
 }
-
-
-output resource_extensions {
-  value = var.resource_extension
-}
