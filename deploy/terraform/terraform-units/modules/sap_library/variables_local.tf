@@ -1,40 +1,23 @@
 // Input arguments 
-variable "region_mapping" {
-  type        = map(string)
-  description = "Region Mapping: Full = Single CHAR, 4-CHAR"
 
-  # 28 Regions 
+variable prefix {
+  type        = string
+  description = "Resource naming prefix"
+}
 
-  default = {
-    westus             = "weus"
-    westus2            = "wus2"
-    centralus          = "ceus"
-    eastus             = "eaus"
-    eastus2            = "eus2"
-    northcentralus     = "ncus"
-    southcentralus     = "scus"
-    westcentralus      = "wcus"
-    northeurope        = "noeu"
-    westeurope         = "weeu"
-    eastasia           = "eaas"
-    southeastasia      = "seas"
-    brazilsouth        = "brso"
-    japaneast          = "jpea"
-    japanwest          = "jpwe"
-    centralindia       = "cein"
-    southindia         = "soin"
-    westindia          = "wein"
-    uksouth2           = "uks2"
-    uknorth            = "ukno"
-    canadacentral      = "cace"
-    canadaeast         = "caea"
-    australiaeast      = "auea"
-    australiasoutheast = "ause"
-    uksouth            = "ukso"
-    ukwest             = "ukwe"
-    koreacentral       = "koce"
-    koreasouth         = "koso"
-  }
+variable sa_names {
+  type        = list
+  description = "Storage account names"
+}
+
+variable kv_names {
+  type        = list
+  description = "Keyvault name list"
+}
+
+variable resource_suffixes {
+  type        = map
+  description = "List of resource suffixes"
 }
 
 locals {
@@ -43,20 +26,18 @@ locals {
   var_infra = try(var.infrastructure, {})
 
   // Region
-  region         = try(local.var_infra.region, "")
-  environment    = try(var.infrastructure.environment, "")
-  location_short = try(var.region_mapping[local.region], "unkn")
-  prefix         = upper(format("%s-%s", local.environment, local.location_short))
+  region = try(local.var_infra.region, "")
+  prefix = try(local.var_infra.resource_group.name, var.prefix)
 
   // Resource group
   var_rg    = try(local.var_infra.resource_group, {})
   rg_exists = try(local.var_rg.is_existing, false)
   rg_arm_id = local.rg_exists ? try(local.var_rg.arm_id, "") : ""
-  rg_name   = local.rg_exists ? "" : try(local.var_rg.name, format("%s-SAP_LIBRARY", local.prefix))
+  rg_name   = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, var.resource_suffixes["library-rg"]))
 
   // Storage account for sapbits
   sa_sapbits_exists                   = try(var.storage_account_sapbits.is_existing, false)
-  sa_sapbits_name                     = lower(format("%s%ssaplib%s", substr(local.environment, 0, 5), local.location_short, substr(random_id.post_fix.hex, 0, 4)))
+  sa_sapbits_name                     = var.sa_names[0]
   sa_sapbits_account_tier             = local.sa_sapbits_exists ? "" : try(var.storage_account_sapbits.account_tier, "Standard")
   sa_sapbits_account_replication_type = local.sa_sapbits_exists ? "" : try(var.storage_account_sapbits.account_replication_type, "LRS")
   sa_sapbits_account_kind             = local.sa_sapbits_exists ? "" : try(var.storage_account_sapbits.account_kind, "StorageV2")
@@ -80,7 +61,7 @@ locals {
   sa_tfstate_account_replication_type = local.sa_sapbits_exists ? "" : try(var.storage_account_tfstate.account_replication_type, "LRS")
   sa_tfstate_account_kind             = local.sa_sapbits_exists ? "" : try(var.storage_account_tfstate.account_kind, "StorageV2")
   sa_tfstate_container_access_type    = "private"
-  sa_tfstate_name                     = lower(format("%s%stfstate%s", substr(local.environment, 0, 5), local.location_short, substr(random_id.post_fix.hex, 0, 4)))
+  sa_tfstate_name                     = var.sa_names[1]
   sa_tfstate_arm_id                   = local.sa_sapbits_exists ? try(var.storage_account_tfstate.arm_id, "") : ""
   sa_tfstate_enable_secure_transfer   = true
   sa_tfstate_delete_retention_policy  = 7
