@@ -50,17 +50,17 @@ variable db_platform {
 
 variable app_server_count {
   type    = number
-  default = 10
+  default = 0
 }
 
 variable scs_server_count {
   type    = number
-  default = 4
+  default = 0
 }
 
 variable web_server_count {
   type    = number
-  default = 4
+  default = 0
 }
 
 
@@ -74,6 +74,7 @@ variable iscsi_server_count {
   default = 1
 }
 
+//Todo: Add to documentation
 variable sapautomation_name_limits {
   description = "Name length for automation resources"
   default = {
@@ -85,7 +86,7 @@ variable sapautomation_name_limits {
   }
 }
 
-
+//Todo: Add to documentation
 variable azlimits {
   description = "Name length for resources"
   default = {
@@ -164,8 +165,7 @@ variable region_mapping {
   }
 }
 
-//ToDO Add to documentation
-
+//Todo: Add to documentation
 variable resource_extension {
   type        = map(string)
   description = "Extension of resource name"
@@ -187,11 +187,13 @@ variable resource_extension {
     "db-subnet"           = "_db-subnet"
     "db-subnet-nsg"       = "_dbSubnet-nsg"
     "deployer-rg"         = "-INFRASTRUCTURE"
+    "deployer-state"      = "_DEPLOYER.terraform.tfstate"
     "deployer-subnet"     = "_deployment-subnet"
     "deployer-subnet-nsg" = "_deployment-subnet-nsg"
     "iscsi-subnet"        = "_iscsi-subnet"
     "iscsi-subnet-nsg"    = "_iscsiSubnet-nsg"
     "library-rg"          = "_SAP-LIBRARY"
+    "library-state"       = "_SAP-LIBRARY.terraform.tfstate"
     "kv"                  = ""
     "msi"                 = "-msi"
     "nic"                 = "-nic"
