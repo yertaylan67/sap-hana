@@ -7,9 +7,9 @@ variable names {
 
 locals {
 
-  sa_names          = var.names["sa_name"]["LIBRARY"]
-  kv_names          = var.names["kv_names"]["LIBRARY"]
-  resource_suffixes = var.names["resource_extensions"]
+  storageaccount_names = var.names["storageaccount_names"]["LIBRARY"]
+  keyvault_names       = var.names["keyvault_names"]["LIBRARY"]
+  resource_suffixes    = var.names["resource_extensions"]
   // Infrastructure
   var_infra = try(var.infrastructure, {})
 
@@ -25,7 +25,7 @@ locals {
 
   // Storage account for sapbits
   sa_sapbits_exists                   = try(var.storage_account_sapbits.is_existing, false)
-  sa_sapbits_name                     = local.sa_names[0]
+  sa_sapbits_name                     = local.storageaccount_names[0]
   sa_sapbits_account_tier             = local.sa_sapbits_exists ? "" : try(var.storage_account_sapbits.account_tier, "Standard")
   sa_sapbits_account_replication_type = local.sa_sapbits_exists ? "" : try(var.storage_account_sapbits.account_replication_type, "LRS")
   sa_sapbits_account_kind             = local.sa_sapbits_exists ? "" : try(var.storage_account_sapbits.account_kind, "StorageV2")
@@ -49,7 +49,7 @@ locals {
   sa_tfstate_account_replication_type = local.sa_sapbits_exists ? "" : try(var.storage_account_tfstate.account_replication_type, "LRS")
   sa_tfstate_account_kind             = local.sa_sapbits_exists ? "" : try(var.storage_account_tfstate.account_kind, "StorageV2")
   sa_tfstate_container_access_type    = "private"
-  sa_tfstate_name                     = local.sa_names[1]
+  sa_tfstate_name                     = local.storageaccount_names[1]
   sa_tfstate_arm_id                   = local.sa_sapbits_exists ? try(var.storage_account_tfstate.arm_id, "") : ""
   sa_tfstate_enable_secure_transfer   = true
   sa_tfstate_delete_retention_policy  = 7
