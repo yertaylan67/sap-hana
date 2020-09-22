@@ -1,7 +1,7 @@
 
 output names {
   value = {
-    "kv_names" : {
+    "keyvault_names" : {
       "SDU"      = local.sdu_kvname,
       "DEPLOYER" = local.deployer_kvname,
       "VNET"     = local.vnet_kvname,
@@ -14,13 +14,13 @@ output names {
       "LIBRARY"  = local.library_name
     },
     "resource_extensions" = var.resource_extension,
-    "sa_names" : {
+    "storageaccount_names" : {
       "SDU"      = [local.sdu_sa_name],
       "DEPLOYER" = [local.deployer_sa_name],
       "VNET"     = [local.vnet_sa_name],
       "LIBRARY"  = [local.library_sa_name, local.state_sa_name]
     },
-    "vm_names" : {
+    "virtualmachine_names" : {
       "ANYDB"    = local.anydb_server_names,
       "ANYDB_HA" = local.anydb_server_names_ha,
       "APP"      = local.app_server_names,
@@ -31,5 +31,4 @@ output names {
       "WEB"      = local.web_server_names
     },
   }
-
 }
