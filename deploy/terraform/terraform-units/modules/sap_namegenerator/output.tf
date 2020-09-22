@@ -13,7 +13,9 @@ output names {
       "VNET"     = local.vnet_name,
       "LIBRARY"  = local.library_name
     },
-    "resource_extensions" = var.resource_extension,
+    "resource_extensions" = {
+      "ALL" = var.resource_extension
+    },
     "storageaccount_names" : {
       "SDU"      = [local.sdu_sa_name],
       "DEPLOYER" = [local.deployer_sa_name],
