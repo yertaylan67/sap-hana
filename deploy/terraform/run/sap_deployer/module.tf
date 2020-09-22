@@ -10,14 +10,10 @@ module "sap_deployer" {
   options              = var.options
   ssh-timeout          = var.ssh-timeout
   sshkey               = var.sshkey
-  prefix               = module.sap_namegenerator.prefix
-  prefix               = module.sap_namegenerator.prefix
-  storageaccount_names = module.sap_namegenerator.storageaccount_names
-  virtualmachine_names = module.sap_namegenerator.virtualmachine_names
-  keyvault_names       = module.sap_namegenerator.keyvault_names
-  resource_suffixes    = module.sap_namegenerator.resource_extensions = module.sap_namegenerator.storageaccount_names
-  virtualmachine_names = module.sap_namegenerator.virtualmachine_names
-  keyvault_names       = module.sap_namegenerator.keyvault_names
+  prefix               = module.sap_namegenerator.prefix["DEPLOYER"]
+  storageaccount_names = module.sap_namegenerator.storageaccount_names["DEPLOYER"]
+  virtualmachine_names = module.sap_namegenerator.virtualmachine_names["DEPLOYER"]
+  keyvault_names       = module.sap_namegenerator.keyvault_names["DEPLOYER"]
   resource_suffixes    = module.sap_namegenerator.resource_extensions
 
 }
@@ -27,7 +23,7 @@ module "sap_namegenerator" {
   environment          = local.environment
   location             = local.location
   codename             = local.codename
-  management_vnet_name = local.management_vnet_name
+  management_vnet_name = local.vnet_mgmt_name_part
   random-id            = random_id.deploy-random-id.hex
   //These are not needed for the deployer
   sap_vnet_name = try(var.infrastructure.vnets.sap.name, "")

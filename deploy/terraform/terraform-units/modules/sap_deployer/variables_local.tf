@@ -3,6 +3,10 @@ Description:
 
   Define local variables.
 */
+variable prefix {
+  type        = string
+  description = "Resource naming prefix"
+}
 
 variable resource_suffixes {
   type        = map
@@ -74,7 +78,7 @@ locals {
   enable_deployers = length(local.deployer_input) > 0 ? true : false
   deployers = [
     for idx, deployer in local.deployer_input : {
-      "name"                 = var.vm_names[idx],
+      "name"                 = var.virtualmachine_names[idx],
       "destroy_after_deploy" = true,
       "size"                 = try(deployer.size, "Standard_D2s_v3"),
       "disk_type"            = try(deployer.disk_type, "StandardSSD_LRS")
