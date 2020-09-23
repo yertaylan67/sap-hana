@@ -7,10 +7,10 @@ module "sap_library" {
   infrastructure          = var.infrastructure
   storage_account_sapbits = var.storage_account_sapbits
   storage_account_tfstate = var.storage_account_tfstate
-  prefix               = module.sap_namegenerator.prefix["LIBRARY"]
-  storageaccount_names = module.sap_namegenerator.storageaccount_names["LIBRARY"]
-  keyvault_names       = module.sap_namegenerator.keyvault_names["LIBRARY"]
-  resource_suffixes    = module.sap_namegenerator.resource_extensions
+  prefix                  = module.sap_namegenerator.prefix["LIBRARY"]
+  storageaccount_names    = module.sap_namegenerator.storageaccount_names["LIBRARY"]
+  keyvault_names          = module.sap_namegenerator.keyvault_names["LIBRARY"]
+  resource_suffixes       = module.sap_namegenerator.resource_extensions
 
 }
 

@@ -17,7 +17,3 @@ output "storagecontainer_sapbits" {
 output "fileshare_sapbits_name" {
   value = local.fileshare_sapbits_name
 }
-
-output "resource_group_name" {
-  value = local.rg_exists ? data.azurerm_resource_group.library[0].name : azurerm_resource_group.library[0].name
-}
