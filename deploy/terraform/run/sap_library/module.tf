@@ -7,9 +7,9 @@ module "sap_library" {
   infrastructure          = var.infrastructure
   storage_account_sapbits = var.storage_account_sapbits
   storage_account_tfstate = var.storage_account_tfstate
-  prefix                  = module.sap_namegenerator.prefixes["LIBRARY"]
-  sa_names                = module.sap_namegenerator.sa_name["LIBRARY"]
-  kv_names                = module.sap_namegenerator.kv_names["LIBRARY"]
+  prefix                  = module.sap_namegenerator.prefix["LIBRARY"]
+  storageaccount_names    = module.sap_namegenerator.storageaccount_names["LIBRARY"]
+  keyvault_names          = module.sap_namegenerator.keyvault_names["LIBRARY"]
   resource_suffixes       = module.sap_namegenerator.resource_extensions
 
 }
@@ -21,10 +21,10 @@ module sap_namegenerator {
   random-id   = random_id.lib-random-id.hex
 
   //These are not needed for the library
-  codename           = ""
-  deployer_vnet_name = ""
-  sap_vnet_name      = ""
-  sap_sid            = ""
-  hdb_sid            = ""
+  codename             = ""
+  management_vnet_name = ""
+  sap_vnet_name        = ""
+  sap_sid              = ""
+  db_sid               = ""
 }
 
