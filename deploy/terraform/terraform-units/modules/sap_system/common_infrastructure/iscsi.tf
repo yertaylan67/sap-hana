@@ -87,7 +87,7 @@ resource "azurerm_network_interface_security_group_association" "iscsi" {
 # Manages Linux Virtual Machine for iSCSI
 resource "azurerm_linux_virtual_machine" "iscsi" {
   count                           = local.iscsi_count
-  name                            = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.virtualmachine_names[count.index], var.resource_suffixes["vm"]) : format("%s%s", var.scs_virtualmachine_names[count.index], var.resource_suffixes["vm"])
+  name                            = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.virtualmachine_names[count.index], var.resource_suffixes["vm"]) : format("%s%s", var.virtualmachine_names[count.index], var.resource_suffixes["vm"])
   computer_name                   = var.virtualmachine_names[count.index]
   location                        = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
   resource_group_name             = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
@@ -98,7 +98,7 @@ resource "azurerm_linux_virtual_machine" "iscsi" {
   disable_password_authentication = local.iscsi.authentication.type != "password" ? true : false
 
   os_disk {
-    name                 = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.scs_virtualmachine_names[count.index], var.resource_suffixes["osdisk"]) : format("%s%s", var.virtualmachine_names[count.index], var.resource_suffixes["osdisk"])
+    name                 = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.virtualmachine_names[count.index], var.resource_suffixes["osdisk"]) : format("%s%s", var.virtualmachine_names[count.index], var.resource_suffixes["osdisk"])
     caching              = "ReadWrite"
     storage_account_type = "Premium_LRS"
   }
