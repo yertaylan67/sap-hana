@@ -55,12 +55,12 @@ variable app_server_count {
 
 variable scs_server_count {
   type    = number
-  default = 0
+  default = 1
 }
 
 variable web_server_count {
   type    = number
-  default = 0
+  default = 1
 }
 
 
