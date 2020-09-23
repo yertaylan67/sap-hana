@@ -50,6 +50,7 @@ module "common_infrastructure" {
   vnet_prefix          = module.sap_namegenerator.prefix["VNET"]
   storageaccount_name  = module.sap_namegenerator.storageaccount_names["SDU"][0]
   keyvault_names       = module.sap_namegenerator.keyvault_names["SDU"]
+  virtualmachine_names = module.sap_namegenerator.virtualmachine_names["ISCSI"]
   resource_suffixes    = module.sap_namegenerator.resource_extensions
 }
 
@@ -70,6 +71,8 @@ module "sap_namegenerator" {
   // The the second db_server_max_count items are for ha
   db_server_count  = local.db_server_count
   app_server_count = local.app_server_count
+  web_server_count = local.webdispatcher_count
+  scs_server_count = local.scs_server_count
 
   //These are not needed for the SDU
   management_vnet_name = ""

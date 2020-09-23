@@ -44,6 +44,11 @@ variable resource_suffixes {
   description = "List of resource suffixes"
 }
 
+variable virtualmachine_names {
+  type        = list
+  description = "Virtual machine name list"
+}
+
 //Set defaults
 locals {
 

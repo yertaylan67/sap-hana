@@ -65,7 +65,7 @@ iSCSI device IP address range: .4 -
 # Creates the NIC and IP address for iSCSI device
 resource "azurerm_network_interface" "iscsi" {
   count               = local.iscsi_count
-  name                = format("iscsi-%02d%s", count.index, var.resource_suffixes["nic"])
+  name                = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.virtualmachine_names[count.index], var.resource_suffixes["osdisk"]) : format("%s%s", var.virtualmachine_names[count.index], var.resource_suffixes["nic"])
   location            = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
   resource_group_name = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
 
@@ -87,18 +87,18 @@ resource "azurerm_network_interface_security_group_association" "iscsi" {
 # Manages Linux Virtual Machine for iSCSI
 resource "azurerm_linux_virtual_machine" "iscsi" {
   count                           = local.iscsi_count
-  name                            = format("iscsi-%02d%s", count.index, var.resource_suffixes["vm"])
+  name                            = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.virtualmachine_names[count.index], var.resource_suffixes["vm"]) : format("%s%s", var.scs_virtualmachine_names[count.index], var.resource_suffixes["vm"])
+  computer_name                   = var.virtualmachine_names[count.index]
   location                        = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
   resource_group_name             = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
   network_interface_ids           = [azurerm_network_interface.iscsi[count.index].id]
   size                            = local.iscsi.size
-  computer_name                   = format("iscsi-%02d", count.index)
   admin_username                  = local.iscsi.authentication.username
   admin_password                  = lookup(local.iscsi.authentication, "password", null)
   disable_password_authentication = local.iscsi.authentication.type != "password" ? true : false
 
   os_disk {
-    name                 = format("iscsi-%02d%s", count.index, var.resource_suffixes["osdisk"])
+    name                 = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.scs_virtualmachine_names[count.index], var.resource_suffixes["osdisk"]) : format("%s%s", var.virtualmachine_names[count.index], var.resource_suffixes["osdisk"])
     caching              = "ReadWrite"
     storage_account_type = "Premium_LRS"
   }
