@@ -29,12 +29,12 @@ variable vnet_prefix {
   description = "VNet naming prefix"
 }
 
-variable kv_names {
+variable keyvault_names {
   type        = list
   description = "Keyvault name list"
 }
 
-variable sa_name {
+variable storageaccount_name {
   type        = string
   description = "Storage account name"
 }
@@ -42,6 +42,11 @@ variable sa_name {
 variable resource_suffixes {
   type        = map
   description = "List of resource suffixes"
+}
+
+variable virtualmachine_names {
+  type        = list
+  description = "Virtual machine name list"
 }
 
 //Set defaults
@@ -83,7 +88,6 @@ locals {
   var_ppg    = try(local.var_infra.ppg, {})
   ppg_arm_id = try(local.var_ppg.arm_id, "")
   ppg_exists = length(local.ppg_arm_id) > 0 ? true : false
-  
   ppg_name   = local.ppg_exists ? try(split("/", local.ppg_arm_id)[8], "") : try(local.var_ppg.name, format("%s%s", local.prefix, var.resource_suffixes["ppg"]))
 
   //iSCSI

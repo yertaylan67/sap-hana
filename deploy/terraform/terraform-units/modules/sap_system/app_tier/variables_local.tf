@@ -27,17 +27,17 @@ variable "random-id" {
   description = "Random hex string"
 }
 
-variable app_vm_names {
+variable app_virtualmachine_names {
   type        = list
   description = "Virtual machine name list"
 }
 
-variable scs_vm_names {
+variable scs_virtualmachine_names {
   type        = list
   description = "Virtual machine name list"
 }
 
-variable web_vm_names {
+variable web_virtualmachine_names {
   type        = list
   description = "Virtual machine name list"
 }
