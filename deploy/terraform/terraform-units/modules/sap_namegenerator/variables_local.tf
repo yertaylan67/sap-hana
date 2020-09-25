@@ -55,12 +55,12 @@ variable app_server_count {
 
 variable scs_server_count {
   type    = number
-  default = 0
+  default = 1
 }
 
 variable web_server_count {
   type    = number
-  default = 0
+  default = 1
 }
 
 
@@ -165,7 +165,7 @@ variable region_mapping {
 }
 
 //Todo: Add to documentation
-variable resource_extension {
+variable resource_suffixes {
   type        = map(string)
   description = "Extension of resource name"
 
