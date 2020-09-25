@@ -10,11 +10,7 @@ module "sap_deployer" {
   options              = var.options
   ssh-timeout          = var.ssh-timeout
   sshkey               = var.sshkey
-  prefix               = module.sap_namegenerator.prefix["DEPLOYER"]
-  storageaccount_names = module.sap_namegenerator.storageaccount_names["DEPLOYER"]
-  virtualmachine_names = module.sap_namegenerator.virtualmachine_names["DEPLOYER"]
-  keyvault_names       = module.sap_namegenerator.keyvault_names["DEPLOYER"]
-  resource_suffixes    = module.sap_namegenerator.resource_extensions
+  naming               = module.sap_namegenerator.naming
 }
 
 module "sap_namegenerator" {
