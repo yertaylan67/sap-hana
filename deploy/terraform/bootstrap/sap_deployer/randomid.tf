@@ -2,7 +2,7 @@
 resource random_id deploy-random-id {
   keepers = {
     # Generate a new id only when a new resource group is defined
-    prefix = format("%s-%s-%s_%s",local.environment,local.location, local.vnet_mgmt_name_part, local.codename)
+    prefix = module.sap_namegenerator.prefix["DEPLOYER"]
   }
   byte_length = 4
 }
