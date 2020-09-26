@@ -11,11 +11,16 @@ output naming {
       SDU      = local.sdu_storageaccount_name,
       VNET     = local.vnet_storageaccount_name,
       LIBRARY = {
-        library_storageaccount_name = local.library_storageaccount_name,
-        terraformstate_storageaccount_name   = local.terraformstate_storageaccount_name
+        library_storageaccount_name        = local.library_storageaccount_name,
+        terraformstate_storageaccount_name = local.terraformstate_storageaccount_name
       }
     }
-    resource_suffixes = var.resource_suffixes
+    keyvault_names = {
+      DEPLOYER = local.deployer_keyvault_name,
+      LIBRARY  = local.library_keyvault_name
+      SDU      = local.sdu_keyvault_name,
+      VNET     = local.vnet_keyvault_name
+    }
     virtualmachine_names = {
       ANYDB    = local.anydb_server_names
       ANYDB_HA = local.anydb_server_names_ha
@@ -27,11 +32,7 @@ output naming {
       SCS      = local.scs_server_names,
       WEB      = local.web_server_names,
     }
-    keyvault_names = {
-      DEPLOYER = local.deployer_keyvault_name,
-      LIBRARY  = local.library_keyvault_name
-      SDU      = local.sdu_keyvault_name,
-      VNET     = local.vnet_keyvault_name
-    }
+    resource_suffixes = var.resource_suffixes
+
   }
 }
