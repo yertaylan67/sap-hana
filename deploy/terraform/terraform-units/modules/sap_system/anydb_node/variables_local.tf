@@ -14,33 +14,12 @@ variable "ppg" {
   description = "Details of the proximity placement group"
 }
 
-variable prefix {
-  type        = string
-  description = "Resource naming prefix"
-}
-
 variable "random-id" {
   description = "Random hex string"
 }
 
-variable storageaccount_names {
-  type        = list
-  description = "Storage account naming prefix"
-}
-
-variable virtualmachine_names {
-  type        = list
-  description = "Virtual machine name list"
-}
-
-variable resource_suffixes {
-  type        = map
-  description = "List of resource suffixes"
-}
-
-variable "db_server_count" {
-  type        = number
-  description = "The number of items in the server name list"
+variable naming {
+  description = "Defines the names for the resources"
 }
 
 locals {
@@ -188,8 +167,8 @@ locals {
     }
     ],
     [for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
-      name         = try("${dbnode.name}-1", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.virtualmachine_names[idx + var.db_server_count], local.resource_suffixes.vm) : format("%s%s", local.virtualmachine_names[idx + var.db_server_count], local.resource_suffixes.vm)))
-      computername = try("${dbnode.name}-1", format("%s%s", local.virtualmachine_names[idx + var.db_server_count], local.resource_suffixes.vm))
+      name         = try("${dbnode.name}-1", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.virtualmachine_names[idx + local.db_server_count], local.resource_suffixes.vm) : format("%s%s", local.virtualmachine_names[idx + local.db_server_count], local.resource_suffixes.vm)))
+      computername = try("${dbnode.name}-1", format("%s%s", local.virtualmachine_names[idx + local.db_server_count], local.resource_suffixes.vm))
       role         = try(dbnode.role, "worker"),
       db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[1],
       } if local.anydb_ha
