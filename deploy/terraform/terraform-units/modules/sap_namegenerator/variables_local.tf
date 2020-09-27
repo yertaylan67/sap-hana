@@ -165,7 +165,7 @@ variable region_mapping {
 }
 
 //Todo: Add to documentation
-variable resource_extension {
+variable resource_suffixes {
   type        = map(string)
   description = "Extension of resource name"
 
