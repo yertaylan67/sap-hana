@@ -5,7 +5,7 @@
 +--------------------------------------4--------------------------------------*/
 
 # Creates network security rule to allow internal traffic for SAP db subnet
-resource "azurerm_network_security_rule" "nsr-internal-db" {
+resource azurerm_network_security_rule "nsr-internal-db" {
   count                        = local.enable_deployment ? (local.sub_db_nsg_exists ? 0 : 1) : 0
   name                         = "allow-internal-traffic"
   resource_group_name          = local.sub_db_nsg_exists ? data.azurerm_network_security_group.db[0].resource_group_name : azurerm_network_security_group.db[0].resource_group_name
@@ -21,7 +21,7 @@ resource "azurerm_network_security_rule" "nsr-internal-db" {
 }
 
 # Creates network security rule to deny external traffic for SAP db subnet
-resource "azurerm_network_security_rule" "nsr-external-db" {
+resource azurerm_network_security_rule "nsr-external-db" {
   count                        = local.enable_deployment ? (local.sub_db_nsg_exists ? 0 : 1) : 0
   name                         = "deny-inbound-traffic"
   resource_group_name          = local.sub_db_nsg_exists ? data.azurerm_network_security_group.db[0].resource_group_name : azurerm_network_security_group.db[0].resource_group_name

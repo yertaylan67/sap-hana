@@ -18,41 +18,26 @@ variable "ppg" {
   description = "Details of the proximity placement group"
 }
 
-variable prefix {
-  type        = string
-  description = "Resource naming prefix"
-}
-
 variable "random-id" {
   description = "Random hex string"
 }
 
-variable app_virtualmachine_names {
-  type        = list
-  description = "Virtual machine name list"
-}
-
-variable scs_virtualmachine_names {
-  type        = list
-  description = "Virtual machine name list"
-}
-
-variable web_virtualmachine_names {
-  type        = list
-  description = "Virtual machine name list"
-}
-
-variable resource_suffixes {
-  type        = map
-  description = "List of resource suffixes"
+variable naming {
+  description = "Defines the names for the resources"
 }
 
 // Set defaults
 locals {
+
+  app_virtualmachine_names = var.naming.virtualmachine_names["APP"]
+  scs_virtualmachine_names = var.naming.virtualmachine_names["SCS"]
+  web_virtualmachine_names = var.naming.virtualmachine_names["WEB"]
+  resource_suffixes        = var.naming.resource_suffixes
+
   region  = try(var.infrastructure.region, "")
   sid     = upper(try(var.application.sid, ""))
-  prefix  = try(var.infrastructure.resource_group.name, var.prefix)
-  rg_name = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, var.resource_suffixes["sdu-rg"]))
+  prefix  = try(var.infrastructure.resource_group.name, var.naming.prefix.SDU)
+  rg_name = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, local.resource_suffixes.sdu-rg))
 
   # SAP vnet
   var_infra       = try(var.infrastructure, {})
@@ -68,14 +53,14 @@ locals {
   var_sub_app    = try(var.infrastructure.vnets.sap.subnet_app, {})
   sub_app_arm_id = try(local.var_sub_app.arm_id, "")
   sub_app_exists = length(local.sub_app_arm_id) > 0 ? true : false
-  sub_app_name   = local.sub_app_exists ? try(split("/", local.sub_app_arm_id)[10], "") : try(local.var_sub_app.name, format("%s%s", local.prefix, var.resource_suffixes["app-subnet"]))
+  sub_app_name   = local.sub_app_exists ? try(split("/", local.sub_app_arm_id)[10], "") : try(local.var_sub_app.name, format("%s%s", local.prefix, local.resource_suffixes.app-subnet))
   sub_app_prefix = try(local.var_sub_app.prefix, "")
 
   // APP NSG
   var_sub_app_nsg    = try(local.var_sub_app.nsg, {})
   sub_app_nsg_arm_id = try(local.var_sub_app_nsg.arm_id, "")
   sub_app_nsg_exists = length(local.sub_app_nsg_arm_id) > 0 ? true : false
-  sub_app_nsg_name   = local.sub_app_nsg_exists ? try(split("/", local.sub_app_nsg_arm_id)[8], "") : try(local.var_sub_app_nsg.name, format("%s%s", local.prefix, var.resource_suffixes["app-subnet-nsg"]))
+  sub_app_nsg_name   = local.sub_app_nsg_exists ? try(split("/", local.sub_app_nsg_arm_id)[8], "") : try(local.var_sub_app_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.app-subnet-nsg))
 
   // WEB subnet
   #If subnet_web is not specified deploy into app subnet
@@ -83,7 +68,7 @@ locals {
   sub_web         = try(var.infrastructure.vnets.sap.subnet_web, {})
   sub_web_arm_id  = try(local.sub_web.arm_id, "")
   sub_web_exists  = length(local.sub_web_arm_id) > 0 ? true : false
-  sub_web_name    = local.sub_web_exists ? try(split("/", local.sub_web_arm_id)[10], "") : try(local.sub_web.name, format("%s%s", local.prefix, var.resource_suffixes["web-subnet"]))
+  sub_web_name    = local.sub_web_exists ? try(split("/", local.sub_web_arm_id)[10], "") : try(local.sub_web.name, format("%s%s", local.prefix, local.resource_suffixes.web-subnet))
   sub_web_prefix  = try(local.sub_web.prefix, "")
   sub_web_deployed = try(local.sub_web_defined ? (
     local.sub_web_exists ? data.azurerm_subnet.subnet-sap-web[0] : azurerm_subnet.subnet-sap-web[0]) : (
@@ -93,7 +78,7 @@ locals {
   sub_web_nsg        = try(local.sub_web.nsg, {})
   sub_web_nsg_arm_id = try(local.sub_web_nsg.arm_id, "") 
   sub_web_nsg_exists = length(local.sub_web_nsg_arm_id) > 0 ? true : false
-  sub_web_nsg_name   = local.sub_web_nsg_exists ? try(split("/", local.sub_web_nsg_arm_id)[8], "") : try(local.sub_web_nsg.name, format("%s%s", local.prefix, var.resource_suffixes["web-subnet-nsg"]))
+  sub_web_nsg_name   = local.sub_web_nsg_exists ? try(split("/", local.sub_web_nsg_arm_id)[8], "") : try(local.sub_web_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.web-subnet-nsg))
   sub_web_nsg_deployed = try(local.sub_web_defined ? (
     local.sub_web_nsg_exists ? data.azurerm_network_security_group.nsg-web[0] : azurerm_network_security_group.nsg-web[0]) : (
   local.sub_app_nsg_exists ? data.azurerm_network_security_group.nsg-app[0] : azurerm_network_security_group.nsg-app[0]), null)
