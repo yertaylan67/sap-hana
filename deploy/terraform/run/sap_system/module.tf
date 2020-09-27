@@ -13,8 +13,9 @@ module "deployer" {
   software          = var.software
   ssh-timeout       = var.ssh-timeout
   sshkey            = var.sshkey
-  library_prefix    = module.sap_namegenerator.prefix["LIBRARY"]
-  resource_suffixes = module.sap_namegenerator.resource_extensions
+  //ToDo: Update once all are merged
+  library_prefix    = module.sap_namegenerator.naming.prefix.DEPLOYER
+  resource_suffixes = module.sap_namegenerator.naming.resource_suffixes
 }
 
 module "saplibrary" {
@@ -27,31 +28,29 @@ module "saplibrary" {
   software          = var.software
   ssh-timeout       = var.ssh-timeout
   sshkey            = var.sshkey
-  library_prefix    = module.sap_namegenerator.prefix["LIBRARY"]
-  resource_suffixes = module.sap_namegenerator.resource_extensions
+  //ToDo: Update once all are merged
+  library_prefix    = module.sap_namegenerator.naming.prefix.LIBRARY
+  resource_suffixes = module.sap_namegenerator.naming.resource_suffixes
 }
 
+
 module "common_infrastructure" {
-  source               = "../../terraform-units/modules/sap_system/common_infrastructure"
-  is_single_node_hana  = "true"
-  application          = var.application
-  databases            = var.databases
-  infrastructure       = var.infrastructure
-  jumpboxes            = var.jumpboxes
-  options              = local.options
-  software             = var.software
-  ssh-timeout          = var.ssh-timeout
-  sshkey               = var.sshkey
-  subnet-sap-admin     = module.hdb_node.subnet-sap-admin
-  vnet-mgmt            = module.deployer.vnet-mgmt
-  subnet-mgmt          = module.deployer.subnet-mgmt
-  nsg-mgmt             = module.deployer.nsg-mgmt
-  prefix               = module.sap_namegenerator.prefix["SDU"]
-  vnet_prefix          = module.sap_namegenerator.prefix["VNET"]
-  storageaccount_name  = module.sap_namegenerator.storageaccount_names["SDU"][0]
-  keyvault_names       = module.sap_namegenerator.keyvault_names["SDU"]
-  virtualmachine_names = module.sap_namegenerator.virtualmachine_names["ISCSI"]
-  resource_suffixes    = module.sap_namegenerator.resource_extensions
+  source              = "../../terraform-units/modules/sap_system/common_infrastructure"
+  is_single_node_hana = "true"
+  application         = var.application
+  databases           = var.databases
+  infrastructure      = var.infrastructure
+  jumpboxes           = var.jumpboxes
+  options             = local.options
+  software            = var.software
+  ssh-timeout         = var.ssh-timeout
+  sshkey              = var.sshkey
+  subnet-sap-admin    = module.hdb_node.subnet-sap-admin
+  vnet-mgmt           = module.deployer.vnet-mgmt
+  subnet-mgmt         = module.deployer.subnet-mgmt
+  nsg-mgmt            = module.deployer.nsg-mgmt
+  naming              = module.sap_namegenerator.naming
+
 }
 
 module "sap_namegenerator" {
@@ -98,52 +97,44 @@ module "jumpbox" {
 
 // Create HANA database nodes
 module "hdb_node" {
-  source               = "../../terraform-units/modules/sap_system/hdb_node"
-  application          = var.application
-  databases            = var.databases
-  infrastructure       = var.infrastructure
-  jumpboxes            = var.jumpboxes
-  options              = local.options
-  software             = var.software
-  ssh-timeout          = var.ssh-timeout
-  sshkey               = var.sshkey
-  resource-group       = module.common_infrastructure.resource-group
-  subnet-mgmt          = module.common_infrastructure.subnet-mgmt
-  nsg-mgmt             = module.common_infrastructure.nsg-mgmt
-  vnet-sap             = module.common_infrastructure.vnet-sap
-  storage-bootdiag     = module.common_infrastructure.storage-bootdiag
-  ppg                  = module.common_infrastructure.ppg
-  random-id            = random_id.deploy-random-id
-  prefix               = module.sap_namegenerator.prefix["SDU"]
-  db_server_count      = length(module.sap_namegenerator.virtualmachine_names["HANA"])
-  virtualmachine_names = concat(module.sap_namegenerator.virtualmachine_names["HANA"], module.sap_namegenerator.virtualmachine_names["HANA_HA"])
-  storageaccount_names = module.sap_namegenerator.storageaccount_names["SDU"]
-  resource_suffixes    = module.sap_namegenerator.resource_extensions
+  source           = "../../terraform-units/modules/sap_system/hdb_node"
+  application      = var.application
+  databases        = var.databases
+  infrastructure   = var.infrastructure
+  jumpboxes        = var.jumpboxes
+  options          = local.options
+  software         = var.software
+  ssh-timeout      = var.ssh-timeout
+  sshkey           = var.sshkey
+  resource-group   = module.common_infrastructure.resource-group
+  subnet-mgmt      = module.common_infrastructure.subnet-mgmt
+  nsg-mgmt         = module.common_infrastructure.nsg-mgmt
+  vnet-sap         = module.common_infrastructure.vnet-sap
+  storage-bootdiag = module.common_infrastructure.storage-bootdiag
+  ppg              = module.common_infrastructure.ppg
+  random-id        = random_id.deploy-random-id
+  naming           = module.sap_namegenerator.naming
 
 }
 
 // Create Application Tier nodes
 module "app_tier" {
-  source                   = "../../terraform-units/modules/sap_system/app_tier"
-  application              = var.application
-  databases                = var.databases
-  infrastructure           = var.infrastructure
-  jumpboxes                = var.jumpboxes
-  options                  = local.options
-  software                 = var.software
-  ssh-timeout              = var.ssh-timeout
-  sshkey                   = var.sshkey
-  resource-group           = module.common_infrastructure.resource-group
-  subnet-mgmt              = module.common_infrastructure.subnet-mgmt
-  vnet-sap                 = module.common_infrastructure.vnet-sap
-  storage-bootdiag         = module.common_infrastructure.storage-bootdiag
-  ppg                      = module.common_infrastructure.ppg
-  random-id                = random_id.deploy-random-id
-  prefix                   = module.sap_namegenerator.prefix["SDU"]
-  app_virtualmachine_names = module.sap_namegenerator.virtualmachine_names["APP"]
-  scs_virtualmachine_names = module.sap_namegenerator.virtualmachine_names["SCS"]
-  web_virtualmachine_names = module.sap_namegenerator.virtualmachine_names["WEB"]
-  resource_suffixes        = module.sap_namegenerator.resource_extensions
+  source           = "../../terraform-units/modules/sap_system/app_tier"
+  application      = var.application
+  databases        = var.databases
+  infrastructure   = var.infrastructure
+  jumpboxes        = var.jumpboxes
+  options          = local.options
+  software         = var.software
+  ssh-timeout      = var.ssh-timeout
+  sshkey           = var.sshkey
+  resource-group   = module.common_infrastructure.resource-group
+  subnet-mgmt      = module.common_infrastructure.subnet-mgmt
+  vnet-sap         = module.common_infrastructure.vnet-sap
+  storage-bootdiag = module.common_infrastructure.storage-bootdiag
+  ppg              = module.common_infrastructure.ppg
+  random-id        = random_id.deploy-random-id
+  naming           = module.sap_namegenerator.naming
 }
 
 // Create anydb database nodes

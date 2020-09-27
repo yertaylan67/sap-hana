@@ -62,7 +62,7 @@ resource "azurerm_virtual_network_peering" "peering-sap-management" {
 
 # Creates boot diagnostics storage account
 resource "azurerm_storage_account" "storage-bootdiag" {
-  name                      = var.storageaccount_name
+  name                      = local.storageaccount_name
   resource_group_name       = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
   location                  = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
   account_replication_type  = "LRS"
