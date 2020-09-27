@@ -4,7 +4,7 @@
 
 resource azurerm_network_interface "anydb" {
   count               = local.enable_deployment ? length(local.anydb_vms) : 0
-  name                = format("%s%s", local.anydb_vms[count.index].name, var.resource_suffixes["db-nic"])
+  name                = format("%s%s", local.anydb_vms[count.index].name, local.resource_suffixes.db-nic)
   location            = var.resource-group[0].location
   resource_group_name = var.resource-group[0].name
 
@@ -45,7 +45,7 @@ resource azurerm_linux_virtual_machine "dbserver" {
     iterator = disk
     for_each = flatten([for storage_type in lookup(local.sizes, local.anydb_size).storage : [for disk_count in range(storage_type.count) : { name = storage_type.name, id = disk_count, disk_type = storage_type.disk_type, size_gb = storage_type.size_gb, caching = storage_type.caching }] if storage_type.name == "os"])
     content {
-      name                 = format("%s%s",local.anydb_vms[count.index].name, var.resource_suffixes["osdisk"])
+      name                 = format("%s%s",local.anydb_vms[count.index].name, local.resource_suffixes.osdisk)
       caching              = disk.value.caching
       storage_account_type = disk.value.disk_type
       disk_size_gb         = disk.value.size_gb
@@ -98,7 +98,7 @@ resource azurerm_windows_virtual_machine "dbserver" {
     iterator = disk
     for_each = flatten([for storage_type in lookup(local.sizes, local.anydb_size).storage : [for disk_count in range(storage_type.count) : { name = storage_type.name, id = disk_count, disk_type = storage_type.disk_type, size_gb = storage_type.size_gb, caching = storage_type.caching }] if storage_type.name == "os"])
     content {
-      name                 = format("%s%s",local.anydb_vms[count.index].name, var.resource_suffixes["osdisk"])
+      name                 = format("%s%s",local.anydb_vms[count.index].name, local.resource_suffixes.osdisk)
       caching              = disk.value.caching
       storage_account_type = disk.value.disk_type
       disk_size_gb         = disk.value.size_gb

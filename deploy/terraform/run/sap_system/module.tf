@@ -4,30 +4,30 @@
 */
 
 module "deployer" {
-  source            = "../../terraform-units/modules/sap_system/deployer"
-  application       = var.application
-  databases         = var.databases
-  infrastructure    = var.infrastructure
-  jumpboxes         = var.jumpboxes
-  options           = var.options
-  software          = var.software
-  ssh-timeout       = var.ssh-timeout
-  sshkey            = var.sshkey
+  source         = "../../terraform-units/modules/sap_system/deployer"
+  application    = var.application
+  databases      = var.databases
+  infrastructure = var.infrastructure
+  jumpboxes      = var.jumpboxes
+  options        = var.options
+  software       = var.software
+  ssh-timeout    = var.ssh-timeout
+  sshkey         = var.sshkey
   //ToDo: Update once all are merged
   library_prefix    = module.sap_namegenerator.naming.prefix.DEPLOYER
   resource_suffixes = module.sap_namegenerator.naming.resource_suffixes
 }
 
 module "saplibrary" {
-  source            = "../../terraform-units/modules/sap_system/saplibrary"
-  application       = var.application
-  databases         = var.databases
-  infrastructure    = var.infrastructure
-  jumpboxes         = var.jumpboxes
-  options           = var.options
-  software          = var.software
-  ssh-timeout       = var.ssh-timeout
-  sshkey            = var.sshkey
+  source         = "../../terraform-units/modules/sap_system/saplibrary"
+  application    = var.application
+  databases      = var.databases
+  infrastructure = var.infrastructure
+  jumpboxes      = var.jumpboxes
+  options        = var.options
+  software       = var.software
+  ssh-timeout    = var.ssh-timeout
+  sshkey         = var.sshkey
   //ToDo: Update once all are merged
   library_prefix    = module.sap_namegenerator.naming.prefix.LIBRARY
   resource_suffixes = module.sap_namegenerator.naming.resource_suffixes
@@ -55,7 +55,7 @@ module "common_infrastructure" {
 
 module "sap_namegenerator" {
   source           = "../../terraform-units/modules/sap_namegenerator"
-  environment      = lower(try(var.infrastructure.landscape, ""))
+  environment      = lower(try(var.infrastructure.environment, ""))
   location         = try(var.infrastructure.region, "")
   codename         = lower(try(var.infrastructure.codename, ""))
   random-id        = random_id.deploy-random-id.hex
@@ -139,25 +139,21 @@ module "app_tier" {
 
 // Create anydb database nodes
 module "anydb_node" {
-  source               = "../../terraform-units/modules/sap_system/anydb_node"
-  application          = var.application
-  databases            = var.databases
-  infrastructure       = var.infrastructure
-  jumpboxes            = var.jumpboxes
-  options              = var.options
-  software             = var.software
-  ssh-timeout          = var.ssh-timeout
-  sshkey               = var.sshkey
-  resource-group       = module.common_infrastructure.resource-group
-  vnet-sap             = module.common_infrastructure.vnet-sap
-  storage-bootdiag     = module.common_infrastructure.storage-bootdiag
-  ppg                  = module.common_infrastructure.ppg
-  random-id            = random_id.deploy-random-id
-  prefix               = module.sap_namegenerator.prefix["SDU"]
-  db_server_count      = length(module.sap_namegenerator.virtualmachine_names["ANYDB"])
-  virtualmachine_names = concat(module.sap_namegenerator.virtualmachine_names["ANYDB"], module.sap_namegenerator.virtualmachine_names["ANYDB_HA"])
-  storageaccount_names = module.sap_namegenerator.storageaccount_names["SDU"]
-  resource_suffixes    = module.sap_namegenerator.resource_extensions
+  source           = "../../terraform-units/modules/sap_system/anydb_node"
+  application      = var.application
+  databases        = var.databases
+  infrastructure   = var.infrastructure
+  jumpboxes        = var.jumpboxes
+  options          = var.options
+  software         = var.software
+  ssh-timeout      = var.ssh-timeout
+  sshkey           = var.sshkey
+  resource-group   = module.common_infrastructure.resource-group
+  vnet-sap         = module.common_infrastructure.vnet-sap
+  storage-bootdiag = module.common_infrastructure.storage-bootdiag
+  ppg              = module.common_infrastructure.ppg
+  random-id        = random_id.deploy-random-id
+  naming           = module.sap_namegenerator.naming
 
 }
 

@@ -44,10 +44,16 @@ variable "db_server_count" {
 }
 
 locals {
+
+  db_server_count      = length(var.naming.virtualmachine_names.ANYDB)
+  virtualmachine_names = concat(var.naming.virtualmachine_names.ANYDB, var.naming.virtualmachine_names.ANYDB_HA)
+  storageaccount_names = var.naming.storageaccount_names.SDU
+  resource_suffixes    = var.naming.resource_suffixes
+
   region  = try(var.infrastructure.region, "")
   sap_sid = upper(try(var.application.sid, ""))
-  prefix  = try(var.infrastructure.resource_group.name, var.prefix)
-  rg_name = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, var.resource_suffixes["sdu-rg"]))
+  prefix  = try(var.infrastructure.resource_group.name, var.naming.prefix.SDU)
+  rg_name = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, local.resource_suffixes.sdu-rg))
 
   # SAP vnet
   var_infra       = try(var.infrastructure, {})
@@ -63,14 +69,14 @@ locals {
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
   sub_db_arm_id = try(local.var_sub_db.arm_id, "")
   sub_db_exists = length(local.sub_db_arm_id) > 0 ? true : false
-  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s%s", local.prefix, var.resource_suffixes["db-subnet"]))
+  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s%s", local.prefix, local.resource_suffixes.db-subnet))
   sub_db_prefix = try(local.var_sub_db.prefix, "")
 
   // DB NSG
   var_sub_db_nsg    = try(var.infrastructure.vnets.sap.subnet_db.nsg, {})
   sub_db_nsg_arm_id = try(local.var_sub_db_nsg.arm_id, "") 
   sub_db_nsg_exists = length(local.sub_db_nsg_arm_id) > 0 ? true : false
-  sub_db_nsg_name   = local.sub_db_nsg_exists ? try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s%s", local.prefix, var.resource_suffixes["db-subnet-nsg"]))
+  sub_db_nsg_name   = local.sub_db_nsg_exists ? try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.db-subnet-nsg))
 
   // Imports database sizing information
   sizes = jsondecode(file("${path.module}/../../../../../configs/anydb_sizes.json"))
@@ -175,15 +181,15 @@ locals {
   customer_provided_names = try(local.anydb.dbnodes[0].name, "") == "" ? false : true
 
   dbnodes = flatten([[for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
-    name         = try(local.anydb_ha ? "${dbnode.name}-0" : "${dbnode.name}", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.virtualmachine_names[idx], var.resource_suffixes["vm"]) : format("%s%s", var.virtualmachine_names[idx], var.resource_suffixes["vm"])))
-    computername = try(local.anydb_ha ? "${dbnode.name}-0" : "${dbnode.name}", format("%s%s", var.virtualmachine_names[idx], var.resource_suffixes["vm"]))
+    name         = try(local.anydb_ha ? "${dbnode.name}-0" : "${dbnode.name}", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.virtualmachine_names[idx], local.resource_suffixes.vm) : format("%s%s", local.virtualmachine_names[idx], local.resource_suffixes.vm)))
+    computername = try(local.anydb_ha ? "${dbnode.name}-0" : "${dbnode.name}", format("%s%s", local.virtualmachine_names[idx], local.resource_suffixes.vm))
     role         = try(dbnode.role, "worker"),
     db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[0]
     }
     ],
     [for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
-      name         = try("${dbnode.name}-1", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.virtualmachine_names[idx + var.db_server_count], var.resource_suffixes["vm"]) : format("%s%s", var.virtualmachine_names[idx + var.db_server_count], var.resource_suffixes["vm"])))
-      computername = try("${dbnode.name}-1", format("%s%s", var.virtualmachine_names[idx + var.db_server_count], var.resource_suffixes["vm"]))
+      name         = try("${dbnode.name}-1", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.virtualmachine_names[idx + var.db_server_count], local.resource_suffixes.vm) : format("%s%s", local.virtualmachine_names[idx + var.db_server_count], local.resource_suffixes.vm)))
+      computername = try("${dbnode.name}-1", format("%s%s", local.virtualmachine_names[idx + var.db_server_count], local.resource_suffixes.vm))
       role         = try(dbnode.role, "worker"),
       db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[1],
       } if local.anydb_ha
