@@ -79,7 +79,7 @@ variable "nics-anydb" {
   description = "List of NICs for the Web dispatcher VMs"
 }
 
-variable "random-id" {
+variable "random_id" {
   description = "Random hex string"
 }
 variable "anydb-loadbalancers" {

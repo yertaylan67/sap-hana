@@ -22,7 +22,7 @@ variable "ppg" {
   description = "Details of the proximity placement group"
 }
 
-variable "random-id" {
+variable "random_id" {
   description = "Random hex string"
 }
 

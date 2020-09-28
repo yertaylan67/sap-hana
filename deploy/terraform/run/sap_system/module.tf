@@ -58,7 +58,7 @@ module "sap_namegenerator" {
   environment   = lower(try(var.infrastructure.landscape, ""))
   location      = try(var.infrastructure.region, "")
   codename      = lower(try(var.infrastructure.codename, ""))
-  random-id     = random_id.deploy-random-id.hex
+  random_id     = random_id.deploy-random-id.hex
   sap_vnet_name = local.vnet_sap_name_part
   sap_sid       = local.sap_sid
   db_sid        = local.db_sid
@@ -116,7 +116,7 @@ module "hdb_node" {
   vnet-sap         = module.common_infrastructure.vnet-sap
   storage-bootdiag = module.common_infrastructure.storage-bootdiag
   ppg              = module.common_infrastructure.ppg
-  random-id        = random_id.deploy-random-id
+  random_id        = random_id.deploy-random-id
   naming           = module.sap_namegenerator.naming
 
 }
@@ -137,7 +137,7 @@ module "app_tier" {
   vnet-sap         = module.common_infrastructure.vnet-sap
   storage-bootdiag = module.common_infrastructure.storage-bootdiag
   ppg              = module.common_infrastructure.ppg
-  random-id        = random_id.deploy-random-id
+  random_id        = random_id.deploy-random-id
   naming           = module.sap_namegenerator.naming
 }
 
@@ -193,5 +193,5 @@ module "output_files" {
   any-database-info            = module.anydb_node.any-database-info
   anydb-loadbalancers          = module.anydb_node.anydb-loadbalancers
   deployers                    = module.deployer.import_deployer
-  random-id                    = random_id.deploy-random-id.hex
+  random_id                    = random_id.deploy-random-id.hex
 }
