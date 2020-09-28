@@ -11,15 +11,15 @@ locals {
   ]
 
   anydb_server_names = [for idx in range(var.db_server_count) :
-    format("%sd%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), idx, 0, local.random-id_vm_verified)
+    format("%sd%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), idx, 0, local.random_id_vm_verified)
     ]
 
   anydb_server_names_ha =  [for idx in range(var.db_server_count) :
-      format("%sd%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), idx, 1, local.random-id_vm_verified)
+      format("%sd%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), idx, 1, local.random_id_vm_verified)
     ]
 
   app_server_names = [for idx in range(var.app_server_count) :
-    format("%sapp%02d%s%s", lower(var.sap_sid), idx, local.app_oscode, local.random-id_vm_verified)
+    format("%sapp%02d%s%s", lower(var.sap_sid), idx, local.app_oscode, local.random_id_vm_verified)
   ]
 
   iscsi_server_names = [for idx in range(var.iscsi_server_count) :
@@ -27,19 +27,19 @@ locals {
   ]
 
   hana_server_names = [for idx in range(var.db_server_count) :
-    format("%sd%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), idx, 0, local.random-id_vm_verified)
+    format("%sd%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), idx, 0, local.random_id_vm_verified)
     ]
 
   hana_server_names_ha = [for idx in range(var.db_server_count) :
-      format("%sd%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), idx, 1, local.random-id_vm_verified)
+      format("%sd%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), idx, 1, local.random_id_vm_verified)
     ]
 
   scs_server_names = [for idx in range(var.scs_server_count) :
-    format("%sscs%02d%s%s", lower(var.sap_sid), idx, local.app_oscode, local.random-id_vm_verified)
+    format("%sscs%02d%s%s", lower(var.sap_sid), idx, local.app_oscode, local.random_id_vm_verified)
   ]
 
   web_server_names = [for idx in range(var.web_server_count) :
-    format("%sweb%02d%s%s", lower(var.sap_sid), idx, local.app_oscode, local.random-id_vm_verified)
+    format("%sweb%02d%s%s", lower(var.sap_sid), idx, local.app_oscode, local.random_id_vm_verified)
   ]
 
 }
