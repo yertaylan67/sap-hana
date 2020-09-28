@@ -116,7 +116,6 @@ module "hdb_node" {
   vnet-sap         = module.common_infrastructure.vnet-sap
   storage-bootdiag = module.common_infrastructure.storage-bootdiag
   ppg              = module.common_infrastructure.ppg
-  random_id        = random_id.deploy-random-id
   naming           = module.sap_namegenerator.naming
 
 }
@@ -137,7 +136,6 @@ module "app_tier" {
   vnet-sap         = module.common_infrastructure.vnet-sap
   storage-bootdiag = module.common_infrastructure.storage-bootdiag
   ppg              = module.common_infrastructure.ppg
-  random_id        = random_id.deploy-random-id
   naming           = module.sap_namegenerator.naming
 }
 
