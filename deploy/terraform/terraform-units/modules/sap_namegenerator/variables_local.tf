@@ -28,7 +28,7 @@ variable db_sid {
   description = "Database SID"
 }
 
-variable random-id {
+variable random_id {
   type        = string
   description = "Random hex string"
 }
@@ -80,7 +80,7 @@ variable sapautomation_name_limits {
   default = {
     environment_variable_length = 5
     sap_vnet_length             = 7
-    random-id_length            = 3
+    random_id_length            = 3
     sdu_name_length             = 80
   }
 }
@@ -226,8 +226,8 @@ locals {
   vnet_verified     = upper(substr(var.sap_vnet_name, 0, var.sapautomation_name_limits.sap_vnet_length))
   dep_vnet_verified = upper(substr(var.management_vnet_name, 0, var.sapautomation_name_limits.sap_vnet_length))
 
-  random-id_verified    = upper(substr(var.random-id, 0, var.sapautomation_name_limits.random-id_length))
-  random-id_vm_verified = lower(substr(var.random-id, 0, var.sapautomation_name_limits.random-id_length))
+  random_id_verified    = upper(substr(var.random_id, 0, var.sapautomation_name_limits.random_id_length))
+  random_id_vm_verified = lower(substr(var.random_id, 0, var.sapautomation_name_limits.random_id_length))
 
 }
 
