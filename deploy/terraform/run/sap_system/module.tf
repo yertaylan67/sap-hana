@@ -4,6 +4,7 @@
 */
 
 module "deployer" {
+<<<<<<< HEAD
   source         = "../../terraform-units/modules/sap_system/deployer"
   application    = var.application
   databases      = var.databases
@@ -13,12 +14,24 @@ module "deployer" {
   software       = var.software
   ssh-timeout    = var.ssh-timeout
   sshkey         = var.sshkey
+=======
+  source            = "../../terraform-units/modules/sap_system/deployer"
+  application       = var.application
+  databases         = var.databases
+  infrastructure    = var.infrastructure
+  jumpboxes         = var.jumpboxes
+  options           = var.options
+  software          = var.software
+  ssh-timeout       = var.ssh-timeout
+  sshkey            = var.sshkey
+>>>>>>> be03f4247cb6340b408cbfc71693761bc24b69b4
   //ToDo: Update once all are merged
   library_prefix    = module.sap_namegenerator.naming.prefix.DEPLOYER
   resource_suffixes = module.sap_namegenerator.naming.resource_suffixes
 }
 
 module "saplibrary" {
+<<<<<<< HEAD
   source         = "../../terraform-units/modules/sap_system/saplibrary"
   application    = var.application
   databases      = var.databases
@@ -28,6 +41,17 @@ module "saplibrary" {
   software       = var.software
   ssh-timeout    = var.ssh-timeout
   sshkey         = var.sshkey
+=======
+  source            = "../../terraform-units/modules/sap_system/saplibrary"
+  application       = var.application
+  databases         = var.databases
+  infrastructure    = var.infrastructure
+  jumpboxes         = var.jumpboxes
+  options           = var.options
+  software          = var.software
+  ssh-timeout       = var.ssh-timeout
+  sshkey            = var.sshkey
+>>>>>>> be03f4247cb6340b408cbfc71693761bc24b69b4
   //ToDo: Update once all are merged
   library_prefix    = module.sap_namegenerator.naming.prefix.LIBRARY
   resource_suffixes = module.sap_namegenerator.naming.resource_suffixes
@@ -54,16 +78,20 @@ module "common_infrastructure" {
 }
 
 module "sap_namegenerator" {
-  source           = "../../terraform-units/modules/sap_namegenerator"
-  environment      = lower(try(var.infrastructure.environment, ""))
-  location         = try(var.infrastructure.region, "")
-  codename         = lower(try(var.infrastructure.codename, ""))
-  random-id        = random_id.deploy-random-id.hex
-  sap_vnet_name    = local.vnet_sap_name_part
-  sap_sid          = local.sap_sid
-  db_sid           = local.db_sid
-  app_ostype       = local.app_ostype
-  db_ostype        = local.db_ostype
+  source        = "../../terraform-units/modules/sap_namegenerator"
+  environment   = lower(try(var.infrastructure.landscape, ""))
+  location      = try(var.infrastructure.region, "")
+  codename      = lower(try(var.infrastructure.codename, ""))
+  random_id     = random_id.deploy-random-id.hex
+  sap_vnet_name = local.vnet_sap_name_part
+  sap_sid       = local.sap_sid
+  db_sid        = local.db_sid
+  app_ostype    = local.app_ostype
+  db_ostype     = local.db_ostype
+  // The naming module creates a list of servers names that is app_server_max_count
+  // for database servers the list is 2 * db_server_max_count. 
+  // The first db_server_max_count items are for single node
+  // The the second db_server_max_count items are for ha
   db_server_count  = local.db_server_count
   app_server_count = local.app_server_count
   web_server_count = local.webdispatcher_count
@@ -112,7 +140,7 @@ module "hdb_node" {
   vnet-sap         = module.common_infrastructure.vnet-sap
   storage-bootdiag = module.common_infrastructure.storage-bootdiag
   ppg              = module.common_infrastructure.ppg
-  random-id        = random_id.deploy-random-id
+  random_id        = random_id.deploy-random-id
   naming           = module.sap_namegenerator.naming
 
 }
@@ -133,7 +161,7 @@ module "app_tier" {
   vnet-sap         = module.common_infrastructure.vnet-sap
   storage-bootdiag = module.common_infrastructure.storage-bootdiag
   ppg              = module.common_infrastructure.ppg
-  random-id        = random_id.deploy-random-id
+  random_id        = random_id.deploy-random-id
   naming           = module.sap_namegenerator.naming
 }
 
@@ -191,5 +219,5 @@ module "output_files" {
   any-database-info            = module.anydb_node.any-database-info
   anydb-loadbalancers          = module.anydb_node.anydb-loadbalancers
   deployers                    = module.deployer.import_deployer
-  random-id                    = random_id.deploy-random-id.hex
+  random_id                    = random_id.deploy-random-id.hex
 }
