@@ -19,7 +19,7 @@ module "sap_namegenerator" {
   location             = local.location
   codename             = local.codename
   management_vnet_name = local.vnet_mgmt_name_part
-  random-id            = random_id.deploy-random-id.hex
+  random_id            = random_id.deploy-random-id.hex
 
   //These are not needed for the deployer
   sap_vnet_name = try(var.infrastructure.vnets.sap.name, "")
