@@ -22,40 +22,12 @@ variable "ppg" {
   description = "Details of the proximity placement group"
 }
 
-variable prefix {
-  type        = string
-  description = "Resource naming prefix"
-}
-
-variable sa_name {
-  type        = list
-  description = "Storage account naming prefix"
-}
-
-
 variable "random-id" {
   description = "Random hex string"
 }
 
-variable vm_names {
-  type        = list
-  description = "Virtual machine name list"
-}
-
-variable kv_names {
-  type        = list
-  description = "Keyvault name list"
-}
-
-
-variable resource_suffixes {
-  type        = map
-  description = "List of resource suffixes"
-}
-
-variable "db_server_count" {
-  type        = number
-  description = "The number of database servers"
+variable naming {
+  description = "Defines the names for the resources"
 }
 
 variable "disk_sizes" {
@@ -66,15 +38,24 @@ variable "disk_sizes" {
 }
 
 locals {
+<<<<<<< HEAD
   // Imports database sizing information
 
   disk_sizes = "${path.module}/../../../../../configs/hdb_sizes.json"
   sizes      = jsondecode(file(length(var.disk_sizes) > 0 ? var.disk_sizes : local.disk_sizes))
+=======
+
+  db_server_count      = length(var.naming.virtualmachine_names["HANA"])
+  virtualmachine_names = concat(var.naming.virtualmachine_names["HANA"], var.naming.virtualmachine_names["HANA_HA"])
+  storageaccount_names = var.naming.storageaccount_names["SDU"]
+  resource_suffixes    = var.naming.resource_suffixes
+>>>>>>> 8b9ab71df935e0a9481b0051adae3252283a3511
 
   region  = try(var.infrastructure.region, "")
   sid     = upper(try(var.application.sid, ""))
-  prefix  = try(var.infrastructure.resource_group.name, var.prefix)
-  rg_name = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, var.resource_suffixes["sdu-rg"]))
+  prefix  = try(var.infrastructure.resource_group.name, var.naming.prefix.SDU)
+
+  rg_name = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, local.resource_suffixes.sdu-rg))
 
   # SAP vnet
   var_infra       = try(var.infrastructure, {})
@@ -90,27 +71,27 @@ locals {
   var_sub_admin    = try(var.infrastructure.vnets.sap.subnet_admin, {})
   sub_admin_arm_id = try(local.var_sub_admin.arm_id, "")
   sub_admin_exists = length(local.sub_admin_arm_id) > 0 ? true : false
-  sub_admin_name   = local.sub_admin_exists ? try(split("/", local.sub_admin_arm_id)[10], "") : try(local.var_sub_admin.name, format("%s%s", local.prefix, var.resource_suffixes["admin-subnet"]))
+  sub_admin_name   = local.sub_admin_exists ? try(split("/", local.sub_admin_arm_id)[10], "") : try(local.var_sub_admin.name, format("%s%s", local.prefix, local.resource_suffixes.admin-subnet))
   sub_admin_prefix = try(local.var_sub_admin.prefix, "")
 
   // Admin NSG
   var_sub_admin_nsg    = try(var.infrastructure.vnets.sap.subnet_admin.nsg, {})
   sub_admin_nsg_arm_id = try(local.var_sub_admin_nsg.arm_id, "") 
   sub_admin_nsg_exists = length(local.sub_admin_nsg_arm_id) > 0 ? true : false
-  sub_admin_nsg_name   = local.sub_admin_nsg_exists ? try(split("/", local.sub_admin_nsg_arm_id)[8], "") : try(local.var_sub_admin_nsg.name, format("%s%s", local.prefix, var.resource_suffixes["admin-subnet-nsg"]))
+  sub_admin_nsg_name   = local.sub_admin_nsg_exists ? try(split("/", local.sub_admin_nsg_arm_id)[8], "") : try(local.var_sub_admin_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.admin-subnet-nsg))
 
   // DB subnet
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
   sub_db_arm_id = try(local.var_sub_db.arm_id, "")
   sub_db_exists = length(local.sub_db_arm_id) > 0 ? true : false
-  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s%s", local.prefix, var.resource_suffixes["db-subnet"]))
+  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s%s", local.prefix, local.resource_suffixes.db-subnet))
   sub_db_prefix = try(local.var_sub_db.prefix, "")
 
   // DB NSG
   var_sub_db_nsg    = try(var.infrastructure.vnets.sap.subnet_db.nsg, {})
   sub_db_nsg_arm_id = try(local.var_sub_db_nsg.arm_id, "") 
   sub_db_nsg_exists = length(local.sub_db_nsg_arm_id) > 0 ? true : false
-  sub_db_nsg_name   = local.sub_db_nsg_exists ? try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s%s", local.prefix, var.resource_suffixes["db-subnet-nsg"]))
+  sub_db_nsg_name   = local.sub_db_nsg_exists ? try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.db-subnet-nsg))
 
   hdb_list = [
     for db in var.databases : db
@@ -157,16 +138,16 @@ locals {
   customer_provided_names = try(local.hdb.dbnodes[0].name, "") == "" ? false : true
 
   dbnodes = flatten([[for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
-    name         = try(local.hdb_ha ? "${dbnode.name}-0" : "${dbnode.name}", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.vm_names[idx], var.resource_suffixes["vm"]) : format("%s%s", var.vm_names[idx], var.resource_suffixes["vm"])))
-    computername = try(local.hdb_ha ? "${dbnode.name}-0" : "${dbnode.name}", format("%s%s", var.vm_names[idx], var.resource_suffixes["vm"]))
+    name         = try(local.hdb_ha ? "${dbnode.name}-0" : "${dbnode.name}", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.virtualmachine_names[idx], local.resource_suffixes.vm) : format("%s%s", local.virtualmachine_names[idx], local.resource_suffixes.vm)))
+    computername = try(local.hdb_ha ? "${dbnode.name}-0" : "${dbnode.name}", format("%s%s", local.virtualmachine_names[idx], local.resource_suffixes.vm))
     role         = try(dbnode.role, "worker")
     admin_nic_ip = lookup(dbnode, "admin_nic_ips", [false, false])[0]
     db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[0]
     }
     ],
     [for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
-      name         = try("${dbnode.name}-1", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, var.vm_names[idx + var.db_server_count], var.resource_suffixes["vm"]) : format("%s%s", var.vm_names[idx + var.db_server_count], var.resource_suffixes["vm"])))
-      computername = try("${dbnode.name}-1", format("%s%s", var.vm_names[idx + var.db_server_count], var.resource_suffixes["vm"]))
+      name         = try("${dbnode.name}-1", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.virtualmachine_names[idx + local.db_server_count], local.resource_suffixes.vm) : format("%s%s", local.virtualmachine_names[idx + local.db_server_count], local.resource_suffixes.vm)))
+      computername = try("${dbnode.name}-1", format("%s%s", local.virtualmachine_names[idx + local.db_server_count], local.resource_suffixes.vm))
       role         = try(dbnode.role, "worker")
       admin_nic_ip = lookup(dbnode, "admin_nic_ips", [false, false])[1]
       db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[1]

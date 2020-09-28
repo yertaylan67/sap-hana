@@ -53,10 +53,9 @@ locals {
   // Default naming of vnet has multiple parts. Taking the second-last part as the name 
   vnet_sap_name_part = try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? substr(split("-", local.vnet_sap_name)[(local.vnet_nr_parts - 2)], 0, 7) : local.vnet_sap_name
 
-
   //SID determination
 
-  hdb_list = [
+  hana-databases = [
     for db in var.databases : db
     if try(db.platform, "NONE") == "HANA"
   ]
@@ -69,19 +68,21 @@ locals {
   ]
 
   sap_sid    = upper(try(var.application.sid, ""))
-  hdb        = try(local.hdb_list[0], {})
+  hdb        = try(local.hana-databases[0], {})
   hdb_ins    = try(local.hdb.instance, {})
   hanadb_sid = try(local.hdb_ins.sid, "HDB") // HANA database sid from the Databases array for use as reference to LB/AS
 
   anydb_platform = try(local.anydb-databases[0].platform, "NONE")
   anydb_sid      = (length(local.anydb-databases) > 0) ? try(local.anydb-databases[0].instance.sid, lower(substr(local.anydb_platform, 0, 3))) : lower(substr(local.anydb_platform, 0, 3))
 
-  db_sid = length(local.hdb_list) > 0 ? local.hanadb_sid : local.anydb_sid
+  db_sid = length(local.hana-databases) > 0 ? local.hanadb_sid : local.anydb_sid
 
-  app_ostype       = try(var.application.os.os_type, "LINUX")
-  db_ostype        = try(var.databases[0].os.os_type, "LINUX")
-  db_server_count  = 10
-  app_server_count = 20
+  app_ostype          = try(var.application.os.os_type, "LINUX")
+  db_ostype           = try(var.databases[0].os.os_type, "LINUX")
+  db_server_count     = length(var.databases)
+  app_server_count    = try(var.application.application_server_count, 0)
+  webdispatcher_count = try(var.application.webdispatcher_count, 0)
+  scs_server_count    = try(var.application.scs_high_availability, false) ? 2 : 1
 
 
 }
