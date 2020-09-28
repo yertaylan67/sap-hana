@@ -4,7 +4,6 @@
 */
 
 module "deployer" {
-<<<<<<< HEAD
   source         = "../../terraform-units/modules/sap_system/deployer"
   application    = var.application
   databases      = var.databases
@@ -14,24 +13,12 @@ module "deployer" {
   software       = var.software
   ssh-timeout    = var.ssh-timeout
   sshkey         = var.sshkey
-=======
-  source            = "../../terraform-units/modules/sap_system/deployer"
-  application       = var.application
-  databases         = var.databases
-  infrastructure    = var.infrastructure
-  jumpboxes         = var.jumpboxes
-  options           = var.options
-  software          = var.software
-  ssh-timeout       = var.ssh-timeout
-  sshkey            = var.sshkey
->>>>>>> be03f4247cb6340b408cbfc71693761bc24b69b4
   //ToDo: Update once all are merged
   library_prefix    = module.sap_namegenerator.naming.prefix.DEPLOYER
   resource_suffixes = module.sap_namegenerator.naming.resource_suffixes
 }
 
 module "saplibrary" {
-<<<<<<< HEAD
   source         = "../../terraform-units/modules/sap_system/saplibrary"
   application    = var.application
   databases      = var.databases
@@ -41,17 +28,6 @@ module "saplibrary" {
   software       = var.software
   ssh-timeout    = var.ssh-timeout
   sshkey         = var.sshkey
-=======
-  source            = "../../terraform-units/modules/sap_system/saplibrary"
-  application       = var.application
-  databases         = var.databases
-  infrastructure    = var.infrastructure
-  jumpboxes         = var.jumpboxes
-  options           = var.options
-  software          = var.software
-  ssh-timeout       = var.ssh-timeout
-  sshkey            = var.sshkey
->>>>>>> be03f4247cb6340b408cbfc71693761bc24b69b4
   //ToDo: Update once all are merged
   library_prefix    = module.sap_namegenerator.naming.prefix.LIBRARY
   resource_suffixes = module.sap_namegenerator.naming.resource_suffixes
@@ -180,7 +156,6 @@ module "anydb_node" {
   vnet-sap         = module.common_infrastructure.vnet-sap
   storage-bootdiag = module.common_infrastructure.storage-bootdiag
   ppg              = module.common_infrastructure.ppg
-  random-id        = random_id.deploy-random-id
   naming           = module.sap_namegenerator.naming
 
 }
