@@ -22,10 +22,6 @@ variable "ppg" {
   description = "Details of the proximity placement group"
 }
 
-variable "random_id" {
-  description = "Random hex string"
-}
-
 variable naming {
   description = "Defines the names for the resources"
 }

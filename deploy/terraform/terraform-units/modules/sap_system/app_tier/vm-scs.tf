@@ -1,5 +1,5 @@
 # Create SCS NICs
-resource azurerm_network_interface "scs" {
+resource "azurerm_network_interface" "scs" {
   count                         = local.enable_deployment ? (local.scs_high_availability ? 2 : 1) : 0
   name                          = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.scs_virtualmachine_names[count.index], local.resource_suffixes.nic) : format("%s%s", local.scs_virtualmachine_names[count.index], local.resource_suffixes.nic)
   location                      = var.resource-group[0].location
@@ -15,7 +15,7 @@ resource azurerm_network_interface "scs" {
 }
 
 # Associate SCS VM NICs with the Load Balancer Backend Address Pool
-resource azurerm_network_interface_backend_address_pool_association "scs" {
+resource "azurerm_network_interface_backend_address_pool_association" "scs" {
   count                   = local.enable_deployment ? length(azurerm_network_interface.scs) : 0
   network_interface_id    = azurerm_network_interface.scs[count.index].id
   ip_configuration_name   = azurerm_network_interface.scs[count.index].ip_configuration[0].name
@@ -23,7 +23,7 @@ resource azurerm_network_interface_backend_address_pool_association "scs" {
 }
 
 # Create the SCS Linux VM(s)
-resource azurerm_linux_virtual_machine "scs" {
+resource "azurerm_linux_virtual_machine" "scs" {
   count                        = local.enable_deployment ? (upper(local.app_ostype) == "LINUX" ? (local.scs_high_availability ? 2 : 1) : 0) : 0
   name                         = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.scs_virtualmachine_names[count.index], local.resource_suffixes.vm) : format("%s%s", local.scs_virtualmachine_names[count.index], local.resource_suffixes.vm)
   computer_name                = local.scs_virtualmachine_names[count.index]
@@ -67,7 +67,7 @@ resource azurerm_linux_virtual_machine "scs" {
 }
 
 # Create the SCS Windows VM(s)
-resource azurerm_windows_virtual_machine "scs" {
+resource "azurerm_windows_virtual_machine" "scs" {
   count                        = local.enable_deployment ? (upper(local.app_ostype) == "WINDOWS" ? (local.scs_high_availability ? 2 : 1) : 0) : 0
   name                         = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.scs_virtualmachine_names[count.index], local.resource_suffixes.vm) : format("%s%s", local.scs_virtualmachine_names[count.index], local.resource_suffixes.vm)
   computer_name                = local.scs_virtualmachine_names[count.index]
@@ -106,7 +106,7 @@ resource azurerm_windows_virtual_machine "scs" {
 }
 
 # Creates managed data disk
-resource azurerm_managed_disk "scs" {
+resource "azurerm_managed_disk" "scs" {
   count                = local.enable_deployment ? length(local.scs-data-disks) : 0
   name                 = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.scs_virtualmachine_names[count.index], local.scs-data-disks[count.index].suffix) : format("%s%s", local.scs_virtualmachine_names[count.index], local.scs-data-disks[count.index].suffix)
   location             = var.resource-group[0].location
@@ -116,7 +116,7 @@ resource azurerm_managed_disk "scs" {
   disk_size_gb         = local.scs-data-disks[count.index].size_gb
 }
 
-resource azurerm_virtual_machine_data_disk_attachment "scs" {
+resource "azurerm_virtual_machine_data_disk_attachment" "scs" {
   count                     = local.enable_deployment ? length(azurerm_managed_disk.scs) : 0
   managed_disk_id           = azurerm_managed_disk.scs[count.index].id
   virtual_machine_id        = upper(local.app_ostype) == "LINUX" ? azurerm_linux_virtual_machine.scs[local.scs-data-disks[count.index].vm_index].id : azurerm_windows_virtual_machine.scs[local.scs-data-disks[count.index].vm_index].id
