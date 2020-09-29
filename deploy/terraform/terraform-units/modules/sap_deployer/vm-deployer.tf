@@ -6,8 +6,11 @@ Description:
   Define 0..n Deployer(s).
 */
 
+data azurerm_subscription "primary" {}
+data azurerm_client_config "current" {}
+
 // Public IP addresse and nic for Deployer
-resource azurerm_public_ip "deployer" {
+resource "azurerm_public_ip" "deployer" {
   count               = length(local.deployers)
   name                = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.deployers[count.index].name, local.resource_suffixes["pip"]) : format("%s%s", local.deployers[count.index].name, local.resource_suffixes["pip"])
   location            = azurerm_resource_group.deployer[0].location
@@ -15,7 +18,7 @@ resource azurerm_public_ip "deployer" {
   allocation_method   = "Static"
 }
 
-resource azurerm_network_interface "deployer" {
+resource "azurerm_network_interface" "deployer" {
   count               = length(local.deployers)
   name                = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.deployers[count.index].name, local.resource_suffixes["nic"]) : format("%s%s", local.deployers[count.index].name, local.resource_suffixes["nic"])
   location            = azurerm_resource_group.deployer[0].location
@@ -31,31 +34,28 @@ resource azurerm_network_interface "deployer" {
 }
 
 // User defined identity for all Deployer, assign contributor to the current subscription
-resource azurerm_user_assigned_identity "deployer" {
+resource "azurerm_user_assigned_identity" "deployer" {
   resource_group_name = azurerm_resource_group.deployer[0].name
   location            = azurerm_resource_group.deployer[0].location
   name                = format("%s-msi", local.prefix)
 }
 
-data azurerm_subscription "primary" {}
-data azurerm_client_config "current" {}
-
 // Add role to be able to deploy resources
-resource azurerm_role_assignment "sub_contributor" {
+resource "azurerm_role_assignment" "sub_contributor" {
   scope                = data.azurerm_subscription.primary.id
   role_definition_name = "Contributor"
   principal_id         = azurerm_user_assigned_identity.deployer.principal_id
 }
 
 // Add role to be able to create lock on rg 
-resource azurerm_role_assignment "sub_user_admin" {
+resource "azurerm_role_assignment" "sub_user_admin" {
   scope                = data.azurerm_subscription.primary.id
   role_definition_name = "User Access Administrator"
   principal_id         = azurerm_user_assigned_identity.deployer.principal_id
 }
 
 // Linux Virtual Machine for Deployer
-resource azurerm_linux_virtual_machine "deployer" {
+resource "azurerm_linux_virtual_machine" "deployer" {
   count                           = length(local.deployers)
   name                            = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.deployers[count.index].name, local.resource_suffixes["vm"]) : format("%s%s", local.deployers[count.index].name, local.resource_suffixes["vm"])
   computer_name                   = local.deployers[count.index].name

@@ -5,7 +5,7 @@ Description:
 */
 
 // Create managed resource group for sap deployer with CanNotDelete lock
-resource azurerm_resource_group "deployer" {
+resource "azurerm_resource_group" "deployer" {
   count    = local.enable_deployers ? 1 : 0
   name     = local.rg_name
   location = local.region
@@ -14,7 +14,7 @@ resource azurerm_resource_group "deployer" {
 // TODO: Add management lock when this issue is addressed https://github.com/terraform-providers/terraform-provider-azurerm/issues/5473
 
 // Create/Import management vnet
-resource azurerm_virtual_network "vnet_mgmt" {
+resource "azurerm_virtual_network" "vnet_mgmt" {
   count               = local.enable_deployers && ! local.vnet_mgmt_exists ? 1 : 0
   name                = local.vnet_mgmt_name
   location            = azurerm_resource_group.deployer[0].location
@@ -22,14 +22,14 @@ resource azurerm_virtual_network "vnet_mgmt" {
   address_space       = [local.vnet_mgmt_addr]
 }
 
-data azurerm_virtual_network "vnet_mgmt" {
+data "azurerm_virtual_network" "vnet_mgmt" {
   count               = local.enable_deployers && local.vnet_mgmt_exists ? 1 : 0
   name                = split("/", local.vnet_mgmt_arm_id)[8]
   resource_group_name = split("/", local.vnet_mgmt_arm_id)[4]
 }
 
 // Create/Import management subnet
-resource azurerm_subnet "subnet_mgmt" {
+resource "azurerm_subnet" "subnet_mgmt" {
   count                = local.enable_deployers && ! local.sub_mgmt_exists ? 1 : 0
   name                 = local.sub_mgmt_name
   resource_group_name  = local.vnet_mgmt_exists ? data.azurerm_virtual_network.vnet_mgmt[0].resource_group_name : azurerm_virtual_network.vnet_mgmt[0].resource_group_name
@@ -37,7 +37,7 @@ resource azurerm_subnet "subnet_mgmt" {
   address_prefixes     = [local.sub_mgmt_prefix]
 }
 
-data azurerm_subnet "subnet_mgmt" {
+data "azurerm_subnet" "subnet_mgmt" {
   count                = local.enable_deployers && local.sub_mgmt_exists ? 1 : 0
   name                 = split("/", local.sub_mgmt_arm_id)[10]
   resource_group_name  = split("/", local.sub_mgmt_arm_id)[4]
@@ -45,7 +45,7 @@ data azurerm_subnet "subnet_mgmt" {
 }
 
 // Creates boot diagnostics storage account for Deployer
-resource azurerm_storage_account "deployer" {
+resource "azurerm_storage_account" "deployer" {
   count                     = local.enable_deployers ? 1 : 0
   name                      = local.storageaccount_names
   resource_group_name       = azurerm_resource_group.deployer[0].name
