@@ -74,6 +74,11 @@ variable iscsi_server_count {
   default = 1
 }
 
+variable deployer_vm_count {
+  type    = number
+  default = 1
+}
+
 //Todo: Add to documentation
 variable sapautomation_name_limits {
   description = "Name length for automation resources"

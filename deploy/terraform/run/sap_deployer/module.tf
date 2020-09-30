@@ -20,5 +20,6 @@ module "sap_namegenerator" {
   codename             = local.codename
   management_vnet_name = local.vnet_mgmt_name_part
   random_id            = random_id.deploy_random_id.hex
+  deployer_vm_count    = local.deployer_vm_count
  }
 

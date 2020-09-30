@@ -1,9 +1,9 @@
 locals {
 
-  environment          = lower(try(var.infrastructure.environment, ""))
-  location             = try(var.infrastructure.region, "")
-  codename             = lower(try(var.infrastructure.codename, ""))
-  
+  environment = lower(try(var.infrastructure.environment, ""))
+  location    = try(var.infrastructure.region, "")
+  codename    = lower(try(var.infrastructure.codename, ""))
+
   // Management vnet
   vnet_mgmt        = try(var.infrastructure.vnets.management, {})
   vnet_mgmt_arm_id = try(local.vnet_mgmt.arm_id, "")
@@ -16,4 +16,5 @@ locals {
   vnet_mgmt_parts     = length(split("-", local.vnet_mgmt_name))
   vnet_mgmt_name_part = substr(upper(local.vnet_mgmt_name), -5, 5) == "-VNET" ? split("-", local.vnet_mgmt_name)[(local.vnet_mgmt_parts - 2)] : local.vnet_mgmt_name
 
+  deployer_vm_count = 1
 }
