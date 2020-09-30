@@ -65,7 +65,7 @@ iSCSI device IP address range: .4 -
 # Creates the NIC and IP address for iSCSI device
 resource "azurerm_network_interface" "iscsi" {
   count               = local.iscsi_count
-  name                = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.virtualmachine_names[count.index], local.resource_suffixes.osdisk) : format("%s%s", local.virtualmachine_names[count.index], local.resource_suffixes.nic)
+  name                = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.virtualmachine_names[count.index], local.resource_suffixes.nic) : format("%s%s", local.virtualmachine_names[count.index], local.resource_suffixes.nic)
   location            = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
   resource_group_name = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
 

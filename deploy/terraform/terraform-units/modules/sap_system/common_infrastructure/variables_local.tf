@@ -23,19 +23,17 @@ variable naming {
   description = "Defines the names for the resources"
 }
 
-
 //Set defaults
 locals {
   //Region and metadata
-  region      = try(local.var_infra.region, "")
-  environment = lower(try(local.var_infra.environment, ""))
-  sid         = upper(try(var.application.sid, ""))
-  prefix      = try(var.infrastructure.resource_group.name, var.naming.prefix["SDU"])
+  region = try(local.var_infra.region, "")
+  sid    = upper(try(var.application.sid, ""))
+  prefix = try(var.infrastructure.resource_group.name, var.naming.prefix.SDU)
 
-  vnet_prefix          = var.naming.prefix["VNET"]
+  vnet_prefix          = var.naming.prefix.VNET
   storageaccount_name  = var.naming.storageaccount_names.SDU
-  keyvault_names       = var.naming.keyvault_names["SDU"]
-  virtualmachine_names = var.naming.virtualmachine_names["ISCSI"]
+  keyvault_names       = var.naming.keyvault_names.SDU
+  virtualmachine_names = var.naming.virtualmachine_names.ISCSI
   resource_suffixes    = var.naming.resource_suffixes
 
   //Filter the list of databases to only HANA platform entries
@@ -78,8 +76,7 @@ locals {
   //  - HANA database has high_availability set to true
   //  - HANA database uses SUSE
   iscsi_count = (local.hdb_ha && upper(local.hdb_os.publisher) == "SUSE") ? try(local.var_iscsi.iscsi_count, 0) : 0
-
-  iscsi_size = try(local.var_iscsi.size, "Standard_D2s_v3")
+  iscsi_size  = try(local.var_iscsi.size, "Standard_D2s_v3")
   iscsi_os = try(local.var_iscsi.os,
     {
       "publisher" = try(local.var_iscsi.os.publisher, "SUSE")
