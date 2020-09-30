@@ -153,8 +153,6 @@ locals {
     { loadbalancer = local.loadbalancer }
   )
 
-  customer_provided_names = try(local.anydb.dbnodes[0].name, "") == "" ? false : true
-
   dbnodes = flatten([[for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
     name         = try(local.anydb_ha ? "${dbnode.name}-0" : "${dbnode.name}", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.virtualmachine_names[idx], local.resource_suffixes.vm) : format("%s%s", local.virtualmachine_names[idx], local.resource_suffixes.vm)))
     computername = try(local.anydb_ha ? "${dbnode.name}-0" : "${dbnode.name}", format("%s%s", local.virtualmachine_names[idx], local.resource_suffixes.vm))
