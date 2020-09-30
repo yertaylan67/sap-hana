@@ -21,7 +21,6 @@ locals {
   // Resource group and location
 
   region             = try(var.infrastructure.region, "")
-  vnet_mgmt_tempname = try(local.vnet_mgmt.name, "")
   prefix             = try(var.infrastructure.resource_group.name, var.naming.prefix.DEPLOYER)
   rg_name            = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, local.resource_suffixes.deployer-rg))
 
