@@ -1,6 +1,6 @@
 locals {
 
-  environment          = lower(try(var.infrastructure.landscape, ""))
+  environment          = lower(try(var.infrastructure.environment, ""))
   location             = try(var.infrastructure.region, "")
   codename             = lower(try(var.infrastructure.codename, ""))
   
