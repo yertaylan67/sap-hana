@@ -55,7 +55,7 @@ module "common_infrastructure" {
 
 module "sap_namegenerator" {
   source        = "../../terraform-units/modules/sap_namegenerator"
-  environment   = lower(try(var.infrastructure.landscape, ""))
+  environment   = lower(try(var.infrastructure.environment, ""))
   location      = try(var.infrastructure.region, "")
   codename      = lower(try(var.infrastructure.codename, ""))
   random_id     = module.common_infrastructure.random_id
