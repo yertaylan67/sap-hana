@@ -40,5 +40,5 @@ output "deployers" {
 }
 
 output "random_id" {
-  value = random_id.deploy_random_id.hex
+  value = random_id.deployer.hex
 }
