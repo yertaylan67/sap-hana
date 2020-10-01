@@ -14,34 +14,22 @@ variable codename {
 
 variable management_vnet_name {
   description = "Name of Management vnet"
-<<<<<<< HEAD
   default     = ""
-=======
->>>>>>> feature/naming-module
 }
 
 variable sap_vnet_name {
   description = "Name of SAP vnet"
-<<<<<<< HEAD
   default     = ""
-=======
->>>>>>> feature/naming-module
 }
 
 variable sap_sid {
   description = "SAP SID"
-<<<<<<< HEAD
   default     = ""
-=======
->>>>>>> feature/naming-module
 }
 
 variable db_sid {
   description = "Database SID"
-<<<<<<< HEAD
   default     = ""
-=======
->>>>>>> feature/naming-module
 }
 
 variable random_id {
