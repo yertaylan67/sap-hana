@@ -95,7 +95,7 @@ module "jumpbox" {
   storage-bootdiag  = module.common_infrastructure.storage-bootdiag
   output-json       = module.output_files.output-json
   ansible-inventory = module.output_files.ansible-inventory
-  random-id         = random_id.deploy-random-id
+  random-id         = module.common_infrastructure.random_id
   deployer-uai      = module.deployer.deployer-uai
 }
 
@@ -154,7 +154,7 @@ module "anydb_node" {
   vnet-sap         = module.common_infrastructure.vnet-sap
   storage-bootdiag = module.common_infrastructure.storage-bootdiag
   ppg              = module.common_infrastructure.ppg
-  random-id        = random_id.deploy-random-id
+  random-id        = module.common_infrastructure.random_id
 }
 
 // Generate output files
