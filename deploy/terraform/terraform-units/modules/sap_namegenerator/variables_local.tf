@@ -205,7 +205,7 @@ variable resource_suffixes {
     "kv"                  = ""
     "msi"                 = "-msi"
     "nic"                 = "-nic"
-    "osdisk"              = "-osdisk"
+    "osdisk"              = "-OsDisk"
     "pip"                 = "-pip"
     "ppg"                 = "-ppg"
     "scs-alb"             = "_scs-alb"
