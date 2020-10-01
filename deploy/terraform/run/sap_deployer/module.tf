@@ -19,7 +19,7 @@ module "sap_namegenerator" {
   location             = local.location
   codename             = local.codename
   management_vnet_name = local.vnet_mgmt_name_part
-  random_id            = random_id.deploy_random_id.hex
+  random_id            = module.sap_deployer.random_id
   deployer_vm_count    = local.deployer_vm_count
  }
 

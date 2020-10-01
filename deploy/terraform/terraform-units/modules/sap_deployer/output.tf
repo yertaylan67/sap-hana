@@ -39,3 +39,6 @@ output "deployers" {
   value = local.deployers_updated
 }
 
+output "random_id" {
+  value = random_id.deploy_random_id.hex
+}
