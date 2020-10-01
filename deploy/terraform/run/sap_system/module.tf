@@ -55,10 +55,10 @@ module "common_infrastructure" {
 
 module "sap_namegenerator" {
   source        = "../../terraform-units/modules/sap_namegenerator"
-  environment   = lower(try(var.infrastructure.landscape, ""))
+  environment   = lower(try(var.infrastructure.environment, ""))
   location      = try(var.infrastructure.region, "")
   codename      = lower(try(var.infrastructure.codename, ""))
-  random_id     = random_id.deploy-random-id.hex
+  random_id     = module.common_infrastructure.random_id
   sap_vnet_name = local.vnet_sap_name_part
   sap_sid       = local.sap_sid
   db_sid        = local.db_sid
@@ -73,7 +73,7 @@ module "sap_namegenerator" {
   web_server_count = local.webdispatcher_count
   scs_server_count = local.scs_server_count
 
-  //These are not needed for the SDU
+  //These are not needed for the SDU but required by the naming module
   management_vnet_name = ""
 
 }
@@ -95,7 +95,7 @@ module "jumpbox" {
   storage-bootdiag  = module.common_infrastructure.storage-bootdiag
   output-json       = module.output_files.output-json
   ansible-inventory = module.output_files.ansible-inventory
-  random-id         = random_id.deploy-random-id
+  random-id         = module.common_infrastructure.random_id
   deployer-uai      = module.deployer.deployer-uai
 }
 
@@ -155,7 +155,7 @@ module "anydb_node" {
   storage-bootdiag = module.common_infrastructure.storage-bootdiag
   ppg              = module.common_infrastructure.ppg
   naming           = module.sap_namegenerator.naming
-
+  random-id        = module.common_infrastructure.random_id
 }
 
 // Generate output files
@@ -192,5 +192,5 @@ module "output_files" {
   any-database-info            = module.anydb_node.any-database-info
   anydb-loadbalancers          = module.anydb_node.anydb-loadbalancers
   deployers                    = module.deployer.import_deployer
-  random_id                    = random_id.deploy-random-id.hex
+  random_id                    = module.common_infrastructure.random_id
 }

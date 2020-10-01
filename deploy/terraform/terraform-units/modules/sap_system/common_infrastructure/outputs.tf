@@ -33,3 +33,7 @@ output "infrastructure_w_defaults" {
 output "software_w_defaults" {
   value = local.software
 }
+
+output "random_id" {
+  value = random_id.random-id.hex
+}
