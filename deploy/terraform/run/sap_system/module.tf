@@ -155,7 +155,6 @@ module "anydb_node" {
   storage-bootdiag = module.common_infrastructure.storage-bootdiag
   ppg              = module.common_infrastructure.ppg
   naming           = module.sap_namegenerator.naming
-  random-id        = module.common_infrastructure.random_id
 }
 
 // Generate output files
