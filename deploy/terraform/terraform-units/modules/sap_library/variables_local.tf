@@ -1,6 +1,6 @@
 // Input arguments 
 variable naming {
-  description = "naming convention"
+  description = "Defines the names for the resources"
 }
 
 locals {

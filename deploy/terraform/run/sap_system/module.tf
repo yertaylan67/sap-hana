@@ -4,16 +4,17 @@
 */
 
 module "deployer" {
-  source         = "../../terraform-units/modules/sap_system/deployer"
-  application    = var.application
-  databases      = var.databases
-  infrastructure = var.infrastructure
-  jumpboxes      = var.jumpboxes
-  options        = var.options
-  software       = var.software
-  ssh-timeout    = var.ssh-timeout
-  sshkey         = var.sshkey
-  naming         = module.sap_namegenerator.naming
+  source            = "../../terraform-units/modules/sap_system/deployer"
+  application       = var.application
+  databases         = var.databases
+  infrastructure    = var.infrastructure
+  jumpboxes         = var.jumpboxes
+  options           = var.options
+  software          = var.software
+  ssh-timeout       = var.ssh-timeout
+  sshkey            = var.sshkey
+  naming            = module.sap_namegenerator.naming
+  deployer_vm_count = 1
 }
 
 module "saplibrary" {
@@ -59,10 +60,12 @@ module "sap_namegenerator" {
   db_sid        = local.db_sid
   app_ostype    = local.app_ostype
   db_ostype     = local.db_ostype
+  /////////////////////////////////////////////////////////////////////////////////////
   // The naming module creates a list of servers names that is app_server_max_count
   // for database servers the list is 2 * db_server_max_count. 
   // The first db_server_max_count items are for single node
   // The the second db_server_max_count items are for ha
+  /////////////////////////////////////////////////////////////////////////////////////
   db_server_count  = local.db_server_count
   app_server_count = local.app_server_count
   web_server_count = local.webdispatcher_count
