@@ -4,33 +4,29 @@
 */
 
 module "deployer" {
-  source            = "../../terraform-units/modules/sap_system/deployer"
-  application       = var.application
-  databases         = var.databases
-  infrastructure    = var.infrastructure
-  jumpboxes         = var.jumpboxes
-  options           = var.options
-  software          = var.software
-  ssh-timeout       = var.ssh-timeout
-  sshkey            = var.sshkey
-  //ToDo: Update once all are merged
-  library_prefix    = module.sap_namegenerator.naming.prefix.DEPLOYER
-  resource_suffixes = module.sap_namegenerator.naming.resource_suffixes
+  source         = "../../terraform-units/modules/sap_system/deployer"
+  application    = var.application
+  databases      = var.databases
+  infrastructure = var.infrastructure
+  jumpboxes      = var.jumpboxes
+  options        = var.options
+  software       = var.software
+  ssh-timeout    = var.ssh-timeout
+  sshkey         = var.sshkey
+  naming         = module.sap_namegenerator.naming
 }
 
 module "saplibrary" {
-  source            = "../../terraform-units/modules/sap_system/saplibrary"
-  application       = var.application
-  databases         = var.databases
-  infrastructure    = var.infrastructure
-  jumpboxes         = var.jumpboxes
-  options           = var.options
-  software          = var.software
-  ssh-timeout       = var.ssh-timeout
-  sshkey            = var.sshkey
-  //ToDo: Update once all are merged
-  library_prefix    = module.sap_namegenerator.naming.prefix.LIBRARY
-  resource_suffixes = module.sap_namegenerator.naming.resource_suffixes
+  source         = "../../terraform-units/modules/sap_system/saplibrary"
+  application    = var.application
+  databases      = var.databases
+  infrastructure = var.infrastructure
+  jumpboxes      = var.jumpboxes
+  options        = var.options
+  software       = var.software
+  ssh-timeout    = var.ssh-timeout
+  sshkey         = var.sshkey
+  naming         = module.sap_namegenerator.naming
 }
 
 
@@ -50,7 +46,6 @@ module "common_infrastructure" {
   subnet-mgmt         = module.deployer.subnet-mgmt
   nsg-mgmt            = module.deployer.nsg-mgmt
   naming              = module.sap_namegenerator.naming
-
 }
 
 module "sap_namegenerator" {
@@ -72,10 +67,6 @@ module "sap_namegenerator" {
   app_server_count = local.app_server_count
   web_server_count = local.webdispatcher_count
   scs_server_count = local.scs_server_count
-
-  //These are not needed for the SDU but required by the naming module
-  management_vnet_name = ""
-
 }
 
 // Create Jumpboxes
@@ -117,7 +108,6 @@ module "hdb_node" {
   storage-bootdiag = module.common_infrastructure.storage-bootdiag
   ppg              = module.common_infrastructure.ppg
   naming           = module.sap_namegenerator.naming
-
 }
 
 // Create Application Tier nodes

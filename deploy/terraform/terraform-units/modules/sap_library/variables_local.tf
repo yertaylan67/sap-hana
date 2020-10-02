@@ -3,11 +3,6 @@ variable naming {
   description = "naming convention"
 }
 
-
-variable keyvault_names {
-  type        = list
-  description = "Keyvault name list"
-}
 locals {
 
   storageaccount_names = var.naming.storageaccount_names.LIBRARY
