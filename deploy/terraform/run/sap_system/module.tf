@@ -14,7 +14,6 @@ module "deployer" {
   ssh-timeout       = var.ssh-timeout
   sshkey            = var.sshkey
   naming            = module.sap_namegenerator.naming
-  deployer_vm_count = 1
 }
 
 module "saplibrary" {
