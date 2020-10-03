@@ -96,7 +96,7 @@ resource "azurerm_lb_rule" "hdb" {
   count                          = local.enable_deployment ? length(local.loadbalancer_ports) : 0
   resource_group_name            = var.resource-group[0].name
   loadbalancer_id                = azurerm_lb.hdb[0].id
-  name                           = "${upper(local.loadbalancer_ports[count.index].sid)}_HDB_${local.loadbalancer_ports[count.index].port}"
+  name =                           format("%s%s%05d-%02d",local.prefix,local.resource_suffixes.db-alb-rule,local.loadbalancer_ports[count.index].port,count.index)
   protocol                       = "Tcp"
   frontend_port                  = local.loadbalancer_ports[count.index].port
   backend_port                   = local.loadbalancer_ports[count.index].port
