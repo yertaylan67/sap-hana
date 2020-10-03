@@ -29,9 +29,9 @@ variable naming {
 // Set defaults
 locals {
 
-  db_server_count      = length(var.naming.virtualmachine_names["HANA"])
-  virtualmachine_names = concat(var.naming.virtualmachine_names["HANA"], var.naming.virtualmachine_names["HANA_HA"])
-  storageaccount_names = var.naming.storageaccount_names["SDU"]
+  db_server_count      = length(var.naming.virtualmachine_names.HANA)
+  virtualmachine_names = concat(var.naming.virtualmachine_names.HANA, var.naming.virtualmachine_names.HANA_HA)
+  storageaccount_names = var.naming.storageaccount_names.SDU
   resource_suffixes    = var.naming.resource_suffixes
 
   region  = try(var.infrastructure.region, "")

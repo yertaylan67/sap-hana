@@ -35,5 +35,5 @@ output "software_w_defaults" {
 }
 
 output "random_id" {
-  value = random_id.random-id.hex
+  value = random_id.random_id.hex
 }

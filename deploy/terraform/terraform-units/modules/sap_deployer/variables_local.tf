@@ -4,7 +4,7 @@ Description:
   Define local variables.
 */
 variable naming {
-  description = "Defines the names for the resources"
+  description = "naming convention"
 }
 
 // Set defaults

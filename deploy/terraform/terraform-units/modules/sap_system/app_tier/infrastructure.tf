@@ -83,7 +83,7 @@ resource "azurerm_lb_rule" "scs" {
   count                          = local.enable_deployment ? length(local.lb-ports.scs) : 0
   resource_group_name            = var.resource-group[0].name
   loadbalancer_id                = azurerm_lb.scs[0].id
-  name                           = "${local.prefix}_SCS_${local.lb-ports.scs[count.index]}"
+  name                           = format("%s%s%05d-%02d", local.prefix, local.resource_suffixes.scs-scs-rule, local.lb-ports.scs[count.index], count.index)
   protocol                       = "Tcp"
   frontend_port                  = local.lb-ports.scs[count.index]
   backend_port                   = local.lb-ports.scs[count.index]
@@ -98,7 +98,7 @@ resource "azurerm_lb_rule" "ers" {
   count                          = local.enable_deployment ? (local.scs_high_availability ? length(local.lb-ports.ers) : 0) : 0
   resource_group_name            = var.resource-group[0].name
   loadbalancer_id                = azurerm_lb.scs[0].id
-  name                           = "${local.prefix}_ERS_${local.lb-ports.ers[count.index]}"
+  name                           = format("%s%s%05d-%02d", local.prefix, local.resource_suffixes.scs-ers-rule, local.lb-ports.ers[count.index], count.index)
   protocol                       = "Tcp"
   frontend_port                  = local.lb-ports.ers[count.index]
   backend_port                   = local.lb-ports.ers[count.index]
@@ -158,7 +158,7 @@ resource "azurerm_lb" "web" {
 
 resource "azurerm_lb_backend_address_pool" "web" {
   count               = local.enable_deployment ? 1 : 0
-  name                          = format("%s%s", local.prefix, local.resource_suffixes.web-alb-bepool)
+  name                = format("%s%s", local.prefix, local.resource_suffixes.web-alb-bepool)
   resource_group_name = var.resource-group[0].name
   loadbalancer_id     = azurerm_lb.web[0].id
 }
@@ -170,7 +170,7 @@ resource "azurerm_lb_rule" "web" {
   count                          = local.enable_deployment ? length(local.lb-ports.web) : 0
   resource_group_name            = var.resource-group[0].name
   loadbalancer_id                = azurerm_lb.web[0].id
-  name                           = "${upper(local.application_sid)}_webAlb-inRule${format("%02d", count.index)}"
+  name                           = format("%s%s%05d-%02d", local.prefix, local.resource_suffixes.web-alb-inrule, local.lb-ports.web[count.index], count.index)
   protocol                       = "Tcp"
   frontend_port                  = local.lb-ports.web[count.index]
   backend_port                   = local.lb-ports.web[count.index]
