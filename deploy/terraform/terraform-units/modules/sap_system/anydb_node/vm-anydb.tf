@@ -2,7 +2,7 @@
 # RESOURCES
 #############################################################################
 
-resource azurerm_network_interface "anydb" {
+resource "azurerm_network_interface" "anydb" {
   count               = local.enable_deployment ? length(local.anydb_vms) : 0
   name                = format("%s%s", local.anydb_vms[count.index].name, local.resource_suffixes.db-nic)
   location            = var.resource-group[0].location
@@ -18,7 +18,7 @@ resource azurerm_network_interface "anydb" {
 }
 
 # Section for Linux Virtual machine 
-resource azurerm_linux_virtual_machine "dbserver" {
+resource "azurerm_linux_virtual_machine" "dbserver" {
   count                        = local.enable_deployment ? ((upper(local.anydb_ostype) == "LINUX") ? length(local.anydb_vms) : 0) : 0
   name                         = local.anydb_vms[count.index].name
   computer_name                = local.anydb_vms[count.index].computername
@@ -71,7 +71,7 @@ resource azurerm_linux_virtual_machine "dbserver" {
 }
 
 # Section for Windows Virtual machine based on a marketplace image 
-resource azurerm_windows_virtual_machine "dbserver" {
+resource "azurerm_windows_virtual_machine" "dbserver" {
   count                        = local.enable_deployment ? ((upper(local.anydb_ostype) == "WINDOWS") ? length(local.anydb_vms) : 0) : 0
   name                         = local.anydb_vms[count.index].name
   computer_name                = local.anydb_vms[count.index].computername
@@ -118,7 +118,7 @@ resource azurerm_windows_virtual_machine "dbserver" {
 }
 
 # Creates managed data disks
-resource azurerm_managed_disk "disks" {
+resource "azurerm_managed_disk" "disks" {
   count                = local.enable_deployment ? length(local.anydb_disks) : 0
   name                 = local.anydb_disks[count.index].name
   location             = var.resource-group[0].location
@@ -129,7 +129,7 @@ resource azurerm_managed_disk "disks" {
 }
 
 # Manages attaching a Disk to a Virtual Machine
-resource azurerm_virtual_machine_data_disk_attachment "vm-disks" {
+resource "azurerm_virtual_machine_data_disk_attachment" "vm-disks" {
   count                     = local.enable_deployment ? length(azurerm_managed_disk.disks) : 0
   managed_disk_id           = azurerm_managed_disk.disks[count.index].id
   virtual_machine_id        = upper(local.anydb_ostype) == "LINUX" ? azurerm_linux_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].id : azurerm_windows_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].id

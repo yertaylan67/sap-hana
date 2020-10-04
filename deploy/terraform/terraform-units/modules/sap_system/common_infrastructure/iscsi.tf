@@ -12,7 +12,7 @@ TODO:  Fix Naming convention and document in the Naming Convention Doc
 Only create/import iSCSI subnet and nsg when iSCSI device(s) will be deployed
 +--------------------------------------4--------------------------------------*/
 # Creates iSCSI subnet of SAP VNET
-resource azurerm_subnet "iscsi" {
+resource "azurerm_subnet" "iscsi" {
   count                = local.iscsi_count == 0 ? 0 : (local.sub_iscsi_exists ? 0 : 1)
   name                 = local.sub_iscsi_name
   resource_group_name  = local.vnet_sap_exists ? data.azurerm_virtual_network.vnet-sap[0].resource_group_name : azurerm_virtual_network.vnet-sap[0].resource_group_name
@@ -21,7 +21,7 @@ resource azurerm_subnet "iscsi" {
 }
 
 # Imports data of existing SAP iSCSI subnet
-data azurerm_subnet "iscsi" {
+data "azurerm_subnet" "iscsi" {
   count                = local.iscsi_count == 0 ? 0 : (local.sub_iscsi_exists ? 1 : 0)
   name                 = split("/", local.sub_iscsi_arm_id)[10]
   resource_group_name  = split("/", local.sub_iscsi_arm_id)[4]
@@ -29,7 +29,7 @@ data azurerm_subnet "iscsi" {
 }
 
 # Creates SAP iSCSI subnet nsg
-resource azurerm_network_security_group "iscsi" {
+resource "azurerm_network_security_group" "iscsi" {
   count               = local.iscsi_count == 0 ? 0 : (local.sub_iscsi_nsg_exists ? 0 : 1)
   name                = local.sub_iscsi_nsg_name
   location            = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
@@ -37,14 +37,14 @@ resource azurerm_network_security_group "iscsi" {
 }
 
 # Imports the SAP iSCSI subnet nsg data
-data azurerm_network_security_group "iscsi" {
+data "azurerm_network_security_group" "iscsi" {
   count               = local.iscsi_count == 0 ? 0 : (local.sub_iscsi_nsg_exists ? 1 : 0)
   name                = split("/", local.sub_iscsi_nsg_arm_id)[8]
   resource_group_name = split("/", local.sub_iscsi_nsg_arm_id)[4]
 }
 
 # Creates network security rule to deny external traffic for SAP iSCSI subnet
-resource azurerm_network_security_rule "iscsi" {
+resource "azurerm_network_security_rule" "iscsi" {
   count                        = local.iscsi_count == 0 ? 0 : (local.sub_iscsi_exists ? 0 : 1)
   name                         = "deny-inbound-traffic"
   resource_group_name          = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
@@ -63,9 +63,9 @@ resource azurerm_network_security_rule "iscsi" {
 iSCSI device IP address range: .4 - 
 +--------------------------------------4--------------------------------------*/
 # Creates the NIC and IP address for iSCSI device
-resource azurerm_network_interface "iscsi" {
+resource "azurerm_network_interface" "iscsi" {
   count               = local.iscsi_count
-  name                = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.virtualmachine_names[count.index], local.resource_suffixes.osdisk) : format("%s%s", local.virtualmachine_names[count.index], local.resource_suffixes.nic)
+  name                = format("%s_%s%s", local.prefix, local.virtualmachine_names[count.index], local.resource_suffixes.nic)
   location            = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
   resource_group_name = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
 
@@ -78,16 +78,16 @@ resource azurerm_network_interface "iscsi" {
 }
 
 # Manages the association between NIC and NSG.
-resource azurerm_network_interface_security_group_association "iscsi" {
+resource "azurerm_network_interface_security_group_association" "iscsi" {
   count                     = local.iscsi_count
   network_interface_id      = azurerm_network_interface.iscsi[count.index].id
   network_security_group_id = local.sub_iscsi_nsg_exists ? data.azurerm_network_security_group.iscsi[0].id : azurerm_network_security_group.iscsi[0].id
 }
 
 # Manages Linux Virtual Machine for iSCSI
-resource azurerm_linux_virtual_machine "iscsi" {
+resource "azurerm_linux_virtual_machine" "iscsi" {
   count                           = local.iscsi_count
-  name                            = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.virtualmachine_names[count.index], local.resource_suffixes.vm) : format("%s%s", local.virtualmachine_names[count.index], local.resource_suffixes.vm)
+  name                            = format("%s_%s%s", local.prefix, local.virtualmachine_names[count.index], local.resource_suffixes.vm)
   computer_name                   = local.virtualmachine_names[count.index]
   location                        = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
   resource_group_name             = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
@@ -98,7 +98,7 @@ resource azurerm_linux_virtual_machine "iscsi" {
   disable_password_authentication = local.iscsi.authentication.type != "password" ? true : false
 
   os_disk {
-    name                 = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.virtualmachine_names[count.index], local.resource_suffixes.osdisk) : format("%s%s", local.virtualmachine_names[count.index], local.resource_suffixes.osdisk)
+    name                 = format("%s_%s%s", local.prefix, local.virtualmachine_names[count.index], local.resource_suffixes.osdisk) 
     caching              = "ReadWrite"
     storage_account_type = "Premium_LRS"
   }

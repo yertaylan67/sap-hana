@@ -4,18 +4,16 @@
 */
 
 module "deployer" {
-  source         = "../../terraform-units/modules/sap_system/deployer"
-  application    = var.application
-  databases      = var.databases
-  infrastructure = var.infrastructure
-  jumpboxes      = var.jumpboxes
-  options        = var.options
-  software       = var.software
-  ssh-timeout    = var.ssh-timeout
-  sshkey         = var.sshkey
-  //ToDo: Update once all are merged
-  library_prefix    = module.sap_namegenerator.naming.prefix.DEPLOYER
-  resource_suffixes = module.sap_namegenerator.naming.resource_suffixes
+  source            = "../../terraform-units/modules/sap_system/deployer"
+  application       = var.application
+  databases         = var.databases
+  infrastructure    = var.infrastructure
+  jumpboxes         = var.jumpboxes
+  options           = var.options
+  software          = var.software
+  ssh-timeout       = var.ssh-timeout
+  sshkey            = var.sshkey
+  naming            = module.sap_namegenerator.naming
 }
 
 module "saplibrary" {
@@ -28,9 +26,7 @@ module "saplibrary" {
   software       = var.software
   ssh-timeout    = var.ssh-timeout
   sshkey         = var.sshkey
-  //ToDo: Update once all are merged
-  library_prefix    = module.sap_namegenerator.naming.prefix.LIBRARY
-  resource_suffixes = module.sap_namegenerator.naming.resource_suffixes
+  naming         = module.sap_namegenerator.naming
 }
 
 
@@ -50,28 +46,29 @@ module "common_infrastructure" {
   subnet-mgmt         = module.deployer.subnet-mgmt
   nsg-mgmt            = module.deployer.nsg-mgmt
   naming              = module.sap_namegenerator.naming
-
 }
 
 module "sap_namegenerator" {
-  source           = "../../terraform-units/modules/sap_namegenerator"
-  environment      = lower(try(var.infrastructure.environment, ""))
-  location         = try(var.infrastructure.region, "")
-  codename         = lower(try(var.infrastructure.codename, ""))
-  random-id        = random_id.deploy-random-id.hex
-  sap_vnet_name    = local.vnet_sap_name_part
-  sap_sid          = local.sap_sid
-  db_sid           = local.db_sid
-  app_ostype       = local.app_ostype
-  db_ostype        = local.db_ostype
+  source        = "../../terraform-units/modules/sap_namegenerator"
+  environment   = lower(try(var.infrastructure.environment, ""))
+  location      = try(var.infrastructure.region, "")
+  codename      = lower(try(var.infrastructure.codename, ""))
+  random_id     = module.common_infrastructure.random_id
+  sap_vnet_name = local.vnet_sap_name_part
+  sap_sid       = local.sap_sid
+  db_sid        = local.db_sid
+  app_ostype    = local.app_ostype
+  db_ostype     = local.db_ostype
+  /////////////////////////////////////////////////////////////////////////////////////
+  // The naming module creates a list of servers names that is app_server_max_count
+  // for database servers the list is 2 * db_server_max_count. 
+  // The first db_server_max_count items are for single node
+  // The the second db_server_max_count items are for ha
+  /////////////////////////////////////////////////////////////////////////////////////
   db_server_count  = local.db_server_count
   app_server_count = local.app_server_count
   web_server_count = local.webdispatcher_count
   scs_server_count = local.scs_server_count
-
-  //These are not needed for the SDU
-  management_vnet_name = ""
-
 }
 
 // Create Jumpboxes
@@ -91,7 +88,7 @@ module "jumpbox" {
   storage-bootdiag  = module.common_infrastructure.storage-bootdiag
   output-json       = module.output_files.output-json
   ansible-inventory = module.output_files.ansible-inventory
-  random-id         = random_id.deploy-random-id
+  random-id         = module.common_infrastructure.random_id
   deployer-uai      = module.deployer.deployer-uai
 }
 
@@ -112,9 +109,7 @@ module "hdb_node" {
   vnet-sap         = module.common_infrastructure.vnet-sap
   storage-bootdiag = module.common_infrastructure.storage-bootdiag
   ppg              = module.common_infrastructure.ppg
-  random-id        = random_id.deploy-random-id
   naming           = module.sap_namegenerator.naming
-
 }
 
 // Create Application Tier nodes
@@ -133,7 +128,6 @@ module "app_tier" {
   vnet-sap         = module.common_infrastructure.vnet-sap
   storage-bootdiag = module.common_infrastructure.storage-bootdiag
   ppg              = module.common_infrastructure.ppg
-  random-id        = random_id.deploy-random-id
   naming           = module.sap_namegenerator.naming
 }
 
@@ -152,9 +146,7 @@ module "anydb_node" {
   vnet-sap         = module.common_infrastructure.vnet-sap
   storage-bootdiag = module.common_infrastructure.storage-bootdiag
   ppg              = module.common_infrastructure.ppg
-  random-id        = random_id.deploy-random-id
   naming           = module.sap_namegenerator.naming
-
 }
 
 // Generate output files
@@ -191,5 +183,5 @@ module "output_files" {
   any-database-info            = module.anydb_node.any-database-info
   anydb-loadbalancers          = module.anydb_node.anydb-loadbalancers
   deployers                    = module.deployer.import_deployer
-  random-id                    = random_id.deploy-random-id.hex
+  random_id                    = module.common_infrastructure.random_id
 }

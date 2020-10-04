@@ -6,10 +6,13 @@ Description:
   Define 0..n Deployer(s).
 */
 
+data azurerm_subscription "primary" {}
+data azurerm_client_config "current" {}
+
 // Public IP addresse and nic for Deployer
 resource "azurerm_public_ip" "deployer" {
   count               = length(local.deployers)
-  name                = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.deployers[count.index].name, var.resource_suffixes["pip"]) : format("%s%s", local.deployers[count.index].name, var.resource_suffixes["pip"])
+  name                = format("%s_%s%s", local.prefix, local.deployers[count.index].name, local.resource_suffixes.pip)
   location            = azurerm_resource_group.deployer[0].location
   resource_group_name = azurerm_resource_group.deployer[0].name
   allocation_method   = "Static"
@@ -17,7 +20,7 @@ resource "azurerm_public_ip" "deployer" {
 
 resource "azurerm_network_interface" "deployer" {
   count               = length(local.deployers)
-  name                = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.deployers[count.index].name, var.resource_suffixes["nic"]) : format("%s%s", local.deployers[count.index].name, var.resource_suffixes["nic"])
+  name                = format("%s_%s%s", local.prefix, local.deployers[count.index].name, local.resource_suffixes.nic)
   location            = azurerm_resource_group.deployer[0].location
   resource_group_name = azurerm_resource_group.deployer[0].name
 
@@ -37,9 +40,6 @@ resource "azurerm_user_assigned_identity" "deployer" {
   name                = format("%s-msi", local.prefix)
 }
 
-data "azurerm_subscription" "primary" {}
-data "azurerm_client_config" "current" {}
-
 // Add role to be able to deploy resources
 resource "azurerm_role_assignment" "sub_contributor" {
   scope                = data.azurerm_subscription.primary.id
@@ -57,7 +57,7 @@ resource "azurerm_role_assignment" "sub_user_admin" {
 // Linux Virtual Machine for Deployer
 resource "azurerm_linux_virtual_machine" "deployer" {
   count                           = length(local.deployers)
-  name                            = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.deployers[count.index].name, var.resource_suffixes["vm"]) : format("%s%s", local.deployers[count.index].name, var.resource_suffixes["vm"])
+  name                            = format("%s_%s%s", local.prefix, local.deployers[count.index].name, local.resource_suffixes.vm)
   computer_name                   = local.deployers[count.index].name
   location                        = azurerm_resource_group.deployer[0].location
   resource_group_name             = azurerm_resource_group.deployer[0].name
@@ -68,7 +68,7 @@ resource "azurerm_linux_virtual_machine" "deployer" {
   disable_password_authentication = local.deployers[count.index].authentication.type != "password" ? true : false
 
   os_disk {
-    name                 = length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.deployers[count.index].name, var.resource_suffixes["osdisk"]) : format("%s%s", local.deployers[count.index].name, var.resource_suffixes["osdisk"])
+    name                 = format("%s_%s%s", local.prefix, local.deployers[count.index].name, local.resource_suffixes.osdisk)
     caching              = "ReadWrite"
     storage_account_type = local.deployers[count.index].disk_type
   }
@@ -148,13 +148,13 @@ resource "null_resource" "prepare-deployer" {
   provisioner "remote-exec" {
     inline = local.deployers[count.index].os.source_image_id != "" ? [] : [
       // Prepare folder structure
-      "mkdir -p $HOME/AZURE_SAP_AUTOMATED_DEPLOYMENT/WORKSPACES/LOCAL/${azurerm_resource_group.deployer[0].name}",
-      "mkdir $HOME/AZURE_SAP_AUTOMATED_DEPLOYMENT/WORKSPACES/SAP_LIBRARY",
-      "mkdir $HOME/AZURE_SAP_AUTOMATED_DEPLOYMENT/WORKSPACES/SAP_SYSTEM",
-      "mkdir $HOME/AZURE_SAP_AUTOMATED_DEPLOYMENT/WORKSPACES/SAP_LANDSCAPE",
-      "mkdir $HOME/AZURE_SAP_AUTOMATED_DEPLOYMENT/WORKSPACES/DEPLOYER",
+      "mkdir -p $HOME/Azure_SAP_Automated_Deployment/WORKSPACES/LOCAL/${azurerm_resource_group.deployer[0].name}",
+      "mkdir $HOME/Azure_SAP_Automated_Deployment/WORKSPACES/SAP_LIBRARY",
+      "mkdir $HOME/Azure_SAP_Automated_Deployment/WORKSPACES/SAP_SYSTEM",
+      "mkdir $HOME/Azure_SAP_Automated_Deployment/WORKSPACES/SAP_LANDSCAPE",
+      "mkdir $HOME/Azure_SAP_Automated_Deployment/WORKSPACES/DEPLOYER",
       // Clones project repository
-      "git clone https://github.com/Azure/sap-hana.git $HOME/AZURE_SAP_AUTOMATED_DEPLOYMENT/sap-hana",
+      "git clone https://github.com/Azure/sap-hana.git $HOME/Azure_SAP_Automated_Deployment/sap-hana",
       // Install terraform for all users
       "sudo apt-get install unzip",
       "sudo mkdir -p /opt/terraform/terraform_0.12.29",

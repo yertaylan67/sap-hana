@@ -14,21 +14,25 @@ variable codename {
 
 variable management_vnet_name {
   description = "Name of Management vnet"
+  default     = ""
 }
 
 variable sap_vnet_name {
   description = "Name of SAP vnet"
+  default     = ""
 }
 
 variable sap_sid {
   description = "SAP SID"
+  default     = ""
 }
 
 variable db_sid {
   description = "Database SID"
+  default     = ""
 }
 
-variable random-id {
+variable random_id {
   type        = string
   description = "Random hex string"
 }
@@ -74,13 +78,18 @@ variable iscsi_server_count {
   default = 1
 }
 
+variable deployer_vm_count {
+  type    = number
+  default = 1
+}
+
 //Todo: Add to documentation
 variable sapautomation_name_limits {
   description = "Name length for automation resources"
   default = {
     environment_variable_length = 5
     sap_vnet_length             = 7
-    random-id_length            = 3
+    random_id_length            = 3
     sdu_name_length             = 80
   }
 }
@@ -178,9 +187,10 @@ variable resource_suffixes {
     "app-subnet"          = "_app-subnet"
     "app-subnet-nsg"      = "_appSubnet-nsg"
     "db-alb"              = "_db-alb"
-    "db-alb-feip"         = "_db-alb-feip"
-    "db-alb-bepool"       = "_db-alb-bepool"
-    "db-alb-hp"           = "_db-alb-hp"
+    "db-alb-bepool"       = "_dbAlb-bePool"
+    "db-alb-feip"         = "_dbAlb-feip"
+    "db-alb-hp"           = "_dbAlb-hp"
+    "db-alb-rule"         = "_dbAlb-rule_"
     "db-avset"            = "_db-avset"
     "db-nic"              = "-db-nic"
     "db-subnet"           = "_db-subnet"
@@ -188,34 +198,40 @@ variable resource_suffixes {
     "deployer-rg"         = "-INFRASTRUCTURE"
     "deployer-state"      = "_DEPLOYER.terraform.tfstate"
     "deployer-subnet"     = "_deployment-subnet"
-    "deployer-subnet-nsg" = "_deployment-subnet-nsg"
+    "deployer-subnet-nsg" = "_deployment-nsg"
     "iscsi-subnet"        = "_iscsi-subnet"
     "iscsi-subnet-nsg"    = "_iscsiSubnet-nsg"
-    "library-rg"          = "_SAP-LIBRARY"
+    "library-rg"          = "-SAP_LIBRARY"
     "library-state"       = "_SAP-LIBRARY.terraform.tfstate"
     "kv"                  = ""
     "msi"                 = "-msi"
     "nic"                 = "-nic"
-    "osdisk"              = "-osdisk"
+    "osdisk"              = "-OsDisk"
     "pip"                 = "-pip"
     "ppg"                 = "-ppg"
     "scs-alb"             = "_scs-alb"
-    "scs-alb-bepool"      = "_scs-alb-bepool"
-    "scs-alb-feip"        = "_scs-alb-feip"
-    "scs-alb-hp"          = "_scs-alb-hp"
-    "scs-ers-feip"        = "_scs-ers-feip"
-    "scs-ers-hp"          = "_scs-ers-hp"
+    "scs-alb-bepool"      = "_scsAlb-bePool"
+    "scs-alb-feip"        = "_scsAlb-feip"
+    "scs-alb-hp"          = "_scsAlb-hp"
+    "scs-alb-rule"        = "_scsAlb-rule_"
+    "scs-ers-feip"        = "_scsErs-feip"
+    "scs-ers-hp"          = "_scsErs-hp"
+    "scs-ers-rule"        = "_scsErs-rule_"
+    "scs-scs-rule"        = "_scsScs-rule_"
     "sdu-rg"              = ""
     "scs-avset"           = "_scs-avset"
     "vm"                  = ""
     "vnet"                = "-vnet"
     "vnet-rg"             = "-INFRASTRUCTURE"
     "web-alb"             = "_web-alb"
-    "web-alb-feip"        = "_web-alb-feip"
-    "web-alb-bepool"      = "_web-alb-bepool"
+    "web-alb-bepool"      = "_webAlb-bePool"
+    "web-alb-feip"        = "_webAlb-feip"
+    "web-alb-hp"          = "_webAlb-hp"
+    "web-alb-inrule"      = "_webAlb-inRule"
     "web-avset"           = "_web-avset"
     "web-subnet"          = "_web-subnet"
     "web-subnet-nsg"      = "_webSubnet-nsg"
+
   }
 }
 
@@ -226,8 +242,8 @@ locals {
   vnet_verified     = upper(substr(var.sap_vnet_name, 0, var.sapautomation_name_limits.sap_vnet_length))
   dep_vnet_verified = upper(substr(var.management_vnet_name, 0, var.sapautomation_name_limits.sap_vnet_length))
 
-  random-id_verified    = upper(substr(var.random-id, 0, var.sapautomation_name_limits.random-id_length))
-  random-id_vm_verified = lower(substr(var.random-id, 0, var.sapautomation_name_limits.random-id_length))
+  random_id_verified    = upper(substr(var.random_id, 0, var.sapautomation_name_limits.random_id_length))
+  random_id_vm_verified = lower(substr(var.random_id, 0, var.sapautomation_name_limits.random_id_length))
 
 }
 

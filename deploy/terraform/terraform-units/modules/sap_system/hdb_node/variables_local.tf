@@ -22,10 +22,6 @@ variable "ppg" {
   description = "Details of the proximity placement group"
 }
 
-variable "random-id" {
-  description = "Random hex string"
-}
-
 variable naming {
   description = "Defines the names for the resources"
 }
@@ -45,9 +41,9 @@ locals {
   sizes      = jsondecode(file(length(var.disk_sizes) > 0 ? var.disk_sizes : local.disk_sizes))
 =======
 
-  db_server_count      = length(var.naming.virtualmachine_names["HANA"])
-  virtualmachine_names = concat(var.naming.virtualmachine_names["HANA"], var.naming.virtualmachine_names["HANA_HA"])
-  storageaccount_names = var.naming.storageaccount_names["SDU"]
+  db_server_count      = length(var.naming.virtualmachine_names.HANA)
+  virtualmachine_names = concat(var.naming.virtualmachine_names.HANA, var.naming.virtualmachine_names.HANA_HA)
+  storageaccount_names = var.naming.storageaccount_names.SDU
   resource_suffixes    = var.naming.resource_suffixes
 >>>>>>> 8b9ab71df935e0a9481b0051adae3252283a3511
 
@@ -134,8 +130,6 @@ locals {
   components             = merge({ hana_database = [] }, try(local.hdb.components, {}))
   xsa                    = try(local.hdb.xsa, { routing = "ports" })
   shine                  = try(local.hdb.shine, { email = "shinedemo@microsoft.com" })
-
-  customer_provided_names = try(local.hdb.dbnodes[0].name, "") == "" ? false : true
 
   dbnodes = flatten([[for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
     name         = try(local.hdb_ha ? "${dbnode.name}-0" : "${dbnode.name}", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.virtualmachine_names[idx], local.resource_suffixes.vm) : format("%s%s", local.virtualmachine_names[idx], local.resource_suffixes.vm)))

@@ -18,10 +18,6 @@ variable "ppg" {
   description = "Details of the proximity placement group"
 }
 
-variable "random-id" {
-  description = "Random hex string"
-}
-
 variable naming {
   description = "Defines the names for the resources"
 }
@@ -41,9 +37,9 @@ locals {
 
 =======
 
-  app_virtualmachine_names = var.naming.virtualmachine_names["APP"]
-  scs_virtualmachine_names = var.naming.virtualmachine_names["SCS"]
-  web_virtualmachine_names = var.naming.virtualmachine_names["WEB"]
+  app_virtualmachine_names = var.naming.virtualmachine_names.APP
+  scs_virtualmachine_names = var.naming.virtualmachine_names.SCS
+  web_virtualmachine_names = var.naming.virtualmachine_names.WEB
   resource_suffixes        = var.naming.resource_suffixes
 >>>>>>> 8b9ab71df935e0a9481b0051adae3252283a3511
 
@@ -60,7 +56,7 @@ locals {
   vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, "")
   vnet_nr_parts   = length(split("-", local.vnet_sap_name))
   // Default naming of vnet has multiple parts. Taking the second-last part as the name 
-  vnet_sap_name_prefix = local.vnet_nr_parts >= 3 ? split("-", upper(local.vnet_sap_name))[local.vnet_nr_parts - 1] == "VNET" ? split("-", local.vnet_sap_name)[local.vnet_nr_parts - 2] : local.vnet_sap_name : local.vnet_sap_name
+  vnet_sap_name_prefix = try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? split("-", local.vnet_sap_name)[(local.vnet_nr_parts -2)] : local.vnet_sap_name
 
   // APP subnet
   var_sub_app    = try(var.infrastructure.vnets.sap.subnet_app, {})
@@ -94,7 +90,7 @@ locals {
   sub_web_nsg_name   = local.sub_web_nsg_exists ? try(split("/", local.sub_web_nsg_arm_id)[8], "") : try(local.sub_web_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.web-subnet-nsg))
   sub_web_nsg_deployed = try(local.sub_web_defined ? (
     local.sub_web_nsg_exists ? data.azurerm_network_security_group.nsg-web[0] : azurerm_network_security_group.nsg-web[0]) : (
-  local.sub_app_nsg_exists ? data.azurerm_network_security_group.nsg-app[0] : azurerm_network_security_group.nsg-app[0]), null)
+    local.sub_app_nsg_exists ? data.azurerm_network_security_group.nsg-app[0] : azurerm_network_security_group.nsg-app[0]), null)
 
   application_sid          = try(var.application.sid, "")
   enable_deployment        = try(var.application.enable_deployment, false)

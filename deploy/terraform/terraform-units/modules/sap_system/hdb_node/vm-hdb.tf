@@ -11,7 +11,7 @@ HANA DB Linux Server private IP range: .10 -
 +--------------------------------------4--------------------------------------*/
 
 # Creates the admin traffic NIC and private IP address for database nodes
-resource azurerm_network_interface "nics-dbnodes-admin" {
+resource "azurerm_network_interface" "nics-dbnodes-admin" {
   count                         = local.enable_deployment ? length(local.hdb_vms) : 0
   name                          = format("%s%s",local.hdb_vms[count.index].name,  local.resource_suffixes.admin-nic)
   location                      = var.resource-group[0].location
@@ -27,7 +27,7 @@ resource azurerm_network_interface "nics-dbnodes-admin" {
 }
 
 # Creates the DB traffic NIC and private IP address for database nodes
-resource azurerm_network_interface "nics-dbnodes-db" {
+resource "azurerm_network_interface" "nics-dbnodes-db" {
   count                         = local.enable_deployment ? length(local.hdb_vms) : 0
   name                          = format("%s%s",local.hdb_vms[count.index].name,  local.resource_suffixes.db-nic)
   location                      = var.resource-group[0].location
@@ -49,7 +49,7 @@ resource azurerm_network_interface "nics-dbnodes-db" {
 Load balancer front IP address range: .4 - .9
 +--------------------------------------4--------------------------------------*/
 
-resource azurerm_lb "hdb" {
+resource "azurerm_lb" "hdb" {
   count               = local.enable_deployment ? 1 : 0
   name                = format("%s%s", local.prefix,  local.resource_suffixes.db-alb)
   resource_group_name = var.resource-group[0].name
@@ -63,7 +63,7 @@ resource azurerm_lb "hdb" {
   }
 }
 
-resource azurerm_lb_backend_address_pool "hdb" {
+resource "azurerm_lb_backend_address_pool" "hdb" {
   count               = local.enable_deployment ? 1 : 0
   name                = format("%s%s", local.prefix,  local.resource_suffixes.db-alb-bepool)
   resource_group_name = var.resource-group[0].name
@@ -71,7 +71,7 @@ resource azurerm_lb_backend_address_pool "hdb" {
   
 }
 
-resource azurerm_lb_probe "hdb" {
+resource "azurerm_lb_probe" "hdb" {
   count               = local.enable_deployment ? 1 : 0
   resource_group_name = var.resource-group[0].name
   loadbalancer_id     = azurerm_lb.hdb[count.index].id
@@ -85,18 +85,18 @@ resource azurerm_lb_probe "hdb" {
 # TODO:
 # Current behavior, it will try to add all VMs in the cluster into the backend pool, which would not work since we do not have availability sets created yet.
 # In a scale-out scenario, we need to rewrite this code according to the scale-out + HA reference architecture.
-resource azurerm_network_interface_backend_address_pool_association "hdb" {
+resource "azurerm_network_interface_backend_address_pool_association" "hdb" {
   count                   = local.enable_deployment ? length(local.hdb_vms) : 0
   network_interface_id    = azurerm_network_interface.nics-dbnodes-db[count.index].id
   ip_configuration_name   = azurerm_network_interface.nics-dbnodes-db[count.index].ip_configuration[0].name
   backend_address_pool_id = azurerm_lb_backend_address_pool.hdb[0].id
 }
 
-resource azurerm_lb_rule "hdb" {
+resource "azurerm_lb_rule" "hdb" {
   count                          = local.enable_deployment ? length(local.loadbalancer_ports) : 0
   resource_group_name            = var.resource-group[0].name
   loadbalancer_id                = azurerm_lb.hdb[0].id
-  name                           = "${upper(local.loadbalancer_ports[count.index].sid)}_HDB_${local.loadbalancer_ports[count.index].port}"
+  name =                           format("%s%s%05d-%02d",local.prefix,local.resource_suffixes.db-alb-rule,local.loadbalancer_ports[count.index].port,count.index)
   protocol                       = "Tcp"
   frontend_port                  = local.loadbalancer_ports[count.index].port
   backend_port                   = local.loadbalancer_ports[count.index].port
@@ -108,7 +108,7 @@ resource azurerm_lb_rule "hdb" {
 
 # AVAILABILITY SET ================================================================================================
 
-resource azurerm_availability_set "hdb" {
+resource "azurerm_availability_set" "hdb" {
   count                        = local.enable_deployment ? 1 : 0
   name                         = format("%s%s", local.prefix,  local.resource_suffixes.db-avset)
   location                     = var.resource-group[0].location
@@ -122,7 +122,7 @@ resource azurerm_availability_set "hdb" {
 # VIRTUAL MACHINES ================================================================================================
 
 # Creates managed data disk
-resource azurerm_managed_disk "data-disk" {
+resource "azurerm_managed_disk" "data-disk" {
   count                = local.enable_deployment ? length(local.data-disk-list) : 0
   name                 = local.data-disk-list[count.index].name
   location             = var.resource-group[0].location
@@ -133,7 +133,7 @@ resource azurerm_managed_disk "data-disk" {
 }
 
 # Manages Linux Virtual Machine for HANA DB servers
-resource azurerm_linux_virtual_machine "vm-dbnode" {
+resource "azurerm_linux_virtual_machine" "vm-dbnode" {
   count                        = local.enable_deployment ? length(local.hdb_vms) : 0
   name                         = local.hdb_vms[count.index].name
   computer_name                = local.hdb_vms[count.index].computername
@@ -185,7 +185,7 @@ resource azurerm_linux_virtual_machine "vm-dbnode" {
 }
 
 # Manages attaching a Disk to a Virtual Machine
-resource azurerm_virtual_machine_data_disk_attachment "vm-dbnode-data-disk" {
+resource "azurerm_virtual_machine_data_disk_attachment" "vm-dbnode-data-disk" {
   count                     = local.enable_deployment ? length(local.data-disk-list) : 0
   managed_disk_id           = azurerm_managed_disk.data-disk[count.index].id
   virtual_machine_id        = azurerm_linux_virtual_machine.vm-dbnode[floor(count.index / length(local.data-disk-per-dbnode))].id
