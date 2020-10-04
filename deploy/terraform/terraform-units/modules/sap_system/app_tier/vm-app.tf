@@ -21,8 +21,8 @@ resource "azurerm_linux_virtual_machine" "app" {
   computer_name                = local.app_virtualmachine_names[count.index]
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
-  availability_set_id          = azurerm_availability_set.app[0].id
-  proximity_placement_group_id = lookup(var.infrastructure, "ppg", false) != false ? (var.ppg[0].id) : null
+  availability_set_id          = local.zonal_deployment ? null : azurerm_availability_set.app[count.index % length(local.zones)].id
+  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
   network_interface_ids = [
     azurerm_network_interface.app[count.index].id
   ]
@@ -65,8 +65,9 @@ resource "azurerm_windows_virtual_machine" "app" {
   computer_name                = local.app_virtualmachine_names[count.index]
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
-  availability_set_id          = azurerm_availability_set.app[0].id
-  proximity_placement_group_id = lookup(var.infrastructure, "ppg", false) != false ? (var.ppg[0].id) : null
+  availability_set_id          = local.zonal_deployment ? null : azurerm_availability_set.app[count.index % length(local.zones)].id
+  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
+
   network_interface_ids = [
     azurerm_network_interface.app[count.index].id
   ]
@@ -114,5 +115,6 @@ resource "azurerm_virtual_machine_data_disk_attachment" "app" {
   virtual_machine_id        = upper(local.app_ostype) == "LINUX" ? azurerm_linux_virtual_machine.app[local.app-data-disks[count.index].vm_index].id : azurerm_windows_virtual_machine.app[local.app-data-disks[count.index].vm_index].id
   caching                   = local.app-data-disks[count.index].caching
   write_accelerator_enabled = local.app-data-disks[count.index].write_accelerator
-  lun                       = count.index
+  //Make sure the LUNs start from 0 for each VM
+  lun                       = count.index - local.app_disk_count * local.app-data-disks[count.index].vm_index
 }

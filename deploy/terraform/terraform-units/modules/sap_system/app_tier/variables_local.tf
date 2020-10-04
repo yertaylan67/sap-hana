@@ -101,6 +101,10 @@ locals {
   scs_nic_ips              = try(var.application.scs_nic_ips, [])
   web_lb_ips               = try(var.application.web_lb_ips, [])
   web_nic_ips              = try(var.application.web_nic_ips, [])
+  
+  // Zones
+  zones            = try(var.application.zones, [])
+  zonal_deployment = length(local.zones) > 0 ? true : false
 
   app_ostype = try(var.application.os.os_type, "Linux")
   app_oscode = upper(local.app_ostype) == "LINUX" ? "l" : "w"
@@ -225,6 +229,8 @@ locals {
     ]
   ])
 
+  app_disk_count = length(local.app-data-disks) / local.application_server_count
+
   scs-data-disks = flatten([
     for vm_count in(local.scs_high_availability ? range(2) : range(1)) : [
       for disk_spec in local.scs_sizing.storage : {
@@ -238,6 +244,8 @@ locals {
     ]
   ])
 
+  scs_disk_count = length(local.scs-data-disks) / (local.scs_high_availability ? 2 : 1)
+
   web-data-disks = flatten([
     for vm_count in range(local.webdispatcher_count) : [
       for disk_spec in local.web_sizing.storage : {
@@ -250,4 +258,7 @@ locals {
       }
     ]
   ])
+
+  web_disk_count = length(local.web-data-disks) / local.webdispatcher_count
+
 }

@@ -29,8 +29,9 @@ resource "azurerm_linux_virtual_machine" "scs" {
   computer_name                = local.scs_virtualmachine_names[count.index]
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
-  availability_set_id          = azurerm_availability_set.scs[0].id
-  proximity_placement_group_id = lookup(var.infrastructure, "ppg", false) != false ? (var.ppg[0].id) : null
+  availability_set_id          = local.zonal_deployment ? null : azurerm_availability_set.scs[count.index % length(local.zones)].id
+  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
+  zone                         = local.zonal_deployment ? try(local.zones[count.index % length(local.zones)], null) : null
   network_interface_ids = [
     azurerm_network_interface.scs[count.index].id
   ]
@@ -73,8 +74,9 @@ resource "azurerm_windows_virtual_machine" "scs" {
   computer_name                = local.scs_virtualmachine_names[count.index]
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
-  availability_set_id          = azurerm_availability_set.scs[0].id
-  proximity_placement_group_id = lookup(var.infrastructure, "ppg", false) != false ? (var.ppg[0].id) : null
+  availability_set_id          = local.zonal_deployment ? null : azurerm_availability_set.scs[count.index % length(local.zones)].id
+  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
+  zone                         = local.zonal_deployment ? try(local.zones[count.index % length(local.zones)], null) : null
   network_interface_ids = [
     azurerm_network_interface.scs[count.index].id
   ]
@@ -114,6 +116,7 @@ resource "azurerm_managed_disk" "scs" {
   create_option        = "Empty"
   storage_account_type = local.scs-data-disks[count.index].disk_type
   disk_size_gb         = local.scs-data-disks[count.index].size_gb
+  zones = local.zonal_deployment ? [try(local.zones[count.index % length(local.zones)], null)] : null
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "scs" {
@@ -122,5 +125,7 @@ resource "azurerm_virtual_machine_data_disk_attachment" "scs" {
   virtual_machine_id        = upper(local.app_ostype) == "LINUX" ? azurerm_linux_virtual_machine.scs[local.scs-data-disks[count.index].vm_index].id : azurerm_windows_virtual_machine.scs[local.scs-data-disks[count.index].vm_index].id
   caching                   = local.scs-data-disks[count.index].caching
   write_accelerator_enabled = local.scs-data-disks[count.index].write_accelerator
-  lun                       = count.index
+    //Make sure the LUNs start from 0 for each VM
+  lun                       = count.index - local.scs_disk_count * local.scs-data-disks[count.index].vm_index
+
 }
