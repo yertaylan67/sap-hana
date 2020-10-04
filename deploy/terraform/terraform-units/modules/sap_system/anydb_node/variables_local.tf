@@ -28,7 +28,7 @@ variable "custom_disk_sizes" {
 locals {
   // Imports database sizing information
 
-  disk_sizes = "${path.module}/../../../../../configs/hdb_sizes.json"
+  disk_sizes = "${path.module}/../../../../../configs/anydb_sizes.json"
   sizes      = jsondecode(file(length(var.custom_disk_sizes) > 0 ? var.custom_disk_sizes : local.disk_sizes))
 
   db_server_count      = length(var.naming.virtualmachine_names.ANYDB)
@@ -87,7 +87,7 @@ locals {
   anydb_ostype = try(local.anydb.os.os_type, "Linux")
   anydb_oscode = upper(local.anydb_ostype) == "LINUX" ? "l" : "w"
   anydb_size   = try(local.anydb.size, "Demo")
-  anydb_sku    = try(lookup(local.sizes, local.anydb_size).compute.vmsize, "Standard_E4s_v3")
+  anydb_sku    = try(lookup(local.sizes, local.anydb_size).compute.vm_size, "Standard_E4s_v3")
   anydb_fs     = try(local.anydb.filesystem, "xfs")
   anydb_ha     = try(local.anydb.high_availability, false)
   db_sid       = lower(substr(local.anydb_platform, 0, 3))
