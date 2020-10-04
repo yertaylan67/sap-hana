@@ -26,7 +26,7 @@ variable naming {
   description = "Defines the names for the resources"
 }
 
-variable "disk_sizes" {
+variable "custom_disk_sizes" {
   type        = string
   description = "Disk size json file"
   default     = ""
@@ -34,18 +34,15 @@ variable "disk_sizes" {
 }
 
 locals {
-<<<<<<< HEAD
   // Imports database sizing information
 
   disk_sizes = "${path.module}/../../../../../configs/hdb_sizes.json"
-  sizes      = jsondecode(file(length(var.disk_sizes) > 0 ? var.disk_sizes : local.disk_sizes))
-=======
+  sizes      = jsondecode(file(length(var.custom_disk_sizes) > 0 ? var.custom_disk_sizes : local.disk_sizes))
 
   db_server_count      = length(var.naming.virtualmachine_names.HANA)
   virtualmachine_names = concat(var.naming.virtualmachine_names.HANA, var.naming.virtualmachine_names.HANA_HA)
   storageaccount_names = var.naming.storageaccount_names.SDU
   resource_suffixes    = var.naming.resource_suffixes
->>>>>>> 8b9ab71df935e0a9481b0051adae3252283a3511
 
   region  = try(var.infrastructure.region, "")
   sid     = upper(try(var.application.sid, ""))
@@ -251,4 +248,17 @@ locals {
       }
     ]
   ])
+
+
+    // Check if any disk is a Ultra Disk
+  data_disk_types = flatten([
+    for hdb_vm in local.hdb_vms : [
+      for datadisk in local.data-disk-per-dbnode : {
+        name                      = format("%s-%s", hdb_vm.name, datadisk.suffix)
+        }
+      if datadisk.storage_account_type == "UltraSSD_LRS"
+  ]])
+
+  enable_ultradisk = length(local.data_disk_types) > 0 ? true : false
+
 }

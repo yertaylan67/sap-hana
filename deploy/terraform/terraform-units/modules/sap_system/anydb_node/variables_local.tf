@@ -18,7 +18,18 @@ variable naming {
   description = "Defines the names for the resources"
 }
 
+variable "custom_disk_sizes" {
+  type        = string
+  description = "Disk size json file"
+  default     = ""
+
+}
+
 locals {
+  // Imports database sizing information
+
+  disk_sizes = "${path.module}/../../../../../configs/hdb_sizes.json"
+  sizes      = jsondecode(file(length(var.custom_disk_sizes) > 0 ? var.custom_disk_sizes : local.disk_sizes))
 
   db_server_count      = length(var.naming.virtualmachine_names.ANYDB)
   virtualmachine_names = concat(var.naming.virtualmachine_names.ANYDB, var.naming.virtualmachine_names.ANYDB_HA)
@@ -49,7 +60,7 @@ locals {
 
   // DB NSG
   var_sub_db_nsg    = try(var.infrastructure.vnets.sap.subnet_db.nsg, {})
-  sub_db_nsg_arm_id = try(local.var_sub_db_nsg.arm_id, "") 
+  sub_db_nsg_arm_id = try(local.var_sub_db_nsg.arm_id, "")
   sub_db_nsg_exists = length(local.sub_db_nsg_arm_id) > 0 ? true : false
   sub_db_nsg_name   = local.sub_db_nsg_exists ? try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.db-subnet-nsg))
 
@@ -213,10 +224,27 @@ locals {
           name                      = format("%s-%s%02d", anydb_vm.name, storage_type.name, disk_count)
           storage_account_type      = storage_type.disk_type
           disk_size_gb              = storage_type.size_gb
+          disk-iops-read-write      = try(storage_type.disk-iops-read-write, 0)
+          disk-mbps-read-write      = try(storage_type.disk-mbps-read-write, 0)
           caching                   = storage_type.caching
           write_accelerator_enabled = storage_type.write_accelerator
         }
       ]
       if storage_type.name != "os"
   ]])
+
+  // Check if any disk is a Ultra Disk
+  anydb_disk_types = flatten([
+    for vm_counter, anydb_vm in local.anydb_vms : [
+      for storage_type in lookup(local.sizes, local.anydb_size).storage : [
+        for disk_count in range(storage_type.count) : {
+          name                      = format("%s-%s%02d", anydb_vm.name, storage_type.name, disk_count)
+        }
+      ]
+      if storage_type.disk_type == "UltraSSD_LRS"
+  ]])
+
+  enable_ultradisk = length(local.anydb_disk_types) > 0 ? true : false
+
+
 }

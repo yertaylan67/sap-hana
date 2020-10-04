@@ -23,25 +23,21 @@ variable naming {
 }
 
 
-variable "disk_sizes" {
+variable "custom_disk_sizes" {
   type        = string
   description = "Disk size json file"
   default     = ""
 }
 
 locals {
-<<<<<<< HEAD
 // Imports Disk sizing sizing information
   disk_sizes = "${path.module}/../../../../../configs/app_sizes.json"
-  sizes      = jsondecode(file(length(var.disk_sizes) > 0 ? var.disk_sizes : local.disk_sizes))
-
-=======
+  sizes      = jsondecode(file(length(var.custom_disk_sizes) > 0 ? var.custom_disk_sizes : local.disk_sizes))
 
   app_virtualmachine_names = var.naming.virtualmachine_names.APP
   scs_virtualmachine_names = var.naming.virtualmachine_names.SCS
   web_virtualmachine_names = var.naming.virtualmachine_names.WEB
   resource_suffixes        = var.naming.resource_suffixes
->>>>>>> 8b9ab71df935e0a9481b0051adae3252283a3511
 
   region  = try(var.infrastructure.region, "")
   sid     = upper(try(var.application.sid, ""))

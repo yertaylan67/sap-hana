@@ -13,10 +13,16 @@ variable "scenario" {
   default     = "HANA Database"
 }
 
-variable "disk_sizes" {
-  description = "Custom disk configuration json file"
+variable "db_disk_sizes" {
+  description = "Custom disk configuration json file for database tier"
   default     = ""
 }
+
+variable "app_disk_sizes" {
+  description = "Custom disk configuration json file for application tier"
+  default     = ""
+}
+
 
 # Set defaults
 locals {
@@ -83,6 +89,4 @@ locals {
   app_server_count    = try(var.application.application_server_count, 0)
   webdispatcher_count = try(var.application.webdispatcher_count, 0)
   scs_server_count    = try(var.application.scs_high_availability, false) ? 2 : 1
-
-
 }

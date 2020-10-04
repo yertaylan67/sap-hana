@@ -19,12 +19,12 @@ resource "azurerm_network_interface" "anydb" {
 
 # Section for Linux Virtual machine 
 resource "azurerm_linux_virtual_machine" "dbserver" {
-  count                        = local.enable_deployment ? ((upper(local.anydb_ostype) == "LINUX") ? length(local.anydb_vms) : 0) : 0
-  name                         = local.anydb_vms[count.index].name
-  computer_name                = local.anydb_vms[count.index].computername
-  resource_group_name          = var.resource-group[0].name
-  location                     = var.resource-group[0].location
-  availability_set_id          = azurerm_availability_set.anydb[0].id
+  count               = local.enable_deployment ? ((upper(local.anydb_ostype) == "LINUX") ? length(local.anydb_vms) : 0) : 0
+  name                = local.anydb_vms[count.index].name
+  computer_name       = local.anydb_vms[count.index].computername
+  resource_group_name = var.resource-group[0].name
+  location            = var.resource-group[0].location
+  //availability_set_id          = azurerm_availability_set.anydb[0].id
   proximity_placement_group_id = local.ppgId
   network_interface_ids        = [azurerm_network_interface.anydb[count.index].id]
   size                         = local.anydb_vms[count.index].size
@@ -45,11 +45,17 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
     iterator = disk
     for_each = flatten([for storage_type in lookup(local.sizes, local.anydb_size).storage : [for disk_count in range(storage_type.count) : { name = storage_type.name, id = disk_count, disk_type = storage_type.disk_type, size_gb = storage_type.size_gb, caching = storage_type.caching }] if storage_type.name == "os"])
     content {
-      name                 = format("%s%s",local.anydb_vms[count.index].name, local.resource_suffixes.osdisk)
+      name                 = format("%s%s", local.anydb_vms[count.index].name, local.resource_suffixes.osdisk)
       caching              = disk.value.caching
       storage_account_type = disk.value.disk_type
       disk_size_gb         = disk.value.size_gb
     }
+  }
+
+  zone = "1"
+
+  additional_capabilities {
+    ultra_ssd_enabled = local.enable_ultradisk
   }
 
   admin_username                  = local.authentication.username
@@ -82,6 +88,11 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
   network_interface_ids        = [azurerm_network_interface.anydb[count.index].id]
   size                         = local.anydb_vms[count.index].size
 
+  additional_capabilities {
+    ultra_ssd_enabled = local.enable_ultradisk
+  }
+
+
   source_image_id = local.anydb_custom_image ? local.anydb_os.source_image_id : null
 
   dynamic "source_image_reference" {
@@ -98,7 +109,7 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
     iterator = disk
     for_each = flatten([for storage_type in lookup(local.sizes, local.anydb_size).storage : [for disk_count in range(storage_type.count) : { name = storage_type.name, id = disk_count, disk_type = storage_type.disk_type, size_gb = storage_type.size_gb, caching = storage_type.caching }] if storage_type.name == "os"])
     content {
-      name                 = format("%s%s",local.anydb_vms[count.index].name, local.resource_suffixes.osdisk)
+      name                 = format("%s%s", local.anydb_vms[count.index].name, local.resource_suffixes.osdisk)
       caching              = disk.value.caching
       storage_account_type = disk.value.disk_type
       disk_size_gb         = disk.value.size_gb
@@ -126,6 +137,11 @@ resource "azurerm_managed_disk" "disks" {
   create_option        = "Empty"
   storage_account_type = local.anydb_disks[count.index].storage_account_type
   disk_size_gb         = local.anydb_disks[count.index].disk_size_gb
+
+  disk_iops_read_write = local.anydb_disks[count.index].disk-iops-read-write > 0 ? local.anydb_disks[count.index].disk-iops-read-write : null
+  disk_mbps_read_write = local.anydb_disks[count.index].disk-mbps-read-write > 0 ? local.anydb_disks[count.index].disk-mbps-read-write : null
+
+  zones = ["1"]
 }
 
 # Manages attaching a Disk to a Virtual Machine
