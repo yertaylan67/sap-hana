@@ -114,6 +114,10 @@ locals {
       "username" = "azureadm"
   })
 
+  // Zones
+  zones            = try(local.hdb.size, [])
+  zonal_deployment = length(local.zones) > 0 ? true : false
+
   hdb_ins                = try(local.hdb.instance, {})
   hdb_sid                = try(local.hdb_ins.sid, local.sid) // HANA database sid from the Databases array for use as reference to LB/AS
   hdb_nr                 = try(local.hdb_ins.instance_number, "00")
@@ -249,6 +253,7 @@ locals {
     ]
   ])
 
+  disk_count = length(local.data-disk-list) / length(local.hdb_vms)
 
     // Check if any disk is a Ultra Disk
   data_disk_types = flatten([

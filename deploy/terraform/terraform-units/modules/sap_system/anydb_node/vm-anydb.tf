@@ -83,8 +83,8 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
   computer_name                = local.anydb_vms[count.index].computername
   resource_group_name          = var.resource-group[0].name
   location                     = var.resource-group[0].location
-  availability_set_id          = azurerm_availability_set.anydb[0].id
-  proximity_placement_group_id = local.ppgId
+  availability_set_id          = local.zonal_deployment ? null : azurerm_availability_set.anydb[0].id
+  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
   zone                         = local.zonal_deployment ? try(local.zones[count.index % length(local.zones)], null) : null
   network_interface_ids        = [azurerm_network_interface.anydb[count.index].id]
   size                         = local.anydb_vms[count.index].size
