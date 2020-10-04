@@ -19,13 +19,13 @@ resource "azurerm_network_interface" "anydb" {
 
 # Section for Linux Virtual machine 
 resource "azurerm_linux_virtual_machine" "dbserver" {
-  count               = local.enable_deployment ? ((upper(local.anydb_ostype) == "LINUX") ? length(local.anydb_vms) : 0) : 0
-  name                = local.anydb_vms[count.index].name
-  computer_name       = local.anydb_vms[count.index].computername
-  resource_group_name = var.resource-group[0].name
-  location            = var.resource-group[0].location
-  //availability_set_id          = azurerm_availability_set.anydb[0].id
-  proximity_placement_group_id = local.ppgId
+  count                        = local.enable_deployment ? ((upper(local.anydb_ostype) == "LINUX") ? length(local.anydb_vms) : 0) : 0
+  name                         = local.anydb_vms[count.index].name
+  computer_name                = local.anydb_vms[count.index].computername
+  resource_group_name          = var.resource-group[0].name
+  location                     = var.resource-group[0].location
+  availability_set_id          = local.zonal_deployment ? null : azurerm_availability_set.anydb[0].id
+  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
   network_interface_ids        = [azurerm_network_interface.anydb[count.index].id]
   size                         = local.anydb_vms[count.index].size
 
@@ -52,7 +52,7 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
     }
   }
 
-  zone = "1"
+  zone = local.zonal_deployment ? try(local.zones[count.index % length(local.zones)], null) : null
 
   additional_capabilities {
     ultra_ssd_enabled = local.enable_ultradisk
@@ -91,7 +91,6 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
   additional_capabilities {
     ultra_ssd_enabled = local.enable_ultradisk
   }
-
 
   source_image_id = local.anydb_custom_image ? local.anydb_os.source_image_id : null
 
@@ -141,7 +140,7 @@ resource "azurerm_managed_disk" "disks" {
   disk_iops_read_write = local.anydb_disks[count.index].disk-iops-read-write > 0 ? local.anydb_disks[count.index].disk-iops-read-write : null
   disk_mbps_read_write = local.anydb_disks[count.index].disk-mbps-read-write > 0 ? local.anydb_disks[count.index].disk-mbps-read-write : null
 
-  zones = ["1"]
+  zones = local.zonal_deployment ? [try(local.zones[count.index % length(local.zones)], null)] : null
 }
 
 # Manages attaching a Disk to a Virtual Machine
@@ -151,5 +150,6 @@ resource "azurerm_virtual_machine_data_disk_attachment" "vm-disks" {
   virtual_machine_id        = upper(local.anydb_ostype) == "LINUX" ? azurerm_linux_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].id : azurerm_windows_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].id
   caching                   = local.anydb_disks[count.index].caching
   write_accelerator_enabled = local.anydb_disks[count.index].write_accelerator_enabled
-  lun                       = count.index
+  //Make sure the LUNs start from 0 for each VM
+  lun                       = count.index - local.disk_count * local.anydb_disks[count.index].vm_index
 }

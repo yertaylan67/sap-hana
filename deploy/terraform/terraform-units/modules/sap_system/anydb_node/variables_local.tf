@@ -71,6 +71,10 @@ locals {
   anydb_platform = try(local.anydb.platform, "NONE")
   anydb_version  = try(local.anydb.db_version, "")
 
+  // Zones
+  zones            = try(local.anydb.zones, [])
+  zonal_deployment = length(local.zones) > 0 ? true : false
+
   // Filter the list of databases to only AnyDB platform entries
   // Supported databases: Oracle, DB2, SQLServer, ASE 
   anydb-databases = [
@@ -233,12 +237,14 @@ locals {
       if storage_type.name != "os"
   ]])
 
+  disk_count = length(local.anydb_disks) / length(local.anydb_vms)
+  
   // Check if any disk is a Ultra Disk
   anydb_disk_types = flatten([
     for vm_counter, anydb_vm in local.anydb_vms : [
       for storage_type in lookup(local.sizes, local.anydb_size).storage : [
         for disk_count in range(storage_type.count) : {
-          name                      = format("%s-%s%02d", anydb_vm.name, storage_type.name, disk_count)
+          name = format("%s-%s%02d", anydb_vm.name, storage_type.name, disk_count)
         }
       ]
       if storage_type.disk_type == "UltraSSD_LRS"
