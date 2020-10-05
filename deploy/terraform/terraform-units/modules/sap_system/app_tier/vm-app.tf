@@ -9,7 +9,31 @@ resource "azurerm_network_interface" "app" {
   ip_configuration {
     name                          = "IPConfig1"
     subnet_id                     = local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].id : azurerm_subnet.subnet-sap-app[0].id
-    private_ip_address            = try(local.app_nic_ips [count.index],cidrhost(local.sub_web_exists ? data.azurerm_subnet.subnet-sap-app[0].address_prefixes[0] : azurerm_subnet.subnet-sap-app[0].address_prefixes[0], tonumber(count.index) + local.ip_offsets.app_vm))
+    private_ip_address            = try(local.app_nic_ips[count.index], 
+                                      cidrhost(local.sub_web_exists ? 
+                                        data.azurerm_subnet.subnet-sap-app[0].address_prefixes[0] : 
+                                        azurerm_subnet.subnet-sap-app[0].address_prefixes[0], 
+                                        tonumber(count.index) + local.ip_offsets.app_vm))
+    private_ip_address_allocation = "static"
+  }
+}
+
+# Create Application NICs
+resource "azurerm_network_interface" "app-admin" {
+  count                         = local.enable_deployment && local.use_two_network_cards ? local.application_server_count : 0
+  name                          = format("%s_%s%s", local.prefix, local.app_virtualmachine_names[count.index], local.resource_suffixes.admin-nic)
+  location                      = var.resource-group[0].location
+  resource_group_name           = var.resource-group[0].name
+  enable_accelerated_networking = local.app_sizing.compute.accelerated_networking
+
+  ip_configuration {
+    name                          = "IPConfig1"
+    subnet_id                     = local.sub_admin_exists ? data.azurerm_subnet.sap-admin[0].id : azurerm_subnet.sap-admin[0].id
+    private_ip_address            = try(local.app_admin_nic_ips[count.index], 
+                                      cidrhost(local.sub_admin_exists ? 
+                                        data.azurerm_subnet.sap-admin[0].address_prefixes[0] : 
+                                        azurerm_subnet.sap-admin[0].address_prefixes[0], 
+                                        tonumber(count.index) + local.ip_offsets.app_vm))
     private_ip_address_allocation = "static"
   }
 }
@@ -17,15 +41,14 @@ resource "azurerm_network_interface" "app" {
 # Create the Linux Application VM(s)
 resource "azurerm_linux_virtual_machine" "app" {
   count                        = local.enable_deployment ? (upper(local.app_ostype) == "LINUX" ? local.application_server_count : 0) : 0
-  name                         = format("%s_%s%s", local.prefix, local.app_virtualmachine_names[count.index], local.resource_suffixes.vm)   
+  name                         = format("%s_%s%s", local.prefix, local.app_virtualmachine_names[count.index], local.resource_suffixes.vm)
   computer_name                = local.app_virtualmachine_names[count.index]
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
   availability_set_id          = local.zonal_deployment ? null : azurerm_availability_set.app[count.index % length(local.zones)].id
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  network_interface_ids = [
-    azurerm_network_interface.app[count.index].id
-  ]
+  network_interface_ids        = local.use_two_network_cards ? [azurerm_network_interface.app[count.index].id, azurerm_network_interface.app-admin[count.index].id] : [azurerm_network_interface.app[count.index].id]
+
   size                            = local.app_sizing.compute.vm_size
   admin_username                  = local.authentication.username
   disable_password_authentication = true
@@ -67,16 +90,14 @@ resource "azurerm_windows_virtual_machine" "app" {
   resource_group_name          = var.resource-group[0].name
   availability_set_id          = local.zonal_deployment ? null : azurerm_availability_set.app[count.index % length(local.zones)].id
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
+  network_interface_ids        = local.use_two_network_cards ? [azurerm_network_interface.app[count.index].id, azurerm_network_interface.app-admin[count.index].id] : [azurerm_network_interface.app[count.index].id]
 
-  network_interface_ids = [
-    azurerm_network_interface.app[count.index].id
-  ]
   size           = local.app_sizing.compute.vm_size
   admin_username = local.authentication.username
   admin_password = local.authentication.password
 
   os_disk {
-    name                 = format("%s_%s%s", local.prefix, local.app_virtualmachine_names[count.index], local.resource_suffixes.osdisk) 
+    name                 = format("%s_%s%s", local.prefix, local.app_virtualmachine_names[count.index], local.resource_suffixes.osdisk)
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
@@ -116,5 +137,5 @@ resource "azurerm_virtual_machine_data_disk_attachment" "app" {
   caching                   = local.app-data-disks[count.index].caching
   write_accelerator_enabled = local.app-data-disks[count.index].write_accelerator
   //Make sure the LUNs start from 0 for each VM
-  lun                       = count.index - local.app_disk_count * local.app-data-disks[count.index].vm_index
+  lun = count.index - local.app_disk_count * local.app-data-disks[count.index].vm_index
 }

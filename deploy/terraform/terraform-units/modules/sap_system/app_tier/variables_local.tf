@@ -30,7 +30,7 @@ variable "custom_disk_sizes" {
 }
 
 locals {
-// Imports Disk sizing sizing information
+  // Imports Disk sizing sizing information
   disk_sizes = "${path.module}/../../../../../configs/app_sizes.json"
   sizes      = jsondecode(file(length(var.custom_disk_sizes) > 0 ? var.custom_disk_sizes : local.disk_sizes))
 
@@ -52,7 +52,20 @@ locals {
   vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, "")
   vnet_nr_parts   = length(split("-", local.vnet_sap_name))
   // Default naming of vnet has multiple parts. Taking the second-last part as the name 
-  vnet_sap_name_prefix = try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? split("-", local.vnet_sap_name)[(local.vnet_nr_parts -2)] : local.vnet_sap_name
+  vnet_sap_name_prefix = try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? split("-", local.vnet_sap_name)[(local.vnet_nr_parts - 2)] : local.vnet_sap_name
+
+  // Admin subnet
+  var_sub_admin    = try(var.infrastructure.vnets.sap.subnet_admin, {})
+  sub_admin_arm_id = try(local.var_sub_admin.arm_id, "")
+  sub_admin_exists = length(local.sub_admin_arm_id) > 0 ? true : false
+  sub_admin_name   = local.sub_admin_exists ? try(split("/", local.sub_admin_arm_id)[10], "") : try(local.var_sub_admin.name, format("%s%s", local.prefix, local.resource_suffixes.admin-subnet))
+  sub_admin_prefix = try(local.var_sub_admin.prefix, "")
+
+  // Admin NSG
+  var_sub_admin_nsg    = try(var.infrastructure.vnets.sap.subnet_admin.nsg, {})
+  sub_admin_nsg_arm_id = try(local.var_sub_admin_nsg.arm_id, "")
+  sub_admin_nsg_exists = length(local.sub_admin_nsg_arm_id) > 0 ? true : false
+  sub_admin_nsg_name   = local.sub_admin_nsg_exists ? try(split("/", local.sub_admin_nsg_arm_id)[8], "") : try(local.var_sub_admin_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.admin-subnet-nsg))
 
   // APP subnet
   var_sub_app    = try(var.infrastructure.vnets.sap.subnet_app, {})
@@ -81,12 +94,12 @@ locals {
 
   // WEB NSG
   sub_web_nsg        = try(local.sub_web.nsg, {})
-  sub_web_nsg_arm_id = try(local.sub_web_nsg.arm_id, "") 
+  sub_web_nsg_arm_id = try(local.sub_web_nsg.arm_id, "")
   sub_web_nsg_exists = length(local.sub_web_nsg_arm_id) > 0 ? true : false
   sub_web_nsg_name   = local.sub_web_nsg_exists ? try(split("/", local.sub_web_nsg_arm_id)[8], "") : try(local.sub_web_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.web-subnet-nsg))
   sub_web_nsg_deployed = try(local.sub_web_defined ? (
     local.sub_web_nsg_exists ? data.azurerm_network_security_group.nsg-web[0] : azurerm_network_security_group.nsg-web[0]) : (
-    local.sub_app_nsg_exists ? data.azurerm_network_security_group.nsg-app[0] : azurerm_network_security_group.nsg-app[0]), null)
+  local.sub_app_nsg_exists ? data.azurerm_network_security_group.nsg-app[0] : azurerm_network_security_group.nsg-app[0]), null)
 
   application_sid          = try(var.application.sid, "")
   enable_deployment        = try(var.application.enable_deployment, false)
@@ -97,14 +110,21 @@ locals {
   webdispatcher_count      = try(var.application.webdispatcher_count, 0)
   vm_sizing                = try(var.application.vm_sizing, "Default")
   app_nic_ips              = try(var.application.app_nic_ips, [])
+  app_admin_nic_ips        = try(var.application.app_admin_nic_ips, [])
   scs_lb_ips               = try(var.application.scs_lb_ips, [])
   scs_nic_ips              = try(var.application.scs_nic_ips, [])
+  scs_admin_nic_ips        = try(var.application.scs_admin_nic_ips, [])
   web_lb_ips               = try(var.application.web_lb_ips, [])
   web_nic_ips              = try(var.application.web_nic_ips, [])
-  
+  web_admin_nic_ips        = try(var.application.web_admin_nic_ips, [])
+
   // Zones
   zones            = try(var.application.zones, [])
   zonal_deployment = length(local.zones) > 0 ? true : false
+
+  // Dual network cards
+
+  use_two_network_cards = try(var.application.dual_nics, false)
 
   app_ostype = try(var.application.os.os_type, "Linux")
   app_oscode = upper(local.app_ostype) == "LINUX" ? "l" : "w"
@@ -129,7 +149,6 @@ locals {
   }
 
 }
-
 
 locals {
   // Subnet IP Offsets

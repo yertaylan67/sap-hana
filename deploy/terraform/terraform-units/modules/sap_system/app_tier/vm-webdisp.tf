@@ -9,24 +9,42 @@ resource "azurerm_network_interface" "web" {
   ip_configuration {
     name                          = "IPConfig1"
     subnet_id                     = local.sub_web_deployed.id
-    private_ip_address            = try(local.web_nic_ips[count.index], local.sub_web_defined ? cidrhost(local.sub_web_prefix, (tonumber(count.index) + local.ip_offsets.web_vm)) : cidrhost(local.sub_app_prefix, (tonumber(count.index) * -1 + local.ip_offsets.web_vm)))
+    private_ip_address            = try(local.web_nic_ips[count.index], local.sub_web_defined ? 
+                                    cidrhost(local.sub_web_prefix, (tonumber(count.index) + local.ip_offsets.web_vm)) : 
+                                    cidrhost(local.sub_app_prefix, (tonumber(count.index) * -1 + local.ip_offsets.web_vm)))
     private_ip_address_allocation = "static"
   }
 }
 
+# Create Application NICs
+resource "azurerm_network_interface" "web-admin" {
+  count                         = local.enable_deployment && local.use_two_network_cards ? local.webdispatcher_count : 0
+  name                          = format("%s_%s%s", local.prefix, local.web_virtualmachine_names[count.index], local.resource_suffixes.admin-nic)
+  location                      = var.resource-group[0].location
+  resource_group_name           = var.resource-group[0].name
+  enable_accelerated_networking = local.app_sizing.compute.accelerated_networking
+
+  ip_configuration {
+    name                          = "IPConfig1"
+    subnet_id                     = local.sub_admin_exists ? data.azurerm_subnet.sap-admin[0].id : azurerm_subnet.sap-admin[0].id
+    private_ip_address            = try(local.web_admin_nic_ips[count.index], 
+                                      cidrhost(local.sub_admin_exists ? 
+                                        data.azurerm_subnet.sap-admin[0].address_prefixes[0] :
+                                         azurerm_subnet.sap-admin[0].address_prefixes[0], tonumber(count.index) + local.ip_offsets.web_vm))
+    private_ip_address_allocation = "static"
+  }
+}
 # Create the Linux Web dispatcher VM(s)
 resource "azurerm_linux_virtual_machine" "web" {
-  count                        = local.enable_deployment ? (upper(local.app_ostype) == "LINUX" ? local.webdispatcher_count : 0) : 0
-  name                         = format("%s_%s%s", local.prefix, local.web_virtualmachine_names[count.index], local.resource_suffixes.vm)
-  computer_name                = local.web_virtualmachine_names[count.index]
-  location                     = var.resource-group[0].location
-  resource_group_name          = var.resource-group[0].name
-  availability_set_id          = local.zonal_deployment ? null : azurerm_availability_set.web[count.index % length(local.zones)].id
-  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  zone                         = local.zonal_deployment ? try(local.zones[count.index % length(local.zones)], null) : null
-  network_interface_ids = [
-    azurerm_network_interface.web[count.index].id
-  ]
+  count                           = local.enable_deployment ? (upper(local.app_ostype) == "LINUX" ? local.webdispatcher_count : 0) : 0
+  name                            = format("%s_%s%s", local.prefix, local.web_virtualmachine_names[count.index], local.resource_suffixes.vm)
+  computer_name                   = local.web_virtualmachine_names[count.index]
+  location                        = var.resource-group[0].location
+  resource_group_name             = var.resource-group[0].name
+  availability_set_id             = local.zonal_deployment ? null : azurerm_availability_set.web[count.index % length(local.zones)].id
+  proximity_placement_group_id    = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
+  zone                            = local.zonal_deployment ? try(local.zones[count.index % length(local.zones)], null) : null
+  network_interface_ids           = local.use_two_network_cards ? [azurerm_network_interface.web[count.index].id, azurerm_network_interface.web-admin[count.index].id] : [azurerm_network_interface.web[count.index].id]
   size                            = local.web_sizing.compute.vm_size
   admin_username                  = local.authentication.username
   disable_password_authentication = true
@@ -69,12 +87,10 @@ resource "azurerm_windows_virtual_machine" "web" {
   availability_set_id          = local.zonal_deployment ? null : azurerm_availability_set.web[count.index % length(local.zones)].id
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
   zone                         = local.zonal_deployment ? try(local.zones[count.index % length(local.zones)], null) : null
-  network_interface_ids = [
-    azurerm_network_interface.web[count.index].id
-  ]
-  size           = local.web_sizing.compute.vm_size
-  admin_username = local.authentication.username
-  admin_password = local.authentication.password
+  network_interface_ids        = local.use_two_network_cards ? [azurerm_network_interface.web[count.index].id, azurerm_network_interface.web-admin[count.index].id] : [azurerm_network_interface.web[count.index].id]
+  size                         = local.web_sizing.compute.vm_size
+  admin_username               = local.authentication.username
+  admin_password               = local.authentication.password
 
   os_disk {
     name                 = format("%s_%s%s", local.prefix, local.web_virtualmachine_names[count.index], local.resource_suffixes.osdisk)
@@ -108,7 +124,7 @@ resource "azurerm_managed_disk" "web" {
   create_option        = "Empty"
   storage_account_type = local.web-data-disks[count.index].disk_type
   disk_size_gb         = local.web-data-disks[count.index].size_gb
-  zones = local.zonal_deployment ? [try(local.zones[count.index % length(local.zones)], null)] : null
+  zones                = local.zonal_deployment ? [try(local.zones[count.index % length(local.zones)], null)] : null
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "web" {
@@ -117,7 +133,7 @@ resource "azurerm_virtual_machine_data_disk_attachment" "web" {
   virtual_machine_id        = upper(local.app_ostype) == "LINUX" ? azurerm_linux_virtual_machine.web[local.web-data-disks[count.index].vm_index].id : azurerm_windows_virtual_machine.web[local.web-data-disks[count.index].vm_index].id
   caching                   = local.web-data-disks[count.index].caching
   write_accelerator_enabled = local.web-data-disks[count.index].write_accelerator
-    //Make sure the LUNs start from 0 for each VM
-  lun                       = count.index - local.web_disk_count * local.web-data-disks[count.index].vm_index
+  //Make sure the LUNs start from 0 for each VM
+  lun = count.index - local.web_disk_count * local.web-data-disks[count.index].vm_index
 
 }
