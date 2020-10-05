@@ -22,7 +22,6 @@ variable naming {
   description = "Defines the names for the resources"
 }
 
-
 variable "custom_disk_sizes" {
   type        = string
   description = "Disk size json file"

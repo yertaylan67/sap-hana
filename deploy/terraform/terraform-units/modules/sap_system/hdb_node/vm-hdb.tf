@@ -51,13 +51,13 @@ Load balancer front IP address range: .4 - .9
 
 resource "azurerm_lb" "hdb" {
   count               = local.enable_deployment ? 1 : 0
-  name                = format("%s%s", local.prefix, local.resource_suffixes.db-alb)
+  name                = format("%s%s", local.prefix,  local.resource_suffixes.db-alb)
   resource_group_name = var.resource-group[0].name
   location            = var.resource-group[0].location
   sku                 = local.zonal_deployment ? "Standard" : "Basic"
 
   frontend_ip_configuration {
-    name                          = format("%s%s", local.prefix, local.resource_suffixes.db-alb-feip)
+    name                          = format("%s%s", local.prefix,  local.resource_suffixes.db-alb-feip)
     subnet_id                     = local.sub_db_exists ? data.azurerm_subnet.sap-db[0].id : azurerm_subnet.sap-db[0].id
     private_ip_address_allocation = "Static"
     private_ip_address            = try(local.hana_database.loadbalancer.frontend_ip, (local.sub_db_exists ? cidrhost(data.azurerm_subnet.sap-db[0].address_prefixes[0], tonumber(count.index) + 4) : cidrhost(azurerm_subnet.sap-db[0].address_prefixes[0], tonumber(count.index) + 4)))
