@@ -256,7 +256,7 @@ locals {
   disk_count = length(local.data-disk-list) / length(local.hdb_vms)
 
     // Check if any disk is a Ultra Disk
-  data_disk_types = flatten([
+  ultra_data_disks = flatten([
     for hdb_vm in local.hdb_vms : [
       for datadisk in local.data-disk-per-dbnode : {
         name                      = format("%s-%s", hdb_vm.name, datadisk.suffix)
@@ -264,6 +264,6 @@ locals {
       if datadisk.storage_account_type == "UltraSSD_LRS"
   ]])
 
-  enable_ultradisk = length(local.data_disk_types) > 0 ? true : false
+  enable_ultradisk = length(local.ultra_data_disks) > 0 ? true : false
 
 }

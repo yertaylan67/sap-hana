@@ -240,7 +240,7 @@ locals {
   disk_count = length(local.anydb_disks) / length(local.anydb_vms)
   
   // Check if any disk is a Ultra Disk
-  anydb_disk_types = flatten([
+  ultra_data_disks = flatten([
     for vm_counter, anydb_vm in local.anydb_vms : [
       for storage_type in lookup(local.sizes, local.anydb_size).storage : [
         for disk_count in range(storage_type.count) : {
@@ -250,7 +250,7 @@ locals {
       if storage_type.disk_type == "UltraSSD_LRS"
   ]])
 
-  enable_ultradisk = length(local.anydb_disk_types) > 0 ? true : false
+  enable_ultradisk = length(local.ultra_data_disks) > 0 ? true : false
 
 
 }
