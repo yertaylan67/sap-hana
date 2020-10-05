@@ -123,7 +123,6 @@ locals {
   zonal_deployment = length(local.zones) > 0 ? true : false
 
   // Dual network cards
-
   use_two_network_cards = try(var.application.dual_nics, false)
 
   app_ostype = try(var.application.os.os_type, "Linux")
