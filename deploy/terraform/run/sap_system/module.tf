@@ -4,18 +4,6 @@
 */
 
 module "deployer" {
-<<<<<<< HEAD
-  source         = "../../terraform-units/modules/sap_system/deployer"
-  application    = var.application
-  databases      = var.databases
-  infrastructure = var.infrastructure
-  jumpboxes      = var.jumpboxes
-  options        = var.options
-  software       = var.software
-  ssh-timeout    = var.ssh-timeout
-  sshkey         = var.sshkey
-  naming         = module.sap_namegenerator.naming
-=======
   source            = "../../terraform-units/modules/sap_system/deployer"
   application       = var.application
   databases         = var.databases
@@ -26,7 +14,6 @@ module "deployer" {
   ssh-timeout       = var.ssh-timeout
   sshkey            = var.sshkey
   naming            = module.sap_namegenerator.naming
->>>>>>> 07a87a57b816658952cbe7b5e6b0a6bab78d1bfa
 }
 
 module "saplibrary" {
