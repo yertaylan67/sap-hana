@@ -73,20 +73,19 @@ locals {
     if contains(["ORACLE", "DB2", "SQLSERVER", "ASE"], upper(try(database.platform, "NONE")))
   ]
 
-  sap_sid    = upper(try(var.application.sid, ""))
-  hdb        = try(local.hana-databases[0], {})
-  hdb_ins    = try(local.hdb.instance, {})
-  hanadb_sid = try(local.hdb_ins.sid, "HDB") // HANA database sid from the Databases array for use as reference to LB/AS
-
+  hdb            = try(local.hana-databases[0], {})
+  hdb_ins        = try(local.hdb.instance, {})
+  hanadb_sid     = try(local.hdb_ins.sid, "HDB") // HANA database sid from the Databases array for use as reference to LB/AS
   anydb_platform = try(local.anydb-databases[0].platform, "NONE")
   anydb_sid      = (length(local.anydb-databases) > 0) ? try(local.anydb-databases[0].instance.sid, lower(substr(local.anydb_platform, 0, 3))) : lower(substr(local.anydb_platform, 0, 3))
-
-  db_sid = length(local.hana-databases) > 0 ? local.hanadb_sid : local.anydb_sid
+  db_sid         = length(local.hana-databases) > 0 ? local.hanadb_sid : local.anydb_sid
+  sap_sid        = upper(try(var.application.sid, local.db_sid))
 
   app_ostype          = try(var.application.os.os_type, "LINUX")
   db_ostype           = try(var.databases[0].os.os_type, "LINUX")
-  db_server_count     = length(var.databases)
+  db_server_count     = try(length(var.databases[0].dbnodes), 1)
   app_server_count    = try(var.application.application_server_count, 0)
   webdispatcher_count = try(var.application.webdispatcher_count, 0)
   scs_server_count    = try(var.application.scs_high_availability, false) ? 2 : 1
+
 }
