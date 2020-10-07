@@ -21,11 +21,13 @@ resource "azurerm_linux_virtual_machine" "app" {
   computer_name                = local.app_virtualmachine_names[count.index]
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
-  availability_set_id          = local.zonal_deployment ? null : azurerm_availability_set.app[count.index % length(local.zones)].id
+  availability_set_id          = local.zonal_deployment && length(local.zones) > 1 ? null : azurerm_availability_set.app[count.index % length(local.zones)].id
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
   network_interface_ids = [
     azurerm_network_interface.app[count.index].id
   ]
+  
+  zone                            = local.zonal_deployment && local.webdispatcher_count > 2 && length(local.zones) > 1 ? try(local.zones[count.index % length(local.zones)], null) : null
   size                            = local.app_sizing.compute.vm_size
   admin_username                  = local.authentication.username
   disable_password_authentication = true
@@ -65,12 +67,14 @@ resource "azurerm_windows_virtual_machine" "app" {
   computer_name                = local.app_virtualmachine_names[count.index]
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
-  availability_set_id          = local.zonal_deployment ? null : azurerm_availability_set.app[count.index % length(local.zones)].id
+  availability_set_id          = local.zonal_deployment && length(local.zones) > 1 ? null : azurerm_availability_set.app[count.index % length(local.zones)].id
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
 
   network_interface_ids = [
     azurerm_network_interface.app[count.index].id
   ]
+
+  zone           = local.zonal_deployment && local.application_server_count  && length(local.zones) > 1 ? try(local.zones[count.index % length(local.zones)], null) : null
   size           = local.app_sizing.compute.vm_size
   admin_username = local.authentication.username
   admin_password = local.authentication.password
@@ -107,6 +111,7 @@ resource "azurerm_managed_disk" "app" {
   create_option        = "Empty"
   storage_account_type = local.app-data-disks[count.index].disk_type
   disk_size_gb         = local.app-data-disks[count.index].size_gb
+  zones                = local.zonal_deployment && local.webdispatcher_count > 2 && length(local.zones) > 1 ? try([local.zones[count.index % length(local.zones)]], null) : null
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "app" {
