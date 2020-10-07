@@ -35,6 +35,10 @@ locals {
   prefix  = try(var.infrastructure.resource_group.name, var.naming.prefix.SDU)
   rg_name = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, local.resource_suffixes.sdu-rg))
 
+  // Zones
+  zones            = try(var.application.zones, [])
+  zonal_deployment = length(local.zones) > 0 ? true : false
+
   # SAP vnet
   var_infra       = try(var.infrastructure, {})
   var_vnet_sap    = try(local.var_infra.vnets.sap, {})

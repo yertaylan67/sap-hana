@@ -30,6 +30,10 @@ locals {
   prefix  = try(var.infrastructure.resource_group.name, var.naming.prefix.SDU)
   rg_name = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, local.resource_suffixes.sdu-rg))
 
+  // Zones
+  zones            = try(local.anydb.zones, [])
+  zonal_deployment = length(local.zones) > 0 ? true : false
+
   # SAP vnet
   var_infra       = try(var.infrastructure, {})
   var_vnet_sap    = try(local.var_infra.vnets.sap, {})
@@ -79,7 +83,7 @@ locals {
   anydb_ostype = try(local.anydb.os.os_type, "Linux")
   anydb_oscode = upper(local.anydb_ostype) == "LINUX" ? "l" : "w"
   anydb_size   = try(local.anydb.size, "Demo")
-  anydb_sku    = try(lookup(local.sizes, local.anydb_size).compute.vmsize, "Standard_E4s_v3")
+  anydb_sku    = try(lookup(local.sizes, local.anydb_size).compute.vm_size, "Standard_E4s_v3")
   anydb_fs     = try(local.anydb.filesystem, "xfs")
   anydb_ha     = try(local.anydb.high_availability, false)
   db_sid       = lower(substr(local.anydb_platform, 0, 3))
