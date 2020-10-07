@@ -95,6 +95,11 @@ locals {
 
   // Filter the list of databases to only HANA platform entries
   hdb          = try(local.hdb_list[0], {})
+
+  // Zones
+  zones            = try(local.hdb.zones, [])
+  zonal_deployment = length(local.zones) > 0 ? true : false
+
   hdb_platform = try(local.hdb.platform, "NONE")
   hdb_version  = try(local.hdb.db_version, "2.00.043")
   // If custom image is used, we do not overwrite os reference with default value
