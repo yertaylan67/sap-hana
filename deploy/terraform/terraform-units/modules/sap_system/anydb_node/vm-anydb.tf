@@ -26,9 +26,9 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
   location            = var.resource-group[0].location
 
   //If more than one servers are deployed into a single zone put them in an availability set and not a zone
-  availability_set_id          = local.zonal_deployment ? (length(local.anydb_vms) > 1 && length(local.zones) == 1) ? azurerm_availability_set.anydb[0].id : azurerm_availability_set.anydb[count.index % length(local.zones)].id : azurerm_availability_set.anydb[0].id
+  availability_set_id          = local.zonal_deployment ? local.enable_ultradisk ? null : (length(local.anydb_vms) > 1 && length(local.zones) == 1) ? azurerm_availability_set.anydb[0].id : azurerm_availability_set.anydb[count.index % length(local.zones)].id : azurerm_availability_set.anydb[0].id
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  zone                         = local.zonal_deployment ? (length(local.anydb_vms) > 1 && length(local.zones) == 1) ? null : local.zones[count.index % length(local.zones)] : null
+  zone                         = local.zonal_deployment ? (length(local.anydb_vms) > 1 && length(local.zones) == 1 && !local.enable_ultradisk) ? null : local.zones[count.index % length(local.zones)] : null
 
   network_interface_ids = [azurerm_network_interface.anydb[count.index].id]
   size                  = local.anydb_vms[count.index].size
@@ -88,9 +88,9 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
   location            = var.resource-group[0].location
 
   //If more than one servers are deployed into a single zone put them in an availability set and not a zone
-  availability_set_id          = local.zonal_deployment ? (length(local.anydb_vms) > 1 && length(local.zones) == 1) ? azurerm_availability_set.anydb[0].id : azurerm_availability_set.anydb[count.index % length(local.zones)].id : azurerm_availability_set.anydb[0].id
+  availability_set_id          = local.zonal_deployment ? local.enable_ultradisk ? null : (length(local.anydb_vms) > 1 && length(local.zones) == 1) ? azurerm_availability_set.anydb[0].id : azurerm_availability_set.anydb[count.index % length(local.zones)].id : azurerm_availability_set.anydb[0].id
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  zone                         = local.zonal_deployment ? (length(local.anydb_vms) > 1 && length(local.zones) == 1) ? null : local.zones[count.index % length(local.zones)] : null
+  zone                         = local.zonal_deployment ? (length(local.anydb_vms) > 1 && length(local.zones) == 1 && !local.enable_ultradisk) ? null : local.zones[count.index % length(local.zones)] : null
 
   network_interface_ids = [azurerm_network_interface.anydb[count.index].id]
   size                  = local.anydb_vms[count.index].size
