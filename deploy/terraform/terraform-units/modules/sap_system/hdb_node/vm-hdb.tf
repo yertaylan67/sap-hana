@@ -128,9 +128,9 @@ resource "azurerm_linux_virtual_machine" "vm-dbnode" {
   computer_name                = local.hdb_vms[count.index].computername
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
-  availability_set_id          = local.zonal_deployment ? null : azurerm_availability_set.hdb[0].id
+  availability_set_id          = (local.zonal_deployment && length(local.zones) > 1) || local.enable_ultradisk ? null : azurerm_availability_set.hdb[count.index % length(local.zones)].id
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  zone                         = local.zonal_deployment ? try(local.zones[count.index % length(local.zones)], null) : null
+  zone                         = local.zonal_deployment && ((length(local.hdb_vms) > 1 && length(local.zones) > 1) || local.enable_ultradisk)  ? try(local.zones[count.index % length(local.zones)], null) : null
 
   network_interface_ids = [
     azurerm_network_interface.nics-dbnodes-admin[count.index].id,
@@ -188,7 +188,7 @@ resource "azurerm_managed_disk" "data-disk" {
   create_option        = "Empty"
   storage_account_type = local.data-disk-list[count.index].storage_account_type
   disk_size_gb         = local.data-disk-list[count.index].disk_size_gb
-  zones                = local.zonal_deployment ? [try(local.zones[count.index % length(local.zones)], null)] : null
+  zones                = local.zonal_deployment && ((length(local.hdb_vms) > 1 && length(local.zones) > 1) || local.enable_ultradisk) ? try([local.zones[count.index % length(local.zones)]], null) : null
 }
 
 # Manages attaching a Disk to a Virtual Machine
