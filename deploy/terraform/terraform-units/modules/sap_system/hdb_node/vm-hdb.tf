@@ -121,18 +121,6 @@ resource "azurerm_availability_set" "hdb" {
 
 # VIRTUAL MACHINES ================================================================================================
 
-# Creates managed data disk
-resource "azurerm_managed_disk" "data-disk" {
-  count                = local.enable_deployment ? length(local.data-disk-list) : 0
-  name                 = local.data-disk-list[count.index].name
-  location             = var.resource-group[0].location
-  resource_group_name  = var.resource-group[0].name
-  create_option        = "Empty"
-  storage_account_type = local.data-disk-list[count.index].storage_account_type
-  disk_size_gb         = local.data-disk-list[count.index].disk_size_gb
-  zones                = local.zonal_deployment ? (length(local.hdb_vms) > 1 && length(local.zones) == 1) ? null : [local.zones[count.index % length(local.zones)]] : null
-}
-
 # Manages Linux Virtual Machine for HANA DB servers
 resource "azurerm_linux_virtual_machine" "vm-dbnode" {
   count                        = local.enable_deployment ? length(local.hdb_vms) : 0
@@ -195,24 +183,25 @@ resource "azurerm_linux_virtual_machine" "vm-dbnode" {
 
 # Creates managed data disk
 resource "azurerm_managed_disk" "data-disk" {
-  count                = local.enable_deployment ? length(local.data-disk-list) : 0
-  name                 = local.data-disk-list[count.index].name
+  count                = local.enable_deployment ? length(local.data_disk_list) : 0
+  name                 = local.data_disk_list[count.index].name
   location             = var.resource-group[0].location
   resource_group_name  = var.resource-group[0].name
   create_option        = "Empty"
-  storage_account_type = local.data-disk-list[count.index].storage_account_type
-  disk_size_gb         = local.data-disk-list[count.index].disk_size_gb
+  storage_account_type = local.data_disk_list[count.index].storage_account_type
+  disk_size_gb         = local.data_disk_list[count.index].disk_size_gb
+  disk_iops_read_write = local.data_disk_list[count.index].disk_iops_read_write
+  disk_mbps_read_write = local.data_disk_list[count.index].disk_mbps_read_write
   zones                = local.zonal_deployment && ((length(local.hdb_vms) > 1 && length(local.zones) > 1) || local.enable_ultradisk) ? try([local.zones[count.index % length(local.zones)]], null) : null
 }
 
 # Manages attaching a Disk to a Virtual Machine
 resource "azurerm_virtual_machine_data_disk_attachment" "vm-dbnode-data-disk" {
-  count                     = local.enable_deployment ? length(local.data-disk-list) : 0
+  count                     = local.enable_deployment ? length(local.data_disk_list) : 0
   managed_disk_id           = azurerm_managed_disk.data-disk[count.index].id
   virtual_machine_id        = azurerm_linux_virtual_machine.vm-dbnode[floor(count.index / length(local.data-disk-per-dbnode))].id
-  caching                   = local.data-disk-list[count.index].caching
-  write_accelerator_enabled = local.data-disk-list[count.index].write_accelerator_enabled
-
+  caching                   = local.data_disk_list[count.index].caching
+  write_accelerator_enabled = local.data_disk_list[count.index].write_accelerator_enabled
   //Make sure the LUNs start from 0 for each VM
   lun                       = count.index - local.disk_count * floor(count.index / length(local.data-disk-per-dbnode))
 }

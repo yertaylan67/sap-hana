@@ -26,18 +26,17 @@ variable naming {
   description = "Defines the names for the resources"
 }
 
-variable "custom_disk_sizes" {
+variable "custom_disk_sizes_filename" {
   type        = string
   description = "Disk size json file"
   default     = ""
-
-}
+  }
 
 locals {
   // Imports database sizing information
 
   disk_sizes = "${path.module}/../../../../../configs/hdb_sizes.json"
-  sizes      = jsondecode(file(length(var.custom_disk_sizes) > 0 ? var.custom_disk_sizes : local.disk_sizes))
+  sizes      = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : local.disk_sizes))
 
   db_server_count      = length(var.naming.virtualmachine_names.HANA)
   virtualmachine_names = concat(var.naming.virtualmachine_names.HANA, var.naming.virtualmachine_names.HANA_HA)
@@ -95,11 +94,6 @@ locals {
 
   // Filter the list of databases to only HANA platform entries
   hdb          = try(local.hdb_list[0], {})
-
-  // Zones
-  zones            = try(local.hdb.zones, [])
-  zonal_deployment = length(local.zones) > 0 ? true : false
-
   hdb_platform = try(local.hdb.platform, "NONE")
   hdb_version  = try(local.hdb.db_version, "2.00.043")
   // If custom image is used, we do not overwrite os reference with default value
@@ -238,6 +232,9 @@ locals {
           suffix                    = format("%s%02d", storage_type.name, disk_count)
           storage_account_type      = storage_type.disk_type,
           disk_size_gb              = storage_type.size_gb,
+          //The following two lines are for Ultradisks only
+          disk_iops_read_write      = try(storage_type.disk-iops-read-write, null)
+          disk_mbps_read_write      = try(storage_type.disk-mbps-read-write, null)
           caching                   = storage_type.caching,
           write_accelerator_enabled = storage_type.write_accelerator
         }
@@ -246,7 +243,7 @@ locals {
     ]
   ) : []
 
-  data-disk-list = flatten([
+  data_disk_list = flatten([
     for hdb_vm in local.hdb_vms : [
       for datadisk in local.data-disk-per-dbnode : {
         name                      = format("%s-%s", hdb_vm.name, datadisk.suffix)
@@ -258,17 +255,11 @@ locals {
     ]
   ])
 
-  disk_count = length(local.data-disk-list) / length(local.hdb_vms)
+  disk_count = length(local.data-disk-per-dbnode)
 
-    // Check if any disk is a Ultra Disk
-  ultra_data_disks = flatten([
-    for hdb_vm in local.hdb_vms : [
-      for datadisk in local.data-disk-per-dbnode : {
-        name                      = format("%s-%s", hdb_vm.name, datadisk.suffix)
-        }
-      if datadisk.storage_account_type == "UltraSSD_LRS"
-  ]])
-
-  enable_ultradisk = length(local.ultra_data_disks) > 0 ? true : false
-
+ storage_list = lookup(local.sizes, local.hdb_size).storage
+  enable_ultradisk = try(compact([
+    for storage in local.storage_list :
+    storage.disk_type == "UltraSSD_LRS" ? true : ""
+  ])[0], false)
 }

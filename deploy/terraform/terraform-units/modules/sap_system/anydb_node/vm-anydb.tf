@@ -143,9 +143,8 @@ resource "azurerm_managed_disk" "disks" {
   create_option        = "Empty"
   storage_account_type = local.anydb_disks[count.index].storage_account_type
   disk_size_gb         = local.anydb_disks[count.index].disk_size_gb
-
-  disk_iops_read_write = local.anydb_disks[count.index].disk-iops-read-write > 0 ? local.anydb_disks[count.index].disk-iops-read-write : null
-  disk_mbps_read_write = local.anydb_disks[count.index].disk-mbps-read-write > 0 ? local.anydb_disks[count.index].disk-mbps-read-write : null
+  disk_iops_read_write = local.anydb_disks[count.index].disk_iops_read_write
+  disk_mbps_read_write = local.anydb_disks[count.index].disk_mbps_read_write
   zones                = local.zonal_deployment && ((length(local.anydb_vms) > 1 && length(local.zones) > 1) || local.enable_ultradisk) ? try([local.zones[count.index % length(local.zones)]], null) : null
 }
 
@@ -156,7 +155,6 @@ resource "azurerm_virtual_machine_data_disk_attachment" "vm-disks" {
   virtual_machine_id        = upper(local.anydb_ostype) == "LINUX" ? azurerm_linux_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].id : azurerm_windows_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].id
   caching                   = local.anydb_disks[count.index].caching
   write_accelerator_enabled = local.anydb_disks[count.index].write_accelerator_enabled
-
   //Make sure the LUNs start from 0 for each VM
   lun = count.index - local.disk_count * local.anydb_disks[count.index].vm_index
 }

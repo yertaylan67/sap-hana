@@ -22,7 +22,7 @@ variable naming {
   description = "Defines the names for the resources"
 }
 
-variable "custom_disk_sizes" {
+variable "custom_disk_sizes_filename" {
   type        = string
   description = "Disk size json file"
   default     = ""
@@ -31,7 +31,7 @@ variable "custom_disk_sizes" {
 locals {
 // Imports Disk sizing sizing information
   disk_sizes = "${path.module}/../../../../../configs/app_sizes.json"
-  sizes      = jsondecode(file(length(var.custom_disk_sizes) > 0 ? var.custom_disk_sizes : local.disk_sizes))
+  sizes      = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : local.disk_sizes))
 
   app_virtualmachine_names = var.naming.virtualmachine_names.APP
   scs_virtualmachine_names = var.naming.virtualmachine_names.SCS
@@ -105,10 +105,6 @@ locals {
   web_lb_ips               = try(var.application.web_lb_ips, [])
   web_nic_ips              = try(var.application.web_nic_ips, [])
   
-  // Zones
-  zones            = try(var.application.zones, [])
-  zonal_deployment = length(local.zones) > 0 ? true : false
-
   app_ostype = try(var.application.os.os_type, "Linux")
   app_oscode = upper(local.app_ostype) == "LINUX" ? "l" : "w"
 
