@@ -30,7 +30,7 @@ variable "custom_disk_sizes_filename" {
   type        = string
   description = "Disk size json file"
   default     = ""
-  }
+}
 
 locals {
   // Imports database sizing information
@@ -43,9 +43,9 @@ locals {
   storageaccount_names = var.naming.storageaccount_names.SDU
   resource_suffixes    = var.naming.resource_suffixes
 
-  region  = try(var.infrastructure.region, "")
-  sid     = upper(try(var.application.sid, ""))
-  prefix  = try(var.infrastructure.resource_group.name, var.naming.prefix.SDU)
+  region = try(var.infrastructure.region, "")
+  sid    = upper(try(var.application.sid, ""))
+  prefix = try(var.infrastructure.resource_group.name, var.naming.prefix.SDU)
 
   rg_name = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, local.resource_suffixes.sdu-rg))
 
@@ -57,7 +57,7 @@ locals {
   vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, "")
   vnet_nr_parts   = length(split("-", local.vnet_sap_name))
   // Default naming of vnet has multiple parts. Taking the second-last part as the name 
-  vnet_sap_name_prefix = try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? split("-", local.vnet_sap_name)[(local.vnet_nr_parts -2)] : local.vnet_sap_name
+  vnet_sap_name_prefix = try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? split("-", local.vnet_sap_name)[(local.vnet_nr_parts - 2)] : local.vnet_sap_name
 
   // Admin subnet
   var_sub_admin    = try(var.infrastructure.vnets.sap.subnet_admin, {})
@@ -68,7 +68,7 @@ locals {
 
   // Admin NSG
   var_sub_admin_nsg    = try(var.infrastructure.vnets.sap.subnet_admin.nsg, {})
-  sub_admin_nsg_arm_id = try(local.var_sub_admin_nsg.arm_id, "") 
+  sub_admin_nsg_arm_id = try(local.var_sub_admin_nsg.arm_id, "")
   sub_admin_nsg_exists = length(local.sub_admin_nsg_arm_id) > 0 ? true : false
   sub_admin_nsg_name   = local.sub_admin_nsg_exists ? try(split("/", local.sub_admin_nsg_arm_id)[8], "") : try(local.var_sub_admin_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.admin-subnet-nsg))
 
@@ -81,7 +81,7 @@ locals {
 
   // DB NSG
   var_sub_db_nsg    = try(var.infrastructure.vnets.sap.subnet_db.nsg, {})
-  sub_db_nsg_arm_id = try(local.var_sub_db_nsg.arm_id, "") 
+  sub_db_nsg_arm_id = try(local.var_sub_db_nsg.arm_id, "")
   sub_db_nsg_exists = length(local.sub_db_nsg_arm_id) > 0 ? true : false
   sub_db_nsg_name   = local.sub_db_nsg_exists ? try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.db-subnet-nsg))
 
@@ -229,9 +229,9 @@ locals {
     [
       for storage_type in lookup(local.sizes, local.hdb_size).storage : [
         for disk_count in range(storage_type.count) : {
-          suffix                    = format("%s%02d", storage_type.name, disk_count)
-          storage_account_type      = storage_type.disk_type,
-          disk_size_gb              = storage_type.size_gb,
+          suffix               = format("%s%02d", storage_type.name, disk_count)
+          storage_account_type = storage_type.disk_type,
+          disk_size_gb         = storage_type.size_gb,
           //The following two lines are for Ultradisks only
           disk_iops_read_write      = try(storage_type.disk-iops-read-write, null)
           disk_mbps_read_write      = try(storage_type.disk-mbps-read-write, null)
@@ -244,20 +244,22 @@ locals {
   ) : []
 
   data_disk_list = flatten([
-    for hdb_vm in local.hdb_vms : [
-      for datadisk in local.data-disk-per-dbnode : {
+    for vm_counter, hdb_vm in local.hdb_vms : [
+      for idx, datadisk in local.data-disk-per-dbnode : {
         name                      = format("%s-%s", hdb_vm.name, datadisk.suffix)
+        vm_index                  = vm_counter
         caching                   = datadisk.caching
         storage_account_type      = datadisk.storage_account_type
         disk_size_gb              = datadisk.disk_size_gb
         write_accelerator_enabled = datadisk.write_accelerator_enabled
+        disk_iops_read_write      = datadisk.disk_iops_read_write
+        disk_mbps_read_write      = datadisk.disk_mbps_read_write
+        lun                       = idx
       }
     ]
   ])
 
-  disk_count = length(local.data-disk-per-dbnode)
-
- storage_list = lookup(local.sizes, local.hdb_size).storage
+  storage_list = lookup(local.sizes, local.hdb_size).storage
   enable_ultradisk = try(compact([
     for storage in local.storage_list :
     storage.disk_type == "UltraSSD_LRS" ? true : ""

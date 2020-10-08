@@ -155,6 +155,5 @@ resource "azurerm_virtual_machine_data_disk_attachment" "vm-disks" {
   virtual_machine_id        = upper(local.anydb_ostype) == "LINUX" ? azurerm_linux_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].id : azurerm_windows_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].id
   caching                   = local.anydb_disks[count.index].caching
   write_accelerator_enabled = local.anydb_disks[count.index].write_accelerator_enabled
-  //Make sure the LUNs start from 0 for each VM
-  lun = count.index - local.disk_count * local.anydb_disks[count.index].vm_index
+  lun                       = local.anydb_disks[count.index].lun
 }
