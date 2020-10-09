@@ -47,7 +47,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "anydb" {
 
 resource "azurerm_availability_set" "anydb" {
   count                        = local.enable_deployment ?  max(length(local.zones),1) : 0
-  name                         = format("%s%s", local.prefix, local.resource_suffixes.db-avset)
+  name                         = local.zonal_deployment ? format("%s_z%s%s", local.prefix, local.zones[count.index], local.resource_suffixes.db-avset) : format("%s%s", local.prefix, local.resource_suffixes.db-avset)
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
   platform_update_domain_count = 20
