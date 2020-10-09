@@ -94,25 +94,6 @@ module "jumpbox" {
 
 // Create HANA database nodes
 module "hdb_node" {
-<<<<<<< HEAD
-  source            = "../../terraform-units/modules/sap_system/hdb_node"
-  application       = var.application
-  databases         = var.databases
-  infrastructure    = var.infrastructure
-  jumpboxes         = var.jumpboxes
-  options           = local.options
-  software          = var.software
-  ssh-timeout       = var.ssh-timeout
-  sshkey            = var.sshkey
-  resource-group    = module.common_infrastructure.resource-group
-  subnet-mgmt       = module.common_infrastructure.subnet-mgmt
-  nsg-mgmt          = module.common_infrastructure.nsg-mgmt
-  vnet-sap          = module.common_infrastructure.vnet-sap
-  storage-bootdiag  = module.common_infrastructure.storage-bootdiag
-  ppg               = module.common_infrastructure.ppg
-  naming            = module.sap_namegenerator.naming
-  custom_disk_sizes = var.db_disk_sizes
-=======
   source                     = "../../terraform-units/modules/sap_system/hdb_node"
   application                = var.application
   databases                  = var.databases
@@ -130,51 +111,10 @@ module "hdb_node" {
   ppg                        = module.common_infrastructure.ppg
   naming                     = module.sap_namegenerator.naming
   custom_disk_sizes_filename = var.db_disk_sizes_filename
->>>>>>> 8cdf29dd164e224b58e8a0b0fe1d5cb42214aa68
 }
 
 // Create Application Tier nodes
 module "app_tier" {
-<<<<<<< HEAD
-  source            = "../../terraform-units/modules/sap_system/app_tier"
-  application       = var.application
-  databases         = var.databases
-  infrastructure    = var.infrastructure
-  jumpboxes         = var.jumpboxes
-  options           = local.options
-  software          = var.software
-  ssh-timeout       = var.ssh-timeout
-  sshkey            = var.sshkey
-  resource-group    = module.common_infrastructure.resource-group
-  subnet-mgmt       = module.common_infrastructure.subnet-mgmt
-  vnet-sap          = module.common_infrastructure.vnet-sap
-  storage-bootdiag  = module.common_infrastructure.storage-bootdiag
-  ppg               = module.common_infrastructure.ppg
-  naming            = module.sap_namegenerator.naming
-  custom_disk_sizes = var.app_disk_sizes
-=======
-  source                     = "../../terraform-units/modules/sap_system/app_tier"
-  application                = var.application
-  databases                  = var.databases
-  infrastructure             = var.infrastructure
-  jumpboxes                  = var.jumpboxes
-  options                    = local.options
-  software                   = var.software
-  ssh-timeout                = var.ssh-timeout
-  sshkey                     = var.sshkey
-  resource-group             = module.common_infrastructure.resource-group
-  subnet-mgmt                = module.common_infrastructure.subnet-mgmt
-  vnet-sap                   = module.common_infrastructure.vnet-sap
-  storage-bootdiag           = module.common_infrastructure.storage-bootdiag
-  ppg                        = module.common_infrastructure.ppg
-  naming                     = module.sap_namegenerator.naming
-  custom_disk_sizes_filename = var.app_disk_sizes_filename
->>>>>>> 8cdf29dd164e224b58e8a0b0fe1d5cb42214aa68
-}
-
-// Create anydb database nodes
-module "anydb_node" {
-<<<<<<< HEAD
   source            = "../../terraform-units/modules/sap_system/anydb_node"
   application       = var.application
   databases         = var.databases
@@ -189,24 +129,7 @@ module "anydb_node" {
   storage-bootdiag  = module.common_infrastructure.storage-bootdiag
   ppg               = module.common_infrastructure.ppg
   naming            = module.sap_namegenerator.naming
-  custom_disk_sizes = var.db_disk_sizes
-=======
-  source                     = "../../terraform-units/modules/sap_system/anydb_node"
-  application                = var.application
-  databases                  = var.databases
-  infrastructure             = var.infrastructure
-  jumpboxes                  = var.jumpboxes
-  options                    = var.options
-  software                   = var.software
-  ssh-timeout                = var.ssh-timeout
-  sshkey                     = var.sshkey
-  resource-group             = module.common_infrastructure.resource-group
-  vnet-sap                   = module.common_infrastructure.vnet-sap
-  storage-bootdiag           = module.common_infrastructure.storage-bootdiag
-  ppg                        = module.common_infrastructure.ppg
-  naming                     = module.sap_namegenerator.naming
   custom_disk_sizes_filename = var.db_disk_sizes_filename
->>>>>>> 8cdf29dd164e224b58e8a0b0fe1d5cb42214aa68
 }
 
 // Generate output files
