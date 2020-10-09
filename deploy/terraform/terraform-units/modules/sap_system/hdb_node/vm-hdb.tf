@@ -51,7 +51,7 @@ Load balancer front IP address range: .4 - .9
 
 resource "azurerm_lb" "hdb" {
   count               = local.enable_deployment ? 1 : 0
-  name                = format("%s%s", local.prefix, local.resource_suffixes.db-alb)
+  name                = format("%s%s", local.prefix,  local.resource_suffixes.db-alb)
   resource_group_name = var.resource-group[0].name
   location            = var.resource-group[0].location
   sku                 = local.zonal_deployment ? "Standard" : "Basic"
@@ -128,9 +128,11 @@ resource "azurerm_linux_virtual_machine" "vm-dbnode" {
   computer_name                = local.hdb_vms[count.index].computername
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
-  availability_set_id          = local.zonal_deployment ? null : azurerm_availability_set.hdb[0].id
+
+  //If more than one servers are deployed into a single zone put them in an availability set and not a zone
+  availability_set_id          = local.zonal_deployment ? (length(local.hdb_vms) > 1 && length(local.zones) == 1) ? azurerm_availability_set.hdb[0].id : azurerm_availability_set.hdb[count.index % length(local.zones)].id : azurerm_availability_set.hdb[0].id
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  zone                         = local.zonal_deployment ? try(local.zones[count.index % length(local.zones)], null) : null
+  zone                         = local.zonal_deployment ? (length(local.hdb_vms) > 1 && length(local.zones) == 1 && !local.enable_ultradisk) ? null : local.zones[count.index % length(local.zones)] : null
 
   network_interface_ids = [
     azurerm_network_interface.nics-dbnodes-admin[count.index].id,
@@ -181,24 +183,24 @@ resource "azurerm_linux_virtual_machine" "vm-dbnode" {
 
 # Creates managed data disk
 resource "azurerm_managed_disk" "data-disk" {
-  count                = local.enable_deployment ? length(local.data-disk-list) : 0
-  name                 = local.data-disk-list[count.index].name
+  count                = local.enable_deployment ? length(local.data_disk_list) : 0
+  name                 = local.data_disk_list[count.index].name
   location             = var.resource-group[0].location
   resource_group_name  = var.resource-group[0].name
   create_option        = "Empty"
-  storage_account_type = local.data-disk-list[count.index].storage_account_type
-  disk_size_gb         = local.data-disk-list[count.index].disk_size_gb
-  zones                = local.zonal_deployment ? [try(local.zones[count.index % length(local.zones)], null)] : null
+  storage_account_type = local.data_disk_list[count.index].storage_account_type
+  disk_size_gb         = local.data_disk_list[count.index].disk_size_gb
+  disk_iops_read_write = local.data_disk_list[count.index].disk_iops_read_write
+  disk_mbps_read_write = local.data_disk_list[count.index].disk_mbps_read_write
+  zones                = local.zonal_deployment && ((length(local.hdb_vms) > 1 && length(local.zones) > 1) || local.enable_ultradisk) ? try([local.zones[count.index % length(local.zones)]], null) : null
 }
 
 # Manages attaching a Disk to a Virtual Machine
 resource "azurerm_virtual_machine_data_disk_attachment" "vm-dbnode-data-disk" {
-  count                     = local.enable_deployment ? length(local.data-disk-list) : 0
+  count                     = local.enable_deployment ? length(local.data_disk_list) : 0
   managed_disk_id           = azurerm_managed_disk.data-disk[count.index].id
-  virtual_machine_id        = azurerm_linux_virtual_machine.vm-dbnode[floor(count.index / length(local.data-disk-per-dbnode))].id
-  caching                   = local.data-disk-list[count.index].caching
-  write_accelerator_enabled = local.data-disk-list[count.index].write_accelerator_enabled
-
-  //Make sure the LUNs start from 0 for each VM
-  lun                       = count.index - local.disk_count * floor(count.index / length(local.data-disk-per-dbnode))
+  virtual_machine_id        = azurerm_linux_virtual_machine.vm-dbnode[local.data_disk_list[count.index].vm_index].id
+  caching                   = local.data_disk_list[count.index].caching
+  write_accelerator_enabled = local.data_disk_list[count.index].write_accelerator_enabled
+  lun                       = local.data_disk_list[count.index].lun
 }

@@ -19,6 +19,7 @@ resource "azurerm_network_interface" "anydb" {
 
 # Section for Linux Virtual machine 
 resource "azurerm_linux_virtual_machine" "dbserver" {
+<<<<<<< HEAD
   count                        = local.enable_deployment ? ((upper(local.anydb_ostype) == "LINUX") ? length(local.anydb_vms) : 0) : 0
   name                         = local.anydb_vms[count.index].name
   computer_name                = local.anydb_vms[count.index].computername
@@ -29,6 +30,21 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
   zone                         = local.zonal_deployment ? try(local.zones[count.index % length(local.zones)], null) : null
   network_interface_ids        = [azurerm_network_interface.anydb[count.index].id]
   size                         = local.anydb_vms[count.index].size
+=======
+  count               = local.enable_deployment ? ((upper(local.anydb_ostype) == "LINUX") ? length(local.anydb_vms) : 0) : 0
+  name                = local.anydb_vms[count.index].name
+  computer_name       = local.anydb_vms[count.index].computername
+  resource_group_name = var.resource-group[0].name
+  location            = var.resource-group[0].location
+
+  //If more than one servers are deployed into a single zone put them in an availability set and not a zone
+  availability_set_id          = local.zonal_deployment ? local.enable_ultradisk ? null : (length(local.anydb_vms) > 1 && length(local.zones) == 1) ? azurerm_availability_set.anydb[0].id : azurerm_availability_set.anydb[count.index % length(local.zones)].id : azurerm_availability_set.anydb[0].id
+  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
+  zone                         = local.zonal_deployment ? (length(local.anydb_vms) > 1 && length(local.zones) == 1 && !local.enable_ultradisk) ? null : local.zones[count.index % length(local.zones)] : null
+
+  network_interface_ids = [azurerm_network_interface.anydb[count.index].id]
+  size                  = local.anydb_vms[count.index].size
+>>>>>>> 8cdf29dd164e224b58e8a0b0fe1d5cb42214aa68
 
   source_image_id = local.anydb_custom_image ? local.anydb_os.source_image_id : null
 
@@ -76,8 +92,9 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
   }
 }
 
-# Section for Windows Virtual machine based on a marketplace image 
+# Section for Windows Virtual machine 
 resource "azurerm_windows_virtual_machine" "dbserver" {
+<<<<<<< HEAD
   count                        = local.enable_deployment ? ((upper(local.anydb_ostype) == "WINDOWS") ? length(local.anydb_vms) : 0) : 0
   name                         = local.anydb_vms[count.index].name
   computer_name                = local.anydb_vms[count.index].computername
@@ -88,6 +105,21 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
   zone                         = local.zonal_deployment ? try(local.zones[count.index % length(local.zones)], null) : null
   network_interface_ids        = [azurerm_network_interface.anydb[count.index].id]
   size                         = local.anydb_vms[count.index].size
+=======
+  count               = local.enable_deployment ? ((upper(local.anydb_ostype) == "WINDOWS") ? length(local.anydb_vms) : 0) : 0
+  name                = local.anydb_vms[count.index].name
+  computer_name       = local.anydb_vms[count.index].computername
+  resource_group_name = var.resource-group[0].name
+  location            = var.resource-group[0].location
+
+  //If more than one servers are deployed into a single zone put them in an availability set and not a zone
+  availability_set_id          = local.zonal_deployment ? local.enable_ultradisk ? null : (length(local.anydb_vms) > 1 && length(local.zones) == 1) ? azurerm_availability_set.anydb[0].id : azurerm_availability_set.anydb[count.index % length(local.zones)].id : azurerm_availability_set.anydb[0].id
+  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
+  zone                         = local.zonal_deployment ? (length(local.anydb_vms) > 1 && length(local.zones) == 1 && !local.enable_ultradisk) ? null : local.zones[count.index % length(local.zones)] : null
+
+  network_interface_ids = [azurerm_network_interface.anydb[count.index].id]
+  size                  = local.anydb_vms[count.index].size
+>>>>>>> 8cdf29dd164e224b58e8a0b0fe1d5cb42214aa68
 
   additional_capabilities {
     ultra_ssd_enabled = local.enable_ultradisk
@@ -137,10 +169,9 @@ resource "azurerm_managed_disk" "disks" {
   create_option        = "Empty"
   storage_account_type = local.anydb_disks[count.index].storage_account_type
   disk_size_gb         = local.anydb_disks[count.index].disk_size_gb
-
-  disk_iops_read_write = local.anydb_disks[count.index].disk-iops-read-write > 0 ? local.anydb_disks[count.index].disk-iops-read-write : null
-  disk_mbps_read_write = local.anydb_disks[count.index].disk-mbps-read-write > 0 ? local.anydb_disks[count.index].disk-mbps-read-write : null
-  zones                = local.zonal_deployment ? [try(local.zones[count.index % length(local.zones)], null)] : null
+  disk_iops_read_write = local.anydb_disks[count.index].disk_iops_read_write
+  disk_mbps_read_write = local.anydb_disks[count.index].disk_mbps_read_write
+  zones                = local.zonal_deployment && ((length(local.anydb_vms) > 1 && length(local.zones) > 1) || local.enable_ultradisk) ? try([local.zones[count.index % length(local.zones)]], null) : null
 }
 
 # Manages attaching a Disk to a Virtual Machine
@@ -150,7 +181,5 @@ resource "azurerm_virtual_machine_data_disk_attachment" "vm-disks" {
   virtual_machine_id        = upper(local.anydb_ostype) == "LINUX" ? azurerm_linux_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].id : azurerm_windows_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].id
   caching                   = local.anydb_disks[count.index].caching
   write_accelerator_enabled = local.anydb_disks[count.index].write_accelerator_enabled
-
-  //Make sure the LUNs start from 0 for each VM
-  lun                       = count.index - local.disk_count * local.anydb_disks[count.index].vm_index
+  lun                       = local.anydb_disks[count.index].lun
 }

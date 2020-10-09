@@ -22,8 +22,7 @@ variable naming {
   description = "Defines the names for the resources"
 }
 
-
-variable "custom_disk_sizes" {
+variable "custom_disk_sizes_filename" {
   type        = string
   description = "Disk size json file"
   default     = ""
@@ -32,7 +31,7 @@ variable "custom_disk_sizes" {
 locals {
   // Imports Disk sizing sizing information
   disk_sizes = "${path.module}/../../../../../configs/app_sizes.json"
-  sizes      = jsondecode(file(length(var.custom_disk_sizes) > 0 ? var.custom_disk_sizes : local.disk_sizes))
+  sizes      = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : local.disk_sizes))
 
   app_virtualmachine_names = var.naming.virtualmachine_names.APP
   scs_virtualmachine_names = var.naming.virtualmachine_names.SCS
@@ -43,6 +42,10 @@ locals {
   sid     = upper(try(var.application.sid, ""))
   prefix  = try(var.infrastructure.resource_group.name, var.naming.prefix.SDU)
   rg_name = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, local.resource_suffixes.sdu-rg))
+
+  // Zones
+  zones            = try(var.application.zones, [])
+  zonal_deployment = length(local.zones) > 0 ? true : false
 
   # SAP vnet
   var_infra       = try(var.infrastructure, {})

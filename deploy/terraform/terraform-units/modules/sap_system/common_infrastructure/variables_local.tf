@@ -29,11 +29,11 @@ locals {
   region = try(local.var_infra.region, "")
   sid    = upper(try(var.application.sid, ""))
   prefix = try(var.infrastructure.resource_group.name, var.naming.prefix.SDU)
-
-    // Zones
+  
+  // Zonal support
   zones            = try(var.infrastructure.zones, [])
   zonal_deployment = length(local.zones) > 0 ? true : false
-
+  
   vnet_prefix          = var.naming.prefix.VNET
   storageaccount_name  = var.naming.storageaccount_names.SDU
   keyvault_names       = var.naming.keyvault_names.SDU

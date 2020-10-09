@@ -18,18 +18,17 @@ variable naming {
   description = "Defines the names for the resources"
 }
 
-variable "custom_disk_sizes" {
+variable "custom_disk_sizes_filename" {
   type        = string
   description = "Disk size json file"
   default     = ""
-
 }
 
 locals {
   // Imports database sizing information
 
   disk_sizes = "${path.module}/../../../../../configs/anydb_sizes.json"
-  sizes      = jsondecode(file(length(var.custom_disk_sizes) > 0 ? var.custom_disk_sizes : local.disk_sizes))
+  sizes      = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : local.disk_sizes))
 
   db_server_count      = length(var.naming.virtualmachine_names.ANYDB)
   virtualmachine_names = concat(var.naming.virtualmachine_names.ANYDB, var.naming.virtualmachine_names.ANYDB_HA)
@@ -220,37 +219,44 @@ locals {
     }
   ])
 
-  anydb_disks = flatten([
-    for vm_counter, anydb_vm in local.anydb_vms : [
+  data-disk-per-dbnode = (length(local.anydb_vms) > 0) ? flatten(
+    [
       for storage_type in lookup(local.sizes, local.anydb_size).storage : [
         for disk_count in range(storage_type.count) : {
-          vm_index                  = vm_counter
-          name                      = format("%s-%s%02d", anydb_vm.name, storage_type.name, disk_count)
-          storage_account_type      = storage_type.disk_type
-          disk_size_gb              = storage_type.size_gb
-          disk-iops-read-write      = try(storage_type.disk-iops-read-write, 0)
-          disk-mbps-read-write      = try(storage_type.disk-mbps-read-write, 0)
-          caching                   = storage_type.caching
+          suffix               = format("%s%02d", storage_type.name, disk_count)
+          storage_account_type = storage_type.disk_type,
+          disk_size_gb         = storage_type.size_gb,
+          //The following two lines are for Ultradisks only
+          disk_iops_read_write      = try(storage_type.disk-iops-read-write, null)
+          disk_mbps_read_write      = try(storage_type.disk-mbps-read-write, null)
+          caching                   = storage_type.caching,
           write_accelerator_enabled = storage_type.write_accelerator
         }
       ]
       if storage_type.name != "os"
-  ]])
+    ]
+  ) : []
 
-  disk_count = length(local.anydb_disks) / length(local.anydb_vms)
-  
-  // Check if any disk is a Ultra Disk
-  anydb_disk_types = flatten([
+  anydb_disks = flatten([
     for vm_counter, anydb_vm in local.anydb_vms : [
-      for storage_type in lookup(local.sizes, local.anydb_size).storage : [
-        for disk_count in range(storage_type.count) : {
-          name = format("%s-%s%02d", anydb_vm.name, storage_type.name, disk_count)
-        }
-      ]
-      if storage_type.disk_type == "UltraSSD_LRS"
-  ]])
+      for idx, datadisk in local.data-disk-per-dbnode : {
+        name                      = format("%s-%s", anydb_vm.name, datadisk.suffix)
+        vm_index                  = vm_counter
+        caching                   = datadisk.caching
+        storage_account_type      = datadisk.storage_account_type
+        disk_size_gb              = datadisk.disk_size_gb
+        write_accelerator_enabled = datadisk.write_accelerator_enabled
+        disk_iops_read_write      = datadisk.disk_iops_read_write
+        disk_mbps_read_write      = datadisk.disk_mbps_read_write
+        lun                       = idx
+      }
+    ]
+  ])
 
-  enable_ultradisk = length(local.anydb_disk_types) > 0 ? true : false
-
+  storage_list = lookup(local.sizes, local.anydb_size).storage
+  enable_ultradisk = try(compact([
+    for storage in local.storage_list :
+    storage.disk_type == "UltraSSD_LRS" ? true : ""
+  ])[0], false)
 
 }
