@@ -111,7 +111,7 @@ resource "azurerm_lb_rule" "ers" {
 
 # Create the SCS Availability Set
 resource "azurerm_availability_set" "scs" {
-  count                        = local.enable_deployment ? length(local.zones) : 0
+  count                        = local.enable_deployment ? max(length(local.zones), 1) : 0
   name                         = format("%s%s", local.prefix, local.resource_suffixes.scs-avset)
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
@@ -127,7 +127,7 @@ resource "azurerm_availability_set" "scs" {
 
 # Create the Application Availability Set
 resource "azurerm_availability_set" "app" {
-  count                        = local.enable_deployment ? length(local.zones) : 0
+  count                        = local.enable_deployment ? max(length(local.zones), 1) : 0
   name                         = format("%s%s", local.prefix, local.resource_suffixes.app-avset)
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
@@ -191,7 +191,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "web" {
 
 # Create the Web dispatcher Availability Set
 resource "azurerm_availability_set" "web" {
-  count                        = local.enable_deployment ? length(local.zones) : 0
+  count                        = local.enable_deployment ? max(length(local.zones), 1) : 0
   name                         = format("%s%s", local.prefix, local.resource_suffixes.web-avset)
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name

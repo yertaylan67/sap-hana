@@ -34,9 +34,9 @@ locals {
   storageaccount_names = var.naming.storageaccount_names.SDU
   resource_suffixes    = var.naming.resource_suffixes
 
-  region  = try(var.infrastructure.region, "")
-  sid     = upper(try(var.application.sid, ""))
-  prefix  = try(var.infrastructure.resource_group.name, var.naming.prefix.SDU)
+  region = try(var.infrastructure.region, "")
+  sid    = upper(try(var.application.sid, ""))
+  prefix = try(var.infrastructure.resource_group.name, var.naming.prefix.SDU)
 
   rg_name = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, local.resource_suffixes.sdu-rg))
 
@@ -48,7 +48,7 @@ locals {
   vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, "")
   vnet_nr_parts   = length(split("-", local.vnet_sap_name))
   // Default naming of vnet has multiple parts. Taking the second-last part as the name 
-  vnet_sap_name_prefix = try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? split("-", local.vnet_sap_name)[(local.vnet_nr_parts -2)] : local.vnet_sap_name
+  vnet_sap_name_prefix = try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? split("-", local.vnet_sap_name)[(local.vnet_nr_parts - 2)] : local.vnet_sap_name
 
   // Admin subnet
   var_sub_admin    = try(var.infrastructure.vnets.sap.subnet_admin, {})
@@ -59,7 +59,7 @@ locals {
 
   // Admin NSG
   var_sub_admin_nsg    = try(var.infrastructure.vnets.sap.subnet_admin.nsg, {})
-  sub_admin_nsg_arm_id = try(local.var_sub_admin_nsg.arm_id, "") 
+  sub_admin_nsg_arm_id = try(local.var_sub_admin_nsg.arm_id, "")
   sub_admin_nsg_exists = length(local.sub_admin_nsg_arm_id) > 0 ? true : false
   sub_admin_nsg_name   = local.sub_admin_nsg_exists ? try(split("/", local.sub_admin_nsg_arm_id)[8], "") : try(local.var_sub_admin_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.admin-subnet-nsg))
 
@@ -72,7 +72,7 @@ locals {
 
   // DB NSG
   var_sub_db_nsg    = try(var.infrastructure.vnets.sap.subnet_db.nsg, {})
-  sub_db_nsg_arm_id = try(local.var_sub_db_nsg.arm_id, "") 
+  sub_db_nsg_arm_id = try(local.var_sub_db_nsg.arm_id, "")
   sub_db_nsg_exists = length(local.sub_db_nsg_arm_id) > 0 ? true : false
   sub_db_nsg_name   = local.sub_db_nsg_exists ? try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.db-subnet-nsg))
 
@@ -84,7 +84,7 @@ locals {
   enable_deployment = (length(local.hdb_list) > 0) ? true : false
 
   // Filter the list of databases to only HANA platform entries
-  hdb          = try(local.hdb_list[0], {})
+  hdb = try(local.hdb_list[0], {})
 
   // Zones
   zones            = try(local.hdb.zones, [])

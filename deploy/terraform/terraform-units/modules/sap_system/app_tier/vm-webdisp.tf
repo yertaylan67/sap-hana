@@ -22,10 +22,10 @@ resource "azurerm_linux_virtual_machine" "web" {
   location            = var.resource-group[0].location
   resource_group_name = var.resource-group[0].name
 
-  //If more than one servers are deployed into a single zone put them in an availability set and not a zone
-  availability_set_id          = local.zonal_deployment ? (local.webdispatcher_count > 1 && length(local.zones) == 1) ? azurerm_availability_set.web[0].id : azurerm_availability_set.web[count.index % length(local.zones)].id : azurerm_availability_set.web[0].id
+  //If more than one servers are deployed into a zone put them in an availability set and not a zone
+  availability_set_id          = local.webdispatcher_count == length(local.zones) ? null : length(local.zones) > 1 ? azurerm_availability_set.web[count.index % length(local.zones)].id : azurerm_availability_set.web[0].id
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  zone                         = local.zonal_deployment ? (local.webdispatcher_count > 1 && length(local.zones) == 1) ? null : local.zones[count.index % length(local.zones)] : null
+  zone                         = local.webdispatcher_count == length(local.zones) ? local.zones[count.index % length(local.zones)] : null
 
   network_interface_ids = [
     azurerm_network_interface.web[count.index].id
@@ -70,10 +70,10 @@ resource "azurerm_windows_virtual_machine" "web" {
   location            = var.resource-group[0].location
   resource_group_name = var.resource-group[0].name
 
-  //If more than one servers are deployed into a single zone put them in an availability set and not a zone
-  availability_set_id          = local.zonal_deployment ? (local.webdispatcher_count > 1 && length(local.zones) == 1) ? azurerm_availability_set.web[0].id : azurerm_availability_set.web[count.index % length(local.zones)].id : azurerm_availability_set.web[0].id
+  //If more than one servers are deployed into a zone put them in an availability set and not a zone
+  availability_set_id          = local.webdispatcher_count == length(local.zones) ? null : length(local.zones) > 1 ? azurerm_availability_set.web[count.index % length(local.zones)].id : azurerm_availability_set.web[0].id
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  zone                         = local.zonal_deployment ? (local.webdispatcher_count > 1 && length(local.zones) == 1) ? null : local.zones[count.index % length(local.zones)] : null
+  zone                         = local.webdispatcher_count == length(local.zones) ? local.zones[count.index % length(local.zones)] : null
 
   network_interface_ids = [
     azurerm_network_interface.web[count.index].id
@@ -114,7 +114,7 @@ resource "azurerm_managed_disk" "web" {
   create_option        = "Empty"
   storage_account_type = local.web-data-disks[count.index].disk_type
   disk_size_gb         = local.web-data-disks[count.index].size_gb
-  zones                = local.zonal_deployment ? (local.webdispatcher_count > 1 && length(local.zones) == 1) ? null : [local.zones[count.index % length(local.zones)]] : null
+  zones                = local.webdispatcher_count == length(local.zones) ? [local.zones[count.index % length(local.zones)]] : null
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "web" {

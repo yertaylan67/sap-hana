@@ -17,7 +17,7 @@ resource "azurerm_network_interface" "anydb" {
   }
 }
 
-# Section for Linux Virtual machine 
+// Section for Linux Virtual machine 
 resource "azurerm_linux_virtual_machine" "dbserver" {
   count               = local.enable_deployment ? ((upper(local.anydb_ostype) == "LINUX") ? length(local.anydb_vms) : 0) : 0
   name                = local.anydb_vms[count.index].name
@@ -26,9 +26,9 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
   location            = var.resource-group[0].location
 
   //If more than one servers are deployed into a single zone put them in an availability set and not a zone
-  availability_set_id          = local.zonal_deployment ? (length(local.anydb_vms) > 1 && length(local.zones) == 1) ? azurerm_availability_set.anydb[0].id : azurerm_availability_set.anydb[count.index % length(local.zones)].id : azurerm_availability_set.anydb[0].id
+  availability_set_id          = length(local.anydb_vms) == length(local.zones) ? null : length(local.zones) > 1 ? azurerm_availability_set.anydb[count.index % length(local.zones)].id : azurerm_availability_set.anydb[0].id
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  zone                         = local.zonal_deployment ? (length(local.anydb_vms) > 1 && length(local.zones) == 1) ? null : local.zones[count.index % length(local.zones)] : null
+  zone                         = length(local.anydb_vms) == length(local.zones) ? local.zones[count.index % length(local.zones)] : null
 
   network_interface_ids = [azurerm_network_interface.anydb[count.index].id]
   size                  = local.anydb_vms[count.index].size
@@ -74,7 +74,7 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
   }
 }
 
-# Section for Windows Virtual machine 
+// Section for Windows Virtual machine 
 resource "azurerm_windows_virtual_machine" "dbserver" {
   count               = local.enable_deployment ? ((upper(local.anydb_ostype) == "WINDOWS") ? length(local.anydb_vms) : 0) : 0
   name                = local.anydb_vms[count.index].name
@@ -83,9 +83,9 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
   location            = var.resource-group[0].location
 
   //If more than one servers are deployed into a single zone put them in an availability set and not a zone
-  availability_set_id          = local.zonal_deployment ? (length(local.anydb_vms) > 1 && length(local.zones) == 1) ? azurerm_availability_set.anydb[0].id : azurerm_availability_set.anydb[count.index % length(local.zones)].id : azurerm_availability_set.anydb[0].id
+  availability_set_id          = length(local.anydb_vms) == length(local.zones) ? null : length(local.zones) > 1 ? azurerm_availability_set.anydb[count.index % length(local.zones)].id : azurerm_availability_set.anydb[0].id
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  zone                         = local.zonal_deployment ? (length(local.anydb_vms) > 1 && length(local.zones) == 1) ? null : local.zones[count.index % length(local.zones)] : null
+  zone                         = length(local.anydb_vms) == length(local.zones) ? local.zones[count.index % length(local.zones)] : null
 
   network_interface_ids = [azurerm_network_interface.anydb[count.index].id]
   size                  = local.anydb_vms[count.index].size
@@ -125,7 +125,7 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
   }
 }
 
-# Creates managed data disks
+// Creates managed data disks
 resource "azurerm_managed_disk" "disks" {
   count                = local.enable_deployment ? length(local.anydb_disks) : 0
   name                 = local.anydb_disks[count.index].name
@@ -134,10 +134,10 @@ resource "azurerm_managed_disk" "disks" {
   create_option        = "Empty"
   storage_account_type = local.anydb_disks[count.index].storage_account_type
   disk_size_gb         = local.anydb_disks[count.index].disk_size_gb
-  zones                = local.zonal_deployment ? (length(local.anydb_vms) > 1 && length(local.zones) == 1) ? null : [local.zones[count.index % length(local.zones)]] : null
+  zones                = length(local.anydb_vms) == length(local.zones) ? [local.zones[count.index % length(local.zones)]] : null
 }
 
-# Manages attaching a Disk to a Virtual Machine
+// Manages attaching a Disk to a Virtual Machine
 resource "azurerm_virtual_machine_data_disk_attachment" "vm-disks" {
   count                     = local.enable_deployment ? length(azurerm_managed_disk.disks) : 0
   managed_disk_id           = azurerm_managed_disk.disks[count.index].id
