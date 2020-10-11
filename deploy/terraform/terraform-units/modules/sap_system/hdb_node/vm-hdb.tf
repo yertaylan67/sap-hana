@@ -51,13 +51,13 @@ Load balancer front IP address range: .4 - .9
 
 resource "azurerm_lb" "hdb" {
   count               = local.enable_deployment ? 1 : 0
-  name                = format("%s%s", local.prefix,  local.resource_suffixes.db-alb)
+  name                = format("%s%s", local.prefix, local.resource_suffixes.db-alb)
   resource_group_name = var.resource-group[0].name
   location            = var.resource-group[0].location
   sku                 = local.zonal_deployment ? "Standard" : "Basic"
 
   frontend_ip_configuration {
-    name                          = format("%s%s", local.prefix,  local.resource_suffixes.db-alb-feip)
+    name                          = format("%s%s", local.prefix, local.resource_suffixes.db-alb-feip)
     subnet_id                     = local.sub_db_exists ? data.azurerm_subnet.sap-db[0].id : azurerm_subnet.sap-db[0].id
     private_ip_address_allocation = "Static"
     private_ip_address            = try(local.hana_database.loadbalancer.frontend_ip, (local.sub_db_exists ? cidrhost(data.azurerm_subnet.sap-db[0].address_prefixes[0], tonumber(count.index) + 4) : cidrhost(azurerm_subnet.sap-db[0].address_prefixes[0], tonumber(count.index) + 4)))
@@ -106,33 +106,32 @@ resource "azurerm_lb_rule" "hdb" {
   enable_floating_ip             = true
 }
 
-# AVAILABILITY SET ================================================================================================
-
-resource "azurerm_availability_set" "hdb" {
-  count                        = local.enable_deployment ? 1 : 0
-  name                         = format("%s%s", local.prefix, local.resource_suffixes.db-avset)
-  location                     = var.resource-group[0].location
-  resource_group_name          = var.resource-group[0].name
-  platform_update_domain_count = 20
-  platform_fault_domain_count  = 2
-  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  managed                      = true
-}
-
 # VIRTUAL MACHINES ================================================================================================
+
+# Creates managed data disk
+resource "azurerm_managed_disk" "data-disk" {
+  count                = local.enable_deployment ? length(local.data-disk-list) : 0
+  name                 = local.data-disk-list[count.index].name
+  location             = var.resource-group[0].location
+  resource_group_name  = var.resource-group[0].name
+  create_option        = "Empty"
+  storage_account_type = local.data-disk-list[count.index].storage_account_type
+  disk_size_gb         = local.data-disk-list[count.index].disk_size_gb
+  zones                = length(local.hdb_vms) == length(local.zones) ? [local.zones[count.index % length(local.zones)]] : null
+}
 
 # Manages Linux Virtual Machine for HANA DB servers
 resource "azurerm_linux_virtual_machine" "vm-dbnode" {
-  count                        = local.enable_deployment ? length(local.hdb_vms) : 0
-  name                         = local.hdb_vms[count.index].name
-  computer_name                = local.hdb_vms[count.index].computername
-  location                     = var.resource-group[0].location
-  resource_group_name          = var.resource-group[0].name
+  count               = local.enable_deployment ? length(local.hdb_vms) : 0
+  name                = local.hdb_vms[count.index].name
+  computer_name       = local.hdb_vms[count.index].computername
+  location            = var.resource-group[0].location
+  resource_group_name = var.resource-group[0].name
 
   //If more than one servers are deployed into a single zone put them in an availability set and not a zone
-  availability_set_id          = local.zonal_deployment ? (length(local.hdb_vms) > 1 && length(local.zones) == 1) ? azurerm_availability_set.hdb[0].id : azurerm_availability_set.hdb[count.index % length(local.zones)].id : azurerm_availability_set.hdb[0].id
+  availability_set_id          = length(local.hdb_vms) == length(local.zones) ? null : length(local.zones) > 1 ? azurerm_availability_set.hdb[count.index % length(local.zones)].id : azurerm_availability_set.hdb[0].id
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  zone                         = local.zonal_deployment ? (length(local.hdb_vms) > 1 && length(local.zones) == 1 && !local.enable_ultradisk) ? null : local.zones[count.index % length(local.zones)] : null
+  zone                         = length(local.hdb_vms) == length(local.zones) ? local.zones[count.index % length(local.zones)] : null
 
   network_interface_ids = [
     azurerm_network_interface.nics-dbnodes-admin[count.index].id,
