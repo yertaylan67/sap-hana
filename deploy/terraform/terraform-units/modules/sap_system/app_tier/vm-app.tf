@@ -113,8 +113,8 @@ resource "azurerm_managed_disk" "app" {
   location             = var.resource-group[0].location
   resource_group_name  = var.resource-group[0].name
   create_option        = "Empty"
-  storage_account_type = local.app-data-disks[count.index].disk_type
-  disk_size_gb         = local.app-data-disks[count.index].size_gb
+  storage_account_type = local.app-data-disks[count.index].storage_account_type
+  disk_size_gb         = local.app-data-disks[count.index].disk_size_gb
   zones                = local.application_server_count == length(local.zones) ? [local.zones[count.index % length(local.zones)]] : null
 }
 
@@ -123,7 +123,6 @@ resource "azurerm_virtual_machine_data_disk_attachment" "app" {
   managed_disk_id           = azurerm_managed_disk.app[count.index].id
   virtual_machine_id        = upper(local.app_ostype) == "LINUX" ? azurerm_linux_virtual_machine.app[local.app-data-disks[count.index].vm_index].id : azurerm_windows_virtual_machine.app[local.app-data-disks[count.index].vm_index].id
   caching                   = local.app-data-disks[count.index].caching
-  write_accelerator_enabled = local.app-data-disks[count.index].write_accelerator
-  //Make sure the LUNs start from 0 for each VM
-  lun                       = count.index - local.app_disk_count * local.app-data-disks[count.index].vm_index
+  write_accelerator_enabled = local.app-data-disks[count.index].write_accelerator_enabled
+  lun                       = local.app-data-disks[count.index].lun
 }

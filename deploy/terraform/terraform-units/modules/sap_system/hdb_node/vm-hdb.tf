@@ -106,21 +106,9 @@ resource "azurerm_lb_rule" "hdb" {
   enable_floating_ip             = true
 }
 
-# VIRTUAL MACHINES ================================================================================================
+// VIRTUAL MACHINES ================================================================================================
 
-# Creates managed data disk
-resource "azurerm_managed_disk" "data-disk" {
-  count                = local.enable_deployment ? length(local.data-disk-list) : 0
-  name                 = local.data-disk-list[count.index].name
-  location             = var.resource-group[0].location
-  resource_group_name  = var.resource-group[0].name
-  create_option        = "Empty"
-  storage_account_type = local.data-disk-list[count.index].storage_account_type
-  disk_size_gb         = local.data-disk-list[count.index].disk_size_gb
-  zones                = length(local.hdb_vms) == length(local.zones) ? [local.zones[count.index % length(local.zones)]] : null
-}
-
-# Manages Linux Virtual Machine for HANA DB servers
+// Manages Linux Virtual Machine for HANA DB servers
 resource "azurerm_linux_virtual_machine" "vm-dbnode" {
   count               = local.enable_deployment ? length(local.hdb_vms) : 0
   name                = local.hdb_vms[count.index].name
@@ -179,8 +167,9 @@ resource "azurerm_linux_virtual_machine" "vm-dbnode" {
     storage_account_uri = var.storage-bootdiag.primary_blob_endpoint
   }
 }
+// MANAGED DISKS ======================================================================================
 
-# Creates managed data disk
+// Creates managed data disk
 resource "azurerm_managed_disk" "data-disk" {
   count                = local.enable_deployment ? length(local.data_disk_list) : 0
   name                 = local.data_disk_list[count.index].name
@@ -194,7 +183,7 @@ resource "azurerm_managed_disk" "data-disk" {
   zones                = local.zonal_deployment && ((length(local.hdb_vms) > 1 && length(local.zones) > 1) || local.enable_ultradisk) ? try([local.zones[count.index % length(local.zones)]], null) : null
 }
 
-# Manages attaching a Disk to a Virtual Machine
+// Manages attaching a Disk to a Virtual Machine
 resource "azurerm_virtual_machine_data_disk_attachment" "vm-dbnode-data-disk" {
   count                     = local.enable_deployment ? length(local.data_disk_list) : 0
   managed_disk_id           = azurerm_managed_disk.data-disk[count.index].id
