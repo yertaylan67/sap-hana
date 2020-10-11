@@ -51,7 +51,7 @@ Load balancer front IP address range: .4 - .9
 
 resource "azurerm_lb" "hdb" {
   count               = local.enable_deployment ? 1 : 0
-  name                = format("%s%s", local.prefix,  local.resource_suffixes.db-alb)
+  name                = format("%s%s", local.prefix, local.resource_suffixes.db-alb)
   resource_group_name = var.resource-group[0].name
   location            = var.resource-group[0].location
   sku                 = local.zonal_deployment ? "Standard" : "Basic"
@@ -106,33 +106,20 @@ resource "azurerm_lb_rule" "hdb" {
   enable_floating_ip             = true
 }
 
-# AVAILABILITY SET ================================================================================================
+// VIRTUAL MACHINES ================================================================================================
 
-resource "azurerm_availability_set" "hdb" {
-  count                        = local.enable_deployment ? 1 : 0
-  name                         = format("%s%s", local.prefix, local.resource_suffixes.db-avset)
-  location                     = var.resource-group[0].location
-  resource_group_name          = var.resource-group[0].name
-  platform_update_domain_count = 20
-  platform_fault_domain_count  = 2
-  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  managed                      = true
-}
-
-# VIRTUAL MACHINES ================================================================================================
-
-# Manages Linux Virtual Machine for HANA DB servers
+// Manages Linux Virtual Machine for HANA DB servers
 resource "azurerm_linux_virtual_machine" "vm-dbnode" {
-  count                        = local.enable_deployment ? length(local.hdb_vms) : 0
-  name                         = local.hdb_vms[count.index].name
-  computer_name                = local.hdb_vms[count.index].computername
-  location                     = var.resource-group[0].location
-  resource_group_name          = var.resource-group[0].name
+  count               = local.enable_deployment ? length(local.hdb_vms) : 0
+  name                = local.hdb_vms[count.index].name
+  computer_name       = local.hdb_vms[count.index].computername
+  location            = var.resource-group[0].location
+  resource_group_name = var.resource-group[0].name
 
   //If more than one servers are deployed into a single zone put them in an availability set and not a zone
-  availability_set_id          = local.zonal_deployment ? (length(local.hdb_vms) > 1 && length(local.zones) == 1) ? azurerm_availability_set.hdb[0].id : azurerm_availability_set.hdb[count.index % length(local.zones)].id : azurerm_availability_set.hdb[0].id
+  availability_set_id          = length(local.hdb_vms) == length(local.zones) ? null : length(local.zones) > 1 ? azurerm_availability_set.hdb[count.index % length(local.zones)].id : azurerm_availability_set.hdb[0].id
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  zone                         = local.zonal_deployment ? (length(local.hdb_vms) > 1 && length(local.zones) == 1 && !local.enable_ultradisk) ? null : local.zones[count.index % length(local.zones)] : null
+  zone                         = length(local.hdb_vms) == length(local.zones) ? local.zones[count.index % length(local.zones)] : null
 
   network_interface_ids = [
     azurerm_network_interface.nics-dbnodes-admin[count.index].id,
@@ -180,8 +167,9 @@ resource "azurerm_linux_virtual_machine" "vm-dbnode" {
     storage_account_uri = var.storage-bootdiag.primary_blob_endpoint
   }
 }
+// MANAGED DISKS ======================================================================================
 
-# Creates managed data disk
+// Creates managed data disk
 resource "azurerm_managed_disk" "data-disk" {
   count                = local.enable_deployment ? length(local.data_disk_list) : 0
   name                 = local.data_disk_list[count.index].name
@@ -195,7 +183,7 @@ resource "azurerm_managed_disk" "data-disk" {
   zones                = local.zonal_deployment && ((length(local.hdb_vms) > 1 && length(local.zones) > 1) || local.enable_ultradisk) ? try([local.zones[count.index % length(local.zones)]], null) : null
 }
 
-# Manages attaching a Disk to a Virtual Machine
+// Manages attaching a Disk to a Virtual Machine
 resource "azurerm_virtual_machine_data_disk_attachment" "vm-dbnode-data-disk" {
   count                     = local.enable_deployment ? length(local.data_disk_list) : 0
   managed_disk_id           = azurerm_managed_disk.data-disk[count.index].id

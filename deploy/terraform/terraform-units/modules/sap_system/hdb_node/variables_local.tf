@@ -93,7 +93,12 @@ locals {
   enable_deployment = (length(local.hdb_list) > 0) ? true : false
 
   // Filter the list of databases to only HANA platform entries
-  hdb          = try(local.hdb_list[0], {})
+  hdb = try(local.hdb_list[0], {})
+
+  // Zones
+  zones            = try(local.hdb.zones, [])
+  zonal_deployment = length(local.zones) > 0 ? true : false
+
   hdb_platform = try(local.hdb.platform, "NONE")
   hdb_version  = try(local.hdb.db_version, "2.00.043")
   // If custom image is used, we do not overwrite os reference with default value
@@ -112,10 +117,6 @@ locals {
       "type"     = "key"
       "username" = "azureadm"
   })
-
-  // Zones
-  zones            = try(local.hdb.size, [])
-  zonal_deployment = length(local.zones) > 0 ? true : false
 
   hdb_ins                = try(local.hdb.instance, {})
   hdb_sid                = try(local.hdb_ins.sid, local.sid) // HANA database sid from the Databases array for use as reference to LB/AS

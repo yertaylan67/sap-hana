@@ -128,8 +128,8 @@ resource "azurerm_lb_rule" "ers" {
 
 # Create the SCS Availability Set
 resource "azurerm_availability_set" "scs" {
-  count                        = local.enable_deployment ? length(local.zones) : 0
-  name                         = format("%s%s", local.prefix, local.resource_suffixes.scs-avset)
+  count                        = local.enable_deployment ? max(length(local.zones), 1) : 0
+  name                         = local.zonal_deployment ? format("%s_z%s%s", local.prefix, local.zones[count.index], local.resource_suffixes.scs-avset) : format("%s%s", local.prefix, local.resource_suffixes.scs-avset)
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
   platform_update_domain_count = 20
@@ -144,8 +144,8 @@ resource "azurerm_availability_set" "scs" {
 
 # Create the Application Availability Set
 resource "azurerm_availability_set" "app" {
-  count                        = local.enable_deployment ? length(local.zones) : 0
-  name                         = format("%s%s", local.prefix, local.resource_suffixes.app-avset)
+  count                        = local.enable_deployment ? max(length(local.zones), 1) : 0
+  name                         = local.zonal_deployment ? format("%s_z%s%s", local.prefix, local.zones[count.index], local.resource_suffixes.app-avset) : format("%s%s", local.prefix, local.resource_suffixes.app-avset)
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
   platform_update_domain_count = 20
@@ -208,8 +208,8 @@ resource "azurerm_network_interface_backend_address_pool_association" "web" {
 
 # Create the Web dispatcher Availability Set
 resource "azurerm_availability_set" "web" {
-  count                        = local.enable_deployment ? length(local.zones) : 0
-  name                         = format("%s%s", local.prefix, local.resource_suffixes.web-avset)
+  count                        = local.enable_deployment ? max(length(local.zones), 1) : 0
+  name                         = local.zonal_deployment ? format("%s_z%s%s", local.prefix, local.zones[count.index], local.resource_suffixes.web-avset) : format("%s%s", local.prefix, local.resource_suffixes.web-avset)
   location                     = var.resource-group[0].location
   resource_group_name          = var.resource-group[0].name
   platform_update_domain_count = 20

@@ -97,12 +97,12 @@ locals {
 
   // WEB NSG
   sub_web_nsg        = try(local.sub_web.nsg, {})
-  sub_web_nsg_arm_id = try(local.sub_web_nsg.arm_id, "") 
+  sub_web_nsg_arm_id = try(local.sub_web_nsg.arm_id, "")
   sub_web_nsg_exists = length(local.sub_web_nsg_arm_id) > 0 ? true : false
   sub_web_nsg_name   = local.sub_web_nsg_exists ? try(split("/", local.sub_web_nsg_arm_id)[8], "") : try(local.sub_web_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.web-subnet-nsg))
   sub_web_nsg_deployed = try(local.sub_web_defined ? (
     local.sub_web_nsg_exists ? data.azurerm_network_security_group.nsg-web[0] : azurerm_network_security_group.nsg-web[0]) : (
-    local.sub_app_nsg_exists ? data.azurerm_network_security_group.nsg-app[0] : azurerm_network_security_group.nsg-app[0]), null)
+  local.sub_app_nsg_exists ? data.azurerm_network_security_group.nsg-app[0] : azurerm_network_security_group.nsg-app[0]), null)
 
   application_sid          = try(var.application.sid, "")
   enable_deployment        = try(var.application.enable_deployment, false)
@@ -120,10 +120,6 @@ locals {
   web_lb_ips               = try(var.application.web_lb_ips, [])
   web_nic_ips              = try(var.application.web_nic_ips, [])
   web_admin_nic_ips        = try(var.application.web_admin_nic_ips, [])
-
-  // Zones
-  zones            = try(var.application.zones, [])
-  zonal_deployment = length(local.zones) > 0 ? true : false
 
   // Dual network cards
   use_two_network_cards = try(var.application.dual_nics, false)
@@ -236,50 +232,105 @@ locals {
     62100 + tonumber(local.ers_instance_number)
   ]
 
-  // Create list of disks per VM
+  app-data-disk-per-dbnode = (local.application_server_count > 0) ? flatten(
+    [
+      for storage_type in local.app_sizing.storage : [
+        for disk_count in range(storage_type.count) : {
+          suffix               = format("-%s%02d", storage_type.name, disk_count)
+          storage_account_type = storage_type.disk_type,
+          disk_size_gb         = storage_type.size_gb,
+          //The following two lines are for Ultradisks only
+          disk_iops_read_write      = try(storage_type.disk-iops-read-write, null)
+          disk_mbps_read_write      = try(storage_type.disk-mbps-read-write, null)
+          caching                   = storage_type.caching,
+          write_accelerator_enabled = storage_type.write_accelerator
+        }
+      ]
+      if storage_type.name != "os"
+    ]
+  ) : []
+
   app-data-disks = flatten([
-    for vm_count in range(local.application_server_count) : [
-      for disk_spec in local.app_sizing.storage : {
-        vm_index          = vm_count
-        suffix            = format("-%s", disk_spec.name)
-        disk_type         = lookup(disk_spec, "disk_type", "Premium_LRS")
-        size_gb           = lookup(disk_spec, "size_gb", 512)
-        caching           = lookup(disk_spec, "caching", false)
-        write_accelerator = lookup(disk_spec, "write_accelerator", false)
+    for vm_counter in range(local.application_server_count) : [
+      for idx, datadisk in local.app-data-disk-per-dbnode : {
+        suffix                    = datadisk.suffix
+        vm_index                  = vm_counter
+        caching                   = datadisk.caching
+        storage_account_type      = datadisk.storage_account_type
+        disk_size_gb              = datadisk.disk_size_gb
+        write_accelerator_enabled = datadisk.write_accelerator_enabled
+        disk_iops_read_write      = datadisk.disk_iops_read_write
+        disk_mbps_read_write      = datadisk.disk_mbps_read_write
+        lun                       = idx
       }
     ]
   ])
 
-  app_disk_count = length(local.app-data-disks) / local.application_server_count
+  scs-data-disk-per-dbnode = (local.enable_deployment) ? flatten(
+    [
+      for storage_type in local.scs_sizing.storage : [
+        for disk_count in range(storage_type.count) : {
+          suffix               = format("-%s%02d", storage_type.name, disk_count)
+          storage_account_type = storage_type.disk_type,
+          disk_size_gb         = storage_type.size_gb,
+          //The following two lines are for Ultradisks only
+          disk_iops_read_write      = try(storage_type.disk-iops-read-write, null)
+          disk_mbps_read_write      = try(storage_type.disk-mbps-read-write, null)
+          caching                   = storage_type.caching,
+          write_accelerator_enabled = storage_type.write_accelerator
+        }
+      ]
+      if storage_type.name != "os"
+    ]
+  ) : []
 
   scs-data-disks = flatten([
-    for vm_count in(local.scs_high_availability ? range(2) : range(1)) : [
-      for disk_spec in local.scs_sizing.storage : {
-        vm_index          = vm_count
-        suffix            = format("-%s", disk_spec.name)
-        disk_type         = lookup(disk_spec, "disk_type", "Premium_LRS")
-        size_gb           = lookup(disk_spec, "size_gb", 512)
-        caching           = lookup(disk_spec, "caching", false)
-        write_accelerator = lookup(disk_spec, "write_accelerator", false)
+    for vm_counter in range(local.scs_high_availability ? 2 : 1) : [
+      for idx, datadisk in local.app-data-disk-per-dbnode : {
+        suffix                    = datadisk.suffix
+        vm_index                  = vm_counter
+        caching                   = datadisk.caching
+        storage_account_type      = datadisk.storage_account_type
+        disk_size_gb              = datadisk.disk_size_gb
+        write_accelerator_enabled = datadisk.write_accelerator_enabled
+        disk_iops_read_write      = datadisk.disk_iops_read_write
+        disk_mbps_read_write      = datadisk.disk_mbps_read_write
+        lun                       = idx
       }
     ]
   ])
 
-  scs_disk_count = length(local.scs-data-disks) / (local.scs_high_availability ? 2 : 1)
+  web-data-disk-per-dbnode = (local.webdispatcher_count > 0) ? flatten(
+    [
+      for storage_type in local.web_sizing.storage : [
+        for disk_count in range(storage_type.count) : {
+          suffix               = format("-%s%02d", storage_type.name, disk_count)
+          storage_account_type = storage_type.disk_type,
+          disk_size_gb         = storage_type.size_gb,
+          //The following two lines are for Ultradisks only
+          disk_iops_read_write      = try(storage_type.disk-iops-read-write, null)
+          disk_mbps_read_write      = try(storage_type.disk-mbps-read-write, null)
+          caching                   = storage_type.caching,
+          write_accelerator_enabled = storage_type.write_accelerator
+        }
+      ]
+      if storage_type.name != "os"
+    ]
+  ) : []
 
   web-data-disks = flatten([
-    for vm_count in range(local.webdispatcher_count) : [
-      for disk_spec in local.web_sizing.storage : {
-        vm_index          = vm_count
-        suffix            = format("-%s", disk_spec.name)
-        disk_type         = lookup(disk_spec, "disk_type", "Premium_LRS")
-        size_gb           = lookup(disk_spec, "size_gb", 512)
-        caching           = lookup(disk_spec, "caching", false)
-        write_accelerator = lookup(disk_spec, "write_accelerator", false)
+    for vm_counter in range(local.webdispatcher_count) : [
+      for idx, datadisk in local.web-data-disk-per-dbnode : {
+        suffix                    = datadisk.suffix
+        vm_index                  = vm_counter
+        caching                   = datadisk.caching
+        storage_account_type      = datadisk.storage_account_type
+        disk_size_gb              = datadisk.disk_size_gb
+        write_accelerator_enabled = datadisk.write_accelerator_enabled
+        disk_iops_read_write      = datadisk.disk_iops_read_write
+        disk_mbps_read_write      = datadisk.disk_mbps_read_write
+        lun                       = idx
       }
     ]
   ])
-
-  web_disk_count = length(local.web-data-disks) / local.webdispatcher_count
-
 }
