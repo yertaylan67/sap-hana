@@ -17,20 +17,26 @@ resource "azurerm_network_interface" "anydb" {
   }
 }
 
+# Creates the DB traffic NIC and private IP address for database nodes
+resource "azurerm_network_interface" "anydb-admin" {
+  count                         = local.enable_deployment ? length(local.anydb_vms) : 0
+  name                          = format("%s%s", local.anydb_vms[count.index].name, local.resource_suffixes.admin-nic)
+  location                      = var.resource-group[0].location
+  resource_group_name           = var.resource-group[0].name
+  enable_accelerated_networking = true
+
+  ip_configuration {
+    primary                       = true
+    name                          = "ipconfig1"
+    subnet_id                     = local.sub_admin_exists ? data.azurerm_subnet.anydb-admin[0].id : azurerm_subnet.anydb-admin[0].id
+    private_ip_address            = try(local.anydb_vms[count.index].admin_nic_ip, false) == false ? cidrhost(local.sub_admin_exists ? data.azurerm_subnet.anydb-admin[0].address_prefixes[0] : azurerm_subnet.anydb-admin[0].address_prefixes[0], tonumber(count.index) + 10) : local.anydb_vms[count.index].admin_nic_ip
+    private_ip_address_allocation = "static"
+  }
+}
+
+
 // Section for Linux Virtual machine 
 resource "azurerm_linux_virtual_machine" "dbserver" {
-<<<<<<< HEAD
-  count                        = local.enable_deployment ? ((upper(local.anydb_ostype) == "LINUX") ? length(local.anydb_vms) : 0) : 0
-  name                         = local.anydb_vms[count.index].name
-  computer_name                = local.anydb_vms[count.index].computername
-  resource_group_name          = var.resource-group[0].name
-  location                     = var.resource-group[0].location
-  availability_set_id          = local.zonal_deployment ? null : azurerm_availability_set.anydb[0].id
-  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  zone                         = local.zonal_deployment ? try(local.zones[count.index % length(local.zones)], null) : null
-  network_interface_ids        = [azurerm_network_interface.anydb[count.index].id]
-  size                         = local.anydb_vms[count.index].size
-=======
   count               = local.enable_deployment ? ((upper(local.anydb_ostype) == "LINUX") ? length(local.anydb_vms) : 0) : 0
   name                = local.anydb_vms[count.index].name
   computer_name       = local.anydb_vms[count.index].computername
@@ -41,10 +47,9 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
   availability_set_id          = length(local.anydb_vms) == length(local.zones) ? null : length(local.zones) > 1 ? azurerm_availability_set.anydb[count.index % length(local.zones)].id : azurerm_availability_set.anydb[0].id
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
   zone                         = length(local.anydb_vms) == length(local.zones) ? local.zones[count.index % length(local.zones)] : null
+  network_interface_ids        = local.use_two_network_cards ? [azurerm_network_interface.anydb[count.index].id, azurerm_network_interface.anydb-admin[count.index].id] : [azurerm_network_interface.anydb[count.index].id]
 
-  network_interface_ids = [azurerm_network_interface.anydb[count.index].id]
-  size                  = local.anydb_vms[count.index].size
->>>>>>> 8cdf29dd164e224b58e8a0b0fe1d5cb42214aa68
+  size = local.anydb_vms[count.index].size
 
   source_image_id = local.anydb_custom_image ? local.anydb_os.source_image_id : null
 
@@ -94,18 +99,6 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
 
 // Section for Windows Virtual machine 
 resource "azurerm_windows_virtual_machine" "dbserver" {
-<<<<<<< HEAD
-  count                        = local.enable_deployment ? ((upper(local.anydb_ostype) == "WINDOWS") ? length(local.anydb_vms) : 0) : 0
-  name                         = local.anydb_vms[count.index].name
-  computer_name                = local.anydb_vms[count.index].computername
-  resource_group_name          = var.resource-group[0].name
-  location                     = var.resource-group[0].location
-  availability_set_id          = local.zonal_deployment ? null : azurerm_availability_set.anydb[0].id
-  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  zone                         = local.zonal_deployment ? try(local.zones[count.index % length(local.zones)], null) : null
-  network_interface_ids        = [azurerm_network_interface.anydb[count.index].id]
-  size                         = local.anydb_vms[count.index].size
-=======
   count               = local.enable_deployment ? ((upper(local.anydb_ostype) == "WINDOWS") ? length(local.anydb_vms) : 0) : 0
   name                = local.anydb_vms[count.index].name
   computer_name       = local.anydb_vms[count.index].computername
@@ -117,9 +110,8 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
   zone                         = length(local.anydb_vms) == length(local.zones) ? local.zones[count.index % length(local.zones)] : null
 
-  network_interface_ids = [azurerm_network_interface.anydb[count.index].id]
+  network_interface_ids = local.use_two_network_cards ? [azurerm_network_interface.anydb[count.index].id, azurerm_network_interface.anydb-admin[count.index].id] : [azurerm_network_interface.anydb[count.index].id]
   size                  = local.anydb_vms[count.index].size
->>>>>>> 8cdf29dd164e224b58e8a0b0fe1d5cb42214aa68
 
   additional_capabilities {
     ultra_ssd_enabled = local.enable_ultradisk

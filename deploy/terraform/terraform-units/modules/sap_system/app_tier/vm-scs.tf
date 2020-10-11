@@ -17,7 +17,7 @@ resource "azurerm_network_interface" "scs" {
   }
 }
 
-# Create Application NICs
+# Create Admin NICs
 resource "azurerm_network_interface" "scs-admin" {
   count                         = local.enable_deployment && local.use_two_network_cards ? (local.scs_high_availability ? 2 : 1) : 0
   name                          = format("%s_%s%s", local.prefix, local.scs_virtualmachine_names[count.index], local.resource_suffixes.admin-nic)
@@ -57,7 +57,8 @@ resource "azurerm_linux_virtual_machine" "scs" {
   proximity_placement_group_id = var.ppg[0].id
   zone                         = local.zonal_deployment ? local.zones[0] : null
 
-  network_interface_ids           = local.use_two_network_cards ? [azurerm_network_interface.scs[count.index].id, azurerm_network_interface.scs-admin[count.index].id] : [azurerm_network_interface.scs[count.index].id]  size                            = local.scs_sizing.compute.vm_size
+  network_interface_ids           = local.use_two_network_cards ? [azurerm_network_interface.scs[count.index].id, azurerm_network_interface.scs-admin[count.index].id] : [azurerm_network_interface.scs[count.index].id]  
+  size                            = local.scs_sizing.compute.vm_size
   admin_username                  = local.authentication.username
   disable_password_authentication = true
 
