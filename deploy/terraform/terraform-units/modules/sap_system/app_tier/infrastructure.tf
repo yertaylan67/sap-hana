@@ -43,7 +43,7 @@ resource "azurerm_lb" "scs" {
   name                = format("%s%s", local.prefix, local.resource_suffixes.scs-alb)
   resource_group_name = var.resource-group[0].name
   location            = var.resource-group[0].location
-  sku                 = local.zonal_deployment ? "Standard" : "Basic"
+  sku                 = local.scs_zonal_deployment ? "Standard" : "Basic"
 
   frontend_ip_configuration {
     name                          = format("%s%s", local.prefix, local.resource_suffixes.scs-alb-feip)
@@ -117,7 +117,7 @@ resource "azurerm_availability_set" "scs" {
   resource_group_name          = var.resource-group[0].name
   platform_update_domain_count = 20
   platform_fault_domain_count  = 2
-  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
+  proximity_placement_group_id = local.scs_zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
   managed                      = true
 }
 
@@ -133,7 +133,7 @@ resource "azurerm_availability_set" "app" {
   resource_group_name          = var.resource-group[0].name
   platform_update_domain_count = 20
   platform_fault_domain_count  = 2
-  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
+  proximity_placement_group_id = local.app_zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
   managed                      = true
 }
 
@@ -148,7 +148,7 @@ resource "azurerm_lb" "web" {
   name                = format("%s%s", local.prefix, local.resource_suffixes.web-alb)
   resource_group_name = var.resource-group[0].name
   location            = var.resource-group[0].location
-  sku                 = local.zonal_deployment ? "Standard" : "Basic"
+  sku                 = local.web_zonal_deployment ? "Standard" : "Basic"
 
   frontend_ip_configuration {
     name                          = format("%s%s", local.prefix, local.resource_suffixes.web-alb-feip)
@@ -197,6 +197,6 @@ resource "azurerm_availability_set" "web" {
   resource_group_name          = var.resource-group[0].name
   platform_update_domain_count = 20
   platform_fault_domain_count  = 2
-  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
+  proximity_placement_group_id = local.web_zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
   managed                      = true
 }
