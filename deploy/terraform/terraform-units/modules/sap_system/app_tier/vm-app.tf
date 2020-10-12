@@ -23,9 +23,9 @@ resource "azurerm_linux_virtual_machine" "app" {
   resource_group_name = var.resource-group[0].name
 
   //If more than one servers are deployed into a zone put them in an availability set and not a zone
-  availability_set_id          = local.application_server_count == length(local.zones) ? null : length(local.zones) > 1 ? azurerm_availability_set.app[count.index % length(local.zones)].id : azurerm_availability_set.app[0].id
-  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  zone                         = local.application_server_count == length(local.zones) ? local.zones[count.index % length(local.zones)] : null
+  availability_set_id          = local.application_server_count == length(local.app_zones) ? null : length(local.app_zones) > 1 ? azurerm_availability_set.app[count.index % length(local.app_zones)].id : azurerm_availability_set.app[0].id
+  proximity_placement_group_id = local.application_server_count == length(local.app_zones) ? var.ppg[count.index % length(local.app_zones)].id : local.app_zonal_deployment ? null : var.ppg[0].id
+  zone                         = local.application_server_count == length(local.app_zones) ? local.app_zones[count.index % length(local.app_zones)] : null
 
   network_interface_ids = [
     azurerm_network_interface.app[count.index].id
@@ -71,9 +71,9 @@ resource "azurerm_windows_virtual_machine" "app" {
   resource_group_name = var.resource-group[0].name
 
   //If more than one servers are deployed into a zone put them in an availability set and not a zone
-  availability_set_id          = local.application_server_count == length(local.zones) ? null : length(local.zones) > 1 ? azurerm_availability_set.app[count.index % length(local.zones)].id : azurerm_availability_set.app[0].id
-  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  zone                         = local.application_server_count == length(local.zones) ? local.zones[count.index % length(local.zones)] : null
+  availability_set_id          = local.application_server_count == length(local.app_zones) ? null : length(local.app_zones) > 1 ? azurerm_availability_set.app[count.index % length(local.app_zones)].id : azurerm_availability_set.app[0].id
+  proximity_placement_group_id = local.application_server_count == length(local.app_zones) ? var.ppg[count.index % length(local.app_zones)].id : local.app_zonal_deployment ? null : var.ppg[0].id
+  zone                         = local.application_server_count == length(local.app_zones) ? local.app_zones[count.index % length(local.app_zones)] : null
 
   network_interface_ids = [
     azurerm_network_interface.app[count.index].id
