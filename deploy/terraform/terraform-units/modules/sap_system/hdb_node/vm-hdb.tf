@@ -180,7 +180,8 @@ resource "azurerm_managed_disk" "data-disk" {
   disk_size_gb         = local.data_disk_list[count.index].disk_size_gb
   disk_iops_read_write = local.data_disk_list[count.index].disk_iops_read_write
   disk_mbps_read_write = local.data_disk_list[count.index].disk_mbps_read_write
-  zones                = local.zonal_deployment && ((length(local.hdb_vms) > 1 && length(local.zones) > 1) || local.enable_ultradisk) ? try([local.zones[count.index % length(local.zones)]], null) : null
+  zones                = local.enable_ultradisk ? [local.zones[count.index % length(local.zones)]] : length(local.hdb_vms) == length(local.zones) ? [local.zones[count.index % length(local.zones)]] : null
+
 }
 
 // Manages attaching a Disk to a Virtual Machine
