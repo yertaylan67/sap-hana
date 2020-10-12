@@ -142,8 +142,7 @@ resource "azurerm_managed_disk" "disks" {
   create_option        = "Empty"
   storage_account_type = local.anydb_disks[count.index].storage_account_type
   disk_size_gb         = local.anydb_disks[count.index].disk_size_gb
-  zones                = local.enable_ultradisk || (length(local.anydb_vms) == length(local.zones)) ? [local.zones[count.index % length(local.zones)]] : null
-  
+  zones                = [upper(local.anydb_ostype) == "LINUX" ? azurerm_linux_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].zone : azurerm_windows_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].zone]
 }
 
 // Manages attaching a Disk to a Virtual Machine

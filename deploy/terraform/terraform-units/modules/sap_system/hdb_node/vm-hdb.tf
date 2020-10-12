@@ -180,7 +180,7 @@ resource "azurerm_managed_disk" "data-disk" {
   disk_size_gb         = local.data_disk_list[count.index].disk_size_gb
   disk_iops_read_write = local.data_disk_list[count.index].disk_iops_read_write
   disk_mbps_read_write = local.data_disk_list[count.index].disk_mbps_read_write
-  zones                = local.enable_ultradisk ? [local.zones[count.index % length(local.zones)]] : length(local.hdb_vms) == length(local.zones) ? [local.zones[count.index % length(local.zones)]] : null
+  zones                = [azurerm_linux_virtual_machine.vm-dbnode[floor(count.index / length(local.data-disk-per-dbnode))].zone]
 
 }
 
