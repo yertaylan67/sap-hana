@@ -30,7 +30,7 @@ variable naming {
 locals {
 
   db_server_count      = length(var.naming.virtualmachine_names.HANA)
-  virtualmachine_names = concat(var.naming.virtualmachine_names.HANA, var.naming.virtualmachine_names.HANA_HA)
+  virtualmachine_names = sort(concat(var.naming.virtualmachine_names.HANA, var.naming.virtualmachine_names.HANA_HA))
   storageaccount_names = var.naming.storageaccount_names.SDU
   resource_suffixes    = var.naming.resource_suffixes
 
