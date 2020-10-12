@@ -44,8 +44,14 @@ locals {
   rg_name = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, local.resource_suffixes.sdu-rg))
 
   // Zones
-  zones            = try(var.application.zones, [])
-  zonal_deployment = length(local.zones) > 0 ? true : false
+  app_zones            = try(var.application.app_zones, [])
+  app_zonal_deployment = length(local.app_zones) > 0 ? true : false
+
+  scs_zones            = try(var.application.scs_zones, [])
+  scs_zonal_deployment = length(local.scs_zones) > 0 ? true : false
+
+  web_zones            = try(var.application.web_zones, [])
+  web_zonal_deployment = length(local.web_zones) > 0 ? true : false
 
   # SAP vnet
   var_infra       = try(var.infrastructure, {})
@@ -97,6 +103,7 @@ locals {
   ers_instance_number      = try(var.application.ers_instance_number, "02")
   scs_high_availability    = try(var.application.scs_high_availability, false)
   application_server_count = try(var.application.application_server_count, 0)
+  scs_server_count         = try(var.application.scs_server_count, local.scs_high_availability ? 2 : 1)
   webdispatcher_count      = try(var.application.webdispatcher_count, 0)
   vm_sizing                = try(var.application.vm_sizing, "Default")
   app_nic_ips              = try(var.application.app_nic_ips, [])
