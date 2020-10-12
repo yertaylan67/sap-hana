@@ -122,7 +122,7 @@ resource "azurerm_managed_disk" "scs" {
   create_option        = "Empty"
   storage_account_type = local.scs-data-disks[count.index].storage_account_type
   disk_size_gb         = local.scs-data-disks[count.index].disk_size_gb
-  zones                = local.zonal_deployment ? [local.zones[0]] : null
+  zones                = local.scs_server_count == length(local.scs_zones) ? [local.scs_zones[count.index % length(local.scs_zones)]] : null
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "scs" {

@@ -115,7 +115,7 @@ resource "azurerm_managed_disk" "app" {
   create_option        = "Empty"
   storage_account_type = local.app-data-disks[count.index].storage_account_type
   disk_size_gb         = local.app-data-disks[count.index].disk_size_gb
-  zones                = local.application_server_count == length(local.zones) ? [local.zones[count.index % length(local.zones)]] : null
+  zones                = local.application_server_count == length(local.app_zones) ? [local.app_zones[count.index % length(local.app_zones)]] : null
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "app" {

@@ -114,7 +114,7 @@ resource "azurerm_managed_disk" "web" {
   create_option        = "Empty"
   storage_account_type = local.web-data-disks[count.index].storage_account_type
   disk_size_gb         = local.web-data-disks[count.index].disk_size_gb
-  zones                = local.webdispatcher_count == length(local.zones) ? [local.zones[count.index % length(local.zones)]] : null
+  zones                = local.webdispatcher_count == length(local.web_zones) ? [local.web_zones[count.index % length(local.web_zones)]] : null
 }
 
 resource "azurerm_virtual_machine_data_disk_attachment" "web" {
