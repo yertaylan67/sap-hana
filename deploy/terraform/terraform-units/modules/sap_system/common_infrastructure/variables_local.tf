@@ -59,6 +59,25 @@ locals {
 
   var_infra = try(var.infrastructure, {})
 
+  anchor      = try(local.var_infra.anchor_vms, {})
+  anchor_size = try(local.anchor.sku, "Standard_D8s_v3")
+  authentication = try(local.anchor.authentication,
+    {
+      "type"     = "key"
+      "username" = "azureadm"
+  })
+  // OS image for all Anchor VMs
+  // If custom image is used, we do not overwrite os reference with default value
+  anchor_custom_image = try(local.anchor.os.source_image_id, "") != "" ? true : false
+
+  app_os = {
+    "source_image_id" = local.anchor_custom_image ? local.anchor.os.source_image_id : ""
+    "publisher"       = try(local.anchor.os.publisher, local.anchor_custom_image ? "" : "suse")
+    "offer"           = try(local.anchor.os.offer, local.anchor_custom_image ? "" : "sles-sap-12-sp5")
+    "sku"             = try(local.anchor.os.sku, local.anchor_custom_image ? "" : "gen1")
+    "version"         = try(local.anchor.os.version, local.anchor_custom_image ? "" : "latest")
+  }
+
   //Resource group
   var_rg    = try(local.var_infra.resource_group, {})
   rg_arm_id = try(local.var_rg.arm_id, "")
