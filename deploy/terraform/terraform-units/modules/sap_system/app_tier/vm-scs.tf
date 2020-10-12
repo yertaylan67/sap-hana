@@ -32,7 +32,7 @@ resource "azurerm_linux_virtual_machine" "scs" {
 
   //If more than one servers are deployed into a zone put them in an availability set and not a zone
   availability_set_id          = local.scs_server_count == length(local.scs_zones) ? null : length(local.scs_zones) > 1 ? azurerm_availability_set.scs[count.index % length(local.scs_zones)].id : azurerm_availability_set.scs[0].id
-  proximity_placement_group_id = local.scs_server_count == length(local.scs_zones) ? var.ppg[count.index % length(local.scs_zones)].id : local.scs_zonal_deployment ? var.ppg[count.index % length(local.scs_zones)].id : var.ppg[0].id
+  proximity_placement_group_id = local.scs_zonal_deployment ? var.ppg[count.index % length(local.scs_zones)].id : var.ppg[0].id
   zone                         = local.scs_server_count == length(local.scs_zones) ? local.scs_zones[count.index % length(local.scs_zones)] : null
 
   network_interface_ids = [
@@ -80,7 +80,7 @@ resource "azurerm_windows_virtual_machine" "scs" {
 
   //If more than one servers are deployed into a zone put them in an availability set and not a zone
   availability_set_id          = local.scs_server_count == length(local.scs_zones) ? null : length(local.scs_zones) > 1 ? azurerm_availability_set.scs[count.index % length(local.scs_zones)].id : azurerm_availability_set.scs[0].id
-  proximity_placement_group_id = local.scs_server_count == length(local.scs_zones) ? var.ppg[count.index % length(local.scs_zones)].id : local.scs_zonal_deployment ? var.ppg[count.index % length(local.scs_zones)].id : var.ppg[0].id
+  proximity_placement_group_id = local.scs_zonal_deployment ? var.ppg[count.index % length(local.scs_zones)].id : var.ppg[0].id
   zone                         = local.scs_server_count == length(local.scs_zones) ? local.scs_zones[count.index % length(local.scs_zones)] : null
 
   network_interface_ids = [
