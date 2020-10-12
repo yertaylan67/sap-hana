@@ -117,7 +117,7 @@ resource "azurerm_managed_disk" "data-disk" {
   create_option        = "Empty"
   storage_account_type = local.data-disk-list[count.index].storage_account_type
   disk_size_gb         = local.data-disk-list[count.index].disk_size_gb
-  zones                = length(local.hdb_vms) == length(local.zones) ? [local.zones[count.index % length(local.zones)]] : null
+  zones                = [azurerm_linux_virtual_machine.vm-dbnode[floor(count.index / length(local.data-disk-per-dbnode))].zone]
 }
 
 # Manages Linux Virtual Machine for HANA DB servers
