@@ -10,8 +10,8 @@ data "azurerm_subnet" "anchor" {
 resource "azurerm_network_interface" "anchor" {
   count                         = local.zonal_deployment ? length(local.zones) : 0
   name                          = format("%s_anchor%02d_z%s%s", local.prefix, count.index, local.zones[count.index], local.resource_suffixes.nic)
-  location                      = azurerm_resource_group.resource-group[0].location
-  resource_group_name           = azurerm_resource_group.resource-group[0].name
+  resource_group_name          = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
+  location                     = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
   enable_accelerated_networking = true
 
   ip_configuration {
@@ -26,8 +26,8 @@ resource "azurerm_linux_virtual_machine" "app" {
   count                        = local.zonal_deployment ? length(local.zones) : 0
   name                         = format("%s_anchor%02d_z%s%s", local.prefix, count.index, local.zones[count.index], local.resource_suffixes.vm)
   computer_name                = format("anchor%02dz%s%s", count.index, local.zones[count.index], local.resource_suffixes.vm)
-  location                     = azurerm_resource_group.resource-group[0].location
-  resource_group_name          = azurerm_resource_group.resource-group[0].name
+  resource_group_name          = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
+  location                     = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
   proximity_placement_group_id = azurerm_proximity_placement_group.ppg[count.index].id
   zone                         = local.zones[count.index]
 
