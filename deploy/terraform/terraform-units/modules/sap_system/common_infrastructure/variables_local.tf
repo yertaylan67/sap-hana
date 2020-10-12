@@ -66,9 +66,13 @@ locals {
       "type"     = "key"
       "username" = "azureadm"
   })
+
+  enable_ultradisk = try(local.anchor.support_ultra, [false, false, false])
+
   // OS image for all Anchor VMs
   // If custom image is used, we do not overwrite os reference with default value
   anchor_custom_image = try(local.anchor.os.source_image_id, "") != "" ? true : false
+
 
   app_os = {
     "source_image_id" = local.anchor_custom_image ? local.anchor.os.source_image_id : ""

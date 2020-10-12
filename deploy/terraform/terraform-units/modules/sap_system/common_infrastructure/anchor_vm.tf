@@ -10,9 +10,9 @@ data "azurerm_subnet" "anchor" {
 resource "azurerm_network_interface" "anchor" {
   count                         = local.zonal_deployment ? length(local.zones) : 0
   name                          = format("%s_anchor%02d_z%s%s", local.prefix, count.index, local.zones[count.index], local.resource_suffixes.nic)
-  resource_group_name          = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
-  location                     = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
-  enable_accelerated_networking = true
+  resource_group_name           = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
+  location                      = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
+  enable_accelerated_networking = false
 
   ip_configuration {
     name                          = "IPConfig1"
@@ -22,7 +22,7 @@ resource "azurerm_network_interface" "anchor" {
 }
 
 # Create the Linux Application VM(s)
-resource "azurerm_linux_virtual_machine" "app" {
+resource "azurerm_linux_virtual_machine" "anchor" {
   count                        = local.zonal_deployment ? length(local.zones) : 0
   name                         = format("%s_anchor%02d_z%s%s", local.prefix, count.index, local.zones[count.index], local.resource_suffixes.vm)
   computer_name                = format("anchor%02dz%s%s", count.index, local.zones[count.index], local.resource_suffixes.vm)
@@ -43,6 +43,11 @@ resource "azurerm_linux_virtual_machine" "app" {
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
+
+  additional_capabilities {
+    ultra_ssd_enabled = local.enable_ultradisk[count.index]
+  }
+
 
   source_image_id = local.anchor_custom_image ? local.anchor.os.source_image_id : null
 
