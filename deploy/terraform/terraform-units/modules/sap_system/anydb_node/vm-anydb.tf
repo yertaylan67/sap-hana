@@ -28,7 +28,7 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
   //If more than one servers are deployed into a single zone put them in an availability set and not a zone
   availability_set_id          = local.enable_ultradisk ? null : length(local.anydb_vms) == length(local.zones) ? null : length(local.zones) > 1 ? azurerm_availability_set.anydb[count.index % length(local.zones)].id : azurerm_availability_set.anydb[0].id
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  zone                         = local.enable_ultradisk ? local.zones[count.index % length(local.zones)] : length(local.anydb_vms) == length(local.zones) ? local.zones[count.index % length(local.zones)] : null
+  zone                         = local.enable_ultradisk || (length(local.anydb_vms) == length(local.zones)) ? local.zones[count.index % length(local.zones)] : null
 
   network_interface_ids = [azurerm_network_interface.anydb[count.index].id]
   size                  = local.anydb_vms[count.index].size
@@ -55,7 +55,6 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
       disk_size_gb         = disk.value.size_gb
     }
   }
-
 
   additional_capabilities {
     ultra_ssd_enabled = local.enable_ultradisk
@@ -90,7 +89,7 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
   //If more than one servers are deployed into a single zone put them in an availability set and not a zone
   availability_set_id          = local.enable_ultradisk ? null : length(local.anydb_vms) == length(local.zones) ? null : length(local.zones) > 1 ? azurerm_availability_set.anydb[count.index % length(local.zones)].id : azurerm_availability_set.anydb[0].id
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  zone                         = local.enable_ultradisk ? local.zones[count.index % length(local.zones)] : length(local.anydb_vms) == length(local.zones) ? local.zones[count.index % length(local.zones)] : null
+  zone                         = local.enable_ultradisk || (length(local.anydb_vms) == length(local.zones)) ? local.zones[count.index % length(local.zones)] : null
 
   network_interface_ids = [azurerm_network_interface.anydb[count.index].id]
   size                  = local.anydb_vms[count.index].size
@@ -143,7 +142,7 @@ resource "azurerm_managed_disk" "disks" {
   create_option        = "Empty"
   storage_account_type = local.anydb_disks[count.index].storage_account_type
   disk_size_gb         = local.anydb_disks[count.index].disk_size_gb
-  zones                = local.enable_ultradisk ? [local.zones[count.index % length(local.zones)]] : length(local.anydb_vms) == length(local.zones) ? [local.zones[count.index % length(local.zones)]] : null
+  zones                = local.enable_ultradisk || (length(local.anydb_vms) == length(local.zones)) ? [local.zones[count.index % length(local.zones)]] : null
   
 }
 
