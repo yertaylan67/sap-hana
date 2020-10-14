@@ -19,9 +19,16 @@ resource "azurerm_network_interface" "nics-dbnodes-admin" {
   enable_accelerated_networking = true
 
   ip_configuration {
-    name                          = "ipconfig1"
-    subnet_id                     = local.sub_admin_exists ? data.azurerm_subnet.sap-admin[0].id : azurerm_subnet.sap-admin[0].id
-    private_ip_address            = lookup(local.hdb_vms[count.index], "admin_nic_ip", false) != false ? local.hdb_vms[count.index].admin_nic_ip : cidrhost(length(local.sub_db_arm_id) > 0 ? data.azurerm_subnet.sap-admin[0].address_prefixes[0] : azurerm_subnet.sap-admin[0].address_prefixes[0], tonumber(count.index) + 10)
+    name      = "ipconfig1"
+    subnet_id = local.sub_admin_exists ? data.azurerm_subnet.sap-admin[0].id : azurerm_subnet.sap-admin[0].id
+    private_ip_address = lookup(local.hdb_vms[count.index], "admin_nic_ip", false) != false ? (
+      local.hdb_vms[count.index].admin_nic_ip) : (
+      cidrhost((local.sub_admin_exists ? (
+        data.azurerm_subnet.sap-admin[0].address_prefixes[0]) : (
+        azurerm_subnet.sap-admin[0].address_prefixes[0])
+      ), tonumber(count.index) + 10)
+    )
+
     private_ip_address_allocation = "static"
   }
 }
@@ -35,10 +42,17 @@ resource "azurerm_network_interface" "nics-dbnodes-db" {
   enable_accelerated_networking = true
 
   ip_configuration {
-    primary                       = true
-    name                          = "ipconfig1"
-    subnet_id                     = local.sub_db_exists ? data.azurerm_subnet.sap-db[0].id : azurerm_subnet.sap-db[0].id
-    private_ip_address            = try(local.hdb_vms[count.index].db_nic_ip, false) == false ? cidrhost(length(local.sub_db_arm_id) > 0 ? data.azurerm_subnet.sap-db[0].address_prefixes[0] : azurerm_subnet.sap-db[0].address_prefixes[0], tonumber(count.index) + 10) : local.hdb_vms[count.index].db_nic_ip
+    primary   = true
+    name      = "ipconfig1"
+    subnet_id = local.sub_db_exists ? data.azurerm_subnet.sap-db[0].id : azurerm_subnet.sap-db[0].id
+
+    private_ip_address = try(local.hdb_vms[count.index].db_nic_ip, false) != false ? (
+      local.hdb_vms[count.index].db_nic_ip) : (
+      cidrhost((local.sub_db_exists ? (
+        data.azurerm_subnet.sap-db[0].address_prefixes[0]) : (
+        azurerm_subnet.sap-db[0].address_prefixes[0])
+      ), tonumber(count.index) + 10)
+    )
     private_ip_address_allocation = "static"
   }
 }
@@ -59,7 +73,10 @@ resource "azurerm_lb" "hdb" {
     name                          = format("%s%s", local.prefix, local.resource_suffixes.db-alb-feip)
     subnet_id                     = local.sub_db_exists ? data.azurerm_subnet.sap-db[0].id : azurerm_subnet.sap-db[0].id
     private_ip_address_allocation = "Static"
-    private_ip_address            = try(local.hana_database.loadbalancer.frontend_ip, (local.sub_db_exists ? cidrhost(data.azurerm_subnet.sap-db[0].address_prefixes[0], tonumber(count.index) + 4) : cidrhost(azurerm_subnet.sap-db[0].address_prefixes[0], tonumber(count.index) + 4)))
+    private_ip_address = try(local.hana_database.loadbalancer.frontend_ip, (local.sub_db_exists ? (
+      cidrhost(data.azurerm_subnet.sap-db[0].address_prefixes[0], tonumber(count.index) + 4)) : (
+      cidrhost(azurerm_subnet.sap-db[0].address_prefixes[0], tonumber(count.index) + 4)))
+    )
   }
 }
 
@@ -117,7 +134,8 @@ resource "azurerm_managed_disk" "data-disk" {
   create_option        = "Empty"
   storage_account_type = local.data-disk-list[count.index].storage_account_type
   disk_size_gb         = local.data-disk-list[count.index].disk_size_gb
-  zones                = [azurerm_linux_virtual_machine.vm-dbnode[floor(count.index / length(local.data-disk-per-dbnode))].zone]
+  zones                = [azurerm_linux_virtual_machine.vm-dbnode[local.data-disk-list[count.index].vm_index].zone]
+
 }
 
 # Manages Linux Virtual Machine for HANA DB servers
@@ -129,7 +147,12 @@ resource "azurerm_linux_virtual_machine" "vm-dbnode" {
   resource_group_name = var.resource-group[0].name
 
   //If more than one servers are deployed into a single zone put them in an availability set and not a zone
-  availability_set_id          = length(local.hdb_vms) == length(local.zones) ? null : length(local.zones) > 1 ? azurerm_availability_set.hdb[count.index % length(local.zones)].id : azurerm_availability_set.hdb[0].id
+  availability_set_id = length(local.hdb_vms) == length(local.zones) ? null : (
+    length(local.zones) > 1 ? (
+      azurerm_availability_set.hdb[count.index % length(local.zones)].id) : (
+      azurerm_availability_set.hdb[0].id
+    )
+  )
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
   zone                         = length(local.hdb_vms) == length(local.zones) ? local.zones[count.index % length(local.zones)] : null
 
@@ -180,7 +203,7 @@ resource "azurerm_linux_virtual_machine" "vm-dbnode" {
 resource "azurerm_virtual_machine_data_disk_attachment" "vm-dbnode-data-disk" {
   count                     = local.enable_deployment ? length(local.data-disk-list) : 0
   managed_disk_id           = azurerm_managed_disk.data-disk[count.index].id
-  virtual_machine_id        = azurerm_linux_virtual_machine.vm-dbnode[floor(count.index / length(local.data-disk-per-dbnode))].id
+  virtual_machine_id        = azurerm_linux_virtual_machine.vm-dbnode[local.data-disk-list[count.index].vm_index].id
   caching                   = local.data-disk-list[count.index].caching
   write_accelerator_enabled = local.data-disk-list[count.index].write_accelerator_enabled
   lun                       = count.index

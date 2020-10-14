@@ -236,8 +236,9 @@ locals {
   ) : []
 
   data-disk-list = flatten([
-    for hdb_vm in local.hdb_vms : [
+    for vm_counter, hdb_vm in local.hdb_vms : [
       for datadisk in local.data-disk-per-dbnode : {
+        vm_index                  = vm_counter
         name                      = format("%s-%s", hdb_vm.name, datadisk.suffix)
         caching                   = datadisk.caching
         storage_account_type      = datadisk.storage_account_type

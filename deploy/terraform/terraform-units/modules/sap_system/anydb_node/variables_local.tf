@@ -20,8 +20,13 @@ variable naming {
 
 locals {
 
-  db_server_count      = length(var.naming.virtualmachine_names.ANYDB)
-  virtualmachine_names = sort(concat(var.naming.virtualmachine_names.ANYDB, var.naming.virtualmachine_names.ANYDB_HA))
+  db_server_count = length(var.naming.virtualmachine_names.ANYDB)
+  // We need to sort the names if we deploy across more than one zone to get the 
+  //Todo Maybe address this in the naming module 
+  virtualmachine_names = local.anydb_ha && length(local.zones) > 1 ? (
+    sort(concat(var.naming.virtualmachine_names.ANYDB, var.naming.virtualmachine_names.ANYDB_HA))) : (
+    concat(var.naming.virtualmachine_names.ANYDB, var.naming.virtualmachine_names.ANYDB_HA)
+  )
   storageaccount_names = var.naming.storageaccount_names.SDU
   resource_suffixes    = var.naming.resource_suffixes
 
