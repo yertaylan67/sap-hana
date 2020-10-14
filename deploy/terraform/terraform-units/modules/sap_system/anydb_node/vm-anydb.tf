@@ -26,7 +26,11 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
   location            = var.resource-group[0].location
 
   //If more than one servers are deployed into a single zone put them in an availability set and not a zone
-  availability_set_id          = length(local.anydb_vms) == length(local.zones) ? null : length(local.zones) > 1 ? azurerm_availability_set.anydb[count.index % length(local.zones)].id : azurerm_availability_set.anydb[0].id
+    availability_set_id = length(local.anydb_vms) == length(local.zones) ? null : (
+    length(local.zones) > 1 ?
+    azurerm_availability_set.anydb[count.index % length(local.zones)].id :
+    azurerm_availability_set.anydb[0].id
+  )
   proximity_placement_group_id = length(local.anydb_vms) == local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
   zone                         = length(local.anydb_vms) == length(local.zones) ? local.zones[count.index % length(local.zones)] : null
 
