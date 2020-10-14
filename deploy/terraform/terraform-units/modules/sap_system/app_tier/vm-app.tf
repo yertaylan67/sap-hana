@@ -7,13 +7,15 @@ resource "azurerm_network_interface" "app" {
   enable_accelerated_networking = local.app_sizing.compute.accelerated_networking
 
   ip_configuration {
-    name                          = "IPConfig1"
-    subnet_id                     = local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].id : azurerm_subnet.subnet-sap-app[0].id
-    private_ip_address            = try(local.app_nic_ips[count.index], 
-                                      cidrhost(local.sub_web_exists ? 
-                                        data.azurerm_subnet.subnet-sap-app[0].address_prefixes[0] : 
-                                        azurerm_subnet.subnet-sap-app[0].address_prefixes[0], 
-                                        tonumber(count.index) + local.ip_offsets.app_vm))
+    name      = "IPConfig1"
+    subnet_id = local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].id : azurerm_subnet.subnet-sap-app[0].id
+    private_ip_address = try(local.app_nic_ips[count.index],
+      cidrhost(local.sub_web_exists ?
+        data.azurerm_subnet.subnet-sap-app[0].address_prefixes[0] :
+        azurerm_subnet.subnet-sap-app[0].address_prefixes[0],
+        tonumber(count.index) + local.ip_offsets.app_vm
+      )
+    )
     private_ip_address_allocation = "static"
   }
 }
@@ -27,13 +29,15 @@ resource "azurerm_network_interface" "app-admin" {
   enable_accelerated_networking = local.app_sizing.compute.accelerated_networking
 
   ip_configuration {
-    name                          = "IPConfig1"
-    subnet_id                     = local.sub_admin_exists ? data.azurerm_subnet.sap-admin[0].id : azurerm_subnet.sap-admin[0].id
-    private_ip_address            = try(local.app_admin_nic_ips[count.index], 
-                                      cidrhost(local.sub_admin_exists ? 
-                                        data.azurerm_subnet.sap-admin[0].address_prefixes[0] : 
-                                        azurerm_subnet.sap-admin[0].address_prefixes[0], 
-                                        tonumber(count.index) + local.ip_offsets.app_vm))
+    name      = "IPConfig1"
+    subnet_id = local.sub_admin_exists ? data.azurerm_subnet.sap-admin[0].id : azurerm_subnet.sap-admin[0].id
+    private_ip_address = try(local.app_admin_nic_ips[count.index],
+      cidrhost(local.sub_admin_exists ?
+        data.azurerm_subnet.sap-admin[0].address_prefixes[0] :
+        azurerm_subnet.sap-admin[0].address_prefixes[0],
+        tonumber(count.index) + local.ip_offsets.app_vm
+      )
+    )
     private_ip_address_allocation = "static"
   }
 }
@@ -55,6 +59,11 @@ resource "azurerm_linux_virtual_machine" "app" {
   )
   proximity_placement_group_id = local.app_zonal_deployment ? var.ppg[count.index % length(local.app_zones)].id : var.ppg[0].id
   zone                         = local.application_server_count == length(local.app_zones) ? local.app_zones[count.index % length(local.app_zones)] : null
+
+  network_interface_ids = local.use_two_network_cards ? (
+    [azurerm_network_interface.app[count.index].id, azurerm_network_interface.app-admin[count.index].id]) : (
+    [azurerm_network_interface.app[count.index].id]
+  )
 
   size                            = local.app_sizing.compute.vm_size
   admin_username                  = local.authentication.username
@@ -104,10 +113,13 @@ resource "azurerm_windows_virtual_machine" "app" {
     )
   )
   proximity_placement_group_id = local.app_zonal_deployment ? var.ppg[count.index % length(local.app_zones)].id : var.ppg[0].id
-  zone = local.application_server_count == length(local.app_zones) ? (local.app_zones[count.index % length(local.app_zones)]) : null
+  zone                         = local.application_server_count == length(local.app_zones) ? (local.app_zones[count.index % length(local.app_zones)]) : null
 
-  network_interface_ids        = local.use_two_network_cards ? [azurerm_network_interface.app[count.index].id, azurerm_network_interface.app-admin[count.index].id] : [azurerm_network_interface.app[count.index].id]
-  
+  network_interface_ids = local.use_two_network_cards ? (
+    [azurerm_network_interface.app[count.index].id, azurerm_network_interface.app-admin[count.index].id]) : (
+    [azurerm_network_interface.app[count.index].id]
+  )
+
   size           = local.app_sizing.compute.vm_size
   admin_username = local.authentication.username
   admin_password = local.authentication.password

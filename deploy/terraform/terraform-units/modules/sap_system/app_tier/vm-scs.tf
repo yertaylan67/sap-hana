@@ -11,8 +11,8 @@ resource "azurerm_network_interface" "scs" {
     subnet_id = local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].id : azurerm_subnet.subnet-sap-app[0].id
     private_ip_address = try(local.scs_nic_ips[count.index],
       cidrhost(local.sub_app_exists ?
-        data.azurerm_subnet.sap-app[0].address_prefixes[0] :
-        azurerm_subnet.sap-app[0].address_prefixes[0],
+        data.azurerm_subnet.subnet-sap-app[0].address_prefixes[0] :
+        azurerm_subnet.subnet-sap-app[0].address_prefixes[0],
         tonumber(count.index) + local.ip_offsets.app_vm
       )
     )
@@ -68,7 +68,10 @@ resource "azurerm_linux_virtual_machine" "scs" {
   proximity_placement_group_id = local.scs_zonal_deployment ? var.ppg[count.index % length(local.scs_zones)].id : var.ppg[0].id
   zone                         = local.scs_server_count == length(local.scs_zones) ? local.scs_zones[count.index % length(local.scs_zones)] : null
 
-  network_interface_ids           = local.use_two_network_cards ? [azurerm_network_interface.scs[count.index].id, azurerm_network_interface.scs-admin[count.index].id] : [azurerm_network_interface.scs[count.index].id]
+  network_interface_ids = local.use_two_network_cards ? (
+    [azurerm_network_interface.scs[count.index].id, azurerm_network_interface.scs-admin[count.index].id]) : (
+    [azurerm_network_interface.scs[count.index].id]
+  )
   size                            = local.scs_sizing.compute.vm_size
   admin_username                  = local.authentication.username
   disable_password_authentication = true
@@ -119,6 +122,10 @@ resource "azurerm_windows_virtual_machine" "scs" {
   proximity_placement_group_id = local.scs_zonal_deployment ? var.ppg[count.index % length(local.scs_zones)].id : var.ppg[0].id
   zone                         = local.scs_server_count == length(local.scs_zones) ? local.scs_zones[count.index % length(local.scs_zones)] : null
 
+  network_interface_ids = local.use_two_network_cards ? (
+    [azurerm_network_interface.scs[count.index].id, azurerm_network_interface.scs-admin[count.index].id]) : (
+    [azurerm_network_interface.scs[count.index].id]
+  )
   size           = local.scs_sizing.compute.vm_size
   admin_username = local.authentication.username
   admin_password = local.authentication.password

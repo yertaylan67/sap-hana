@@ -33,9 +33,9 @@ resource "azurerm_network_interface" "anydb-admin" {
   enable_accelerated_networking = true
 
   ip_configuration {
-    primary                       = true
-    name                          = "ipconfig1"
-    subnet_id                     = local.sub_admin_exists ? data.azurerm_subnet.anydb-admin[0].id : azurerm_subnet.anydb-admin[0].id
+    primary   = true
+    name      = "ipconfig1"
+    subnet_id = local.sub_admin_exists ? data.azurerm_subnet.anydb-admin[0].id : azurerm_subnet.anydb-admin[0].id
     private_ip_address = try(local.anydb_vms[count.index].admin_nic_ip, false) != false ? (
       local.anydb_vms[count.index].admin_nic_ip) : (
       cidrhost((local.sub_admin_exists ? (
@@ -67,6 +67,10 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
   proximity_placement_group_id = length(local.anydb_vms) == local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
   zone                         = local.enable_ultradisk || (length(local.anydb_vms) == length(local.zones)) ? local.zones[count.index % length(local.zones)] : null
 
+  network_interface_ids = local.use_two_network_cards ? (
+    [azurerm_network_interface.anydb[count.index].id, azurerm_network_interface.anydb-admin[count.index].id]) : (
+    [azurerm_network_interface.anydb[count.index].id]
+  )
   size = local.anydb_vms[count.index].size
 
   source_image_id = local.anydb_custom_image ? local.anydb_os.source_image_id : null
@@ -134,8 +138,11 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
   zone                         = local.enable_ultradisk || (length(local.anydb_vms) == length(local.zones)) ? local.zones[count.index % length(local.zones)] : null
 
-  network_interface_ids = local.use_two_network_cards ? [azurerm_network_interface.anydb[count.index].id, azurerm_network_interface.anydb-admin[count.index].id] : [azurerm_network_interface.anydb[count.index].id]
-  size                  = local.anydb_vms[count.index].size
+  network_interface_ids = local.use_two_network_cards ? (
+    [azurerm_network_interface.anydb[count.index].id, azurerm_network_interface.anydb-admin[count.index].id]) : (
+    [azurerm_network_interface.anydb[count.index].id]
+  )
+  size = local.anydb_vms[count.index].size
 
   additional_capabilities {
     ultra_ssd_enabled = local.enable_ultradisk

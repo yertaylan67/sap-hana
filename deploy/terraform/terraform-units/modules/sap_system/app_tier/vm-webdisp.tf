@@ -57,7 +57,10 @@ resource "azurerm_linux_virtual_machine" "web" {
   proximity_placement_group_id = local.web_zonal_deployment ? var.ppg[count.index % length(local.web_zones)].id : var.ppg[0].id
   zone                         = local.webdispatcher_count == length(local.web_zones) ? local.web_zones[count.index % length(local.web_zones)] : null
 
-  network_interface_ids = local.use_two_network_cards ? [azurerm_network_interface.web[count.index].id, azurerm_network_interface.web-admin[count.index].id] : [azurerm_network_interface.web[count.index].id]
+  network_interface_ids = local.use_two_network_cards ? (
+    [azurerm_network_interface.web[count.index].id, azurerm_network_interface.web-admin[count.index].id]) : (
+    [azurerm_network_interface.web[count.index].id]
+  )
 
   size                            = local.web_sizing.compute.vm_size
   admin_username                  = local.authentication.username
@@ -109,7 +112,10 @@ resource "azurerm_windows_virtual_machine" "web" {
   proximity_placement_group_id = local.web_zonal_deployment ? var.ppg[count.index % length(local.web_zones)].id : var.ppg[0].id
   zone                         = local.webdispatcher_count == length(local.web_zones) ? local.web_zones[count.index % length(local.web_zones)] : null
 
-  network_interface_ids = local.use_two_network_cards ? [azurerm_network_interface.web[count.index].id, azurerm_network_interface.web-admin[count.index].id] : [azurerm_network_interface.web[count.index].id]
+  network_interface_ids = local.use_two_network_cards ? (
+    [azurerm_network_interface.web[count.index].id, azurerm_network_interface.web-admin[count.index].id]) : (
+    [azurerm_network_interface.web[count.index].id]
+  )
 
   size           = local.web_sizing.compute.vm_size
   admin_username = local.authentication.username
