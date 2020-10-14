@@ -9,10 +9,40 @@ resource "azurerm_network_interface" "anydb" {
   resource_group_name = var.resource-group[0].name
 
   ip_configuration {
-    primary                       = true
-    name                          = "ipconfig1"
-    subnet_id                     = local.sub_db_exists ? data.azurerm_subnet.anydb[0].id : azurerm_subnet.anydb[0].id
-    private_ip_address            = try(local.anydb_vms[count.index].db_nic_ip, false) == false ? cidrhost(length(local.sub_db_arm_id) > 0 ? data.azurerm_subnet.anydb[0].address_prefixes[0] : azurerm_subnet.anydb[0].address_prefixes[0], tonumber(count.index) + 10) : local.anydb_vms[count.index].db_nic_ip
+    primary   = true
+    name      = "ipconfig1"
+    subnet_id = local.sub_db_exists ? data.azurerm_subnet.anydb[0].id : azurerm_subnet.anydb[0].id
+
+    private_ip_address = try(local.anydb_vms[count.index].db_nic_ip, false) != false ? (
+      local.anydb_vms[count.index].db_nic_ip) : (
+      cidrhost((local.sub_db_exists ? (
+        data.azurerm_subnet.anydb[0].address_prefixes[0]) : (
+        azurerm_subnet.anydb[0].address_prefixes[0])
+      ), tonumber(count.index) + 10)
+    )
+    private_ip_address_allocation = "static"
+  }
+}
+
+# Creates the DB traffic NIC and private IP address for database nodes
+resource "azurerm_network_interface" "anydb-admin" {
+  count                         = local.enable_deployment ? length(local.anydb_vms) : 0
+  name                          = format("%s%s", local.anydb_vms[count.index].name, local.resource_suffixes.admin-nic)
+  location                      = var.resource-group[0].location
+  resource_group_name           = var.resource-group[0].name
+  enable_accelerated_networking = true
+
+  ip_configuration {
+    primary   = true
+    name      = "ipconfig1"
+    subnet_id = local.sub_admin_exists ? data.azurerm_subnet.anydb-admin[0].id : azurerm_subnet.anydb-admin[0].id
+    private_ip_address = try(local.anydb_vms[count.index].admin_nic_ip, false) != false ? (
+      local.anydb_vms[count.index].admin_nic_ip) : (
+      cidrhost((local.sub_admin_exists ? (
+        data.azurerm_subnet.anydb-admin[0].address_prefixes[0]) : (
+        azurerm_subnet.anydb-admin[0].address_prefixes[0])
+      ), tonumber(count.index) + 10)
+    )
     private_ip_address_allocation = "static"
   }
 }
@@ -26,12 +56,22 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
   location            = var.resource-group[0].location
 
   //If more than one servers are deployed into a single zone put them in an availability set and not a zone
-  availability_set_id          = local.enable_ultradisk ? null : length(local.anydb_vms) == length(local.zones) ? null : length(local.zones) > 1 ? azurerm_availability_set.anydb[count.index % length(local.zones)].id : azurerm_availability_set.anydb[0].id
-  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
+  availability_set_id = local.enable_ultradisk ? null : (
+    length(local.anydb_vms) == length(local.zones) ? null : (
+      length(local.zones) > 1 ? (
+        azurerm_availability_set.anydb[count.index % length(local.zones)].id) : (
+        azurerm_availability_set.anydb[0].id
+      )
+    )
+  )
+  proximity_placement_group_id = length(local.anydb_vms) == local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
   zone                         = local.enable_ultradisk || (length(local.anydb_vms) == length(local.zones)) ? local.zones[count.index % length(local.zones)] : null
 
-  network_interface_ids = [azurerm_network_interface.anydb[count.index].id]
-  size                  = local.anydb_vms[count.index].size
+  network_interface_ids = local.use_two_network_cards ? (
+    [azurerm_network_interface.anydb[count.index].id, azurerm_network_interface.anydb-admin[count.index].id]) : (
+    [azurerm_network_interface.anydb[count.index].id]
+  )
+  size = local.anydb_vms[count.index].size
 
   source_image_id = local.anydb_custom_image ? local.anydb_os.source_image_id : null
 
@@ -87,12 +127,22 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
   location            = var.resource-group[0].location
 
   //If more than one servers are deployed into a single zone put them in an availability set and not a zone
-  availability_set_id          = local.enable_ultradisk ? null : length(local.anydb_vms) == length(local.zones) ? null : length(local.zones) > 1 ? azurerm_availability_set.anydb[count.index % length(local.zones)].id : azurerm_availability_set.anydb[0].id
+  availability_set_id = local.enable_ultradisk ? null : (
+    length(local.anydb_vms) == length(local.zones) ? null : (
+      length(local.zones) > 1 ? (
+        azurerm_availability_set.anydb[count.index % length(local.zones)].id) : (
+        azurerm_availability_set.anydb[0].id
+      )
+    )
+  )
   proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
   zone                         = local.enable_ultradisk || (length(local.anydb_vms) == length(local.zones)) ? local.zones[count.index % length(local.zones)] : null
 
-  network_interface_ids = [azurerm_network_interface.anydb[count.index].id]
-  size                  = local.anydb_vms[count.index].size
+  network_interface_ids = local.use_two_network_cards ? (
+    [azurerm_network_interface.anydb[count.index].id, azurerm_network_interface.anydb-admin[count.index].id]) : (
+    [azurerm_network_interface.anydb[count.index].id]
+  )
+  size = local.anydb_vms[count.index].size
 
   additional_capabilities {
     ultra_ssd_enabled = local.enable_ultradisk
@@ -142,14 +192,20 @@ resource "azurerm_managed_disk" "disks" {
   create_option        = "Empty"
   storage_account_type = local.anydb_disks[count.index].storage_account_type
   disk_size_gb         = local.anydb_disks[count.index].disk_size_gb
-  zones                = [upper(local.anydb_ostype) == "LINUX" ? azurerm_linux_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].zone : azurerm_windows_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].zone]
+  zones = upper(local.anydb_ostype) == "LINUX" ? (
+    [azurerm_linux_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].zone]) : (
+    [azurerm_windows_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].zone]
+  )
 }
 
 // Manages attaching a Disk to a Virtual Machine
 resource "azurerm_virtual_machine_data_disk_attachment" "vm-disks" {
-  count                     = local.enable_deployment ? length(azurerm_managed_disk.disks) : 0
-  managed_disk_id           = azurerm_managed_disk.disks[count.index].id
-  virtual_machine_id        = upper(local.anydb_ostype) == "LINUX" ? azurerm_linux_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].id : azurerm_windows_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].id
+  count           = local.enable_deployment ? length(azurerm_managed_disk.disks) : 0
+  managed_disk_id = azurerm_managed_disk.disks[count.index].id
+  virtual_machine_id = upper(local.anydb_ostype) == "LINUX" ? (
+    azurerm_linux_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].id) : (
+    azurerm_windows_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].id
+  )
   caching                   = local.anydb_disks[count.index].caching
   write_accelerator_enabled = local.anydb_disks[count.index].write_accelerator_enabled
   lun                       = local.anydb_disks[count.index].lun

@@ -30,8 +30,13 @@ locals {
   disk_sizes = "${path.module}/../../../../../configs/anydb_sizes.json"
   sizes      = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : local.disk_sizes))
 
-  db_server_count      = length(var.naming.virtualmachine_names.ANYDB)
-  virtualmachine_names = sort(concat(var.naming.virtualmachine_names.ANYDB, var.naming.virtualmachine_names.ANYDB_HA))
+  db_server_count = length(var.naming.virtualmachine_names.ANYDB)
+  // We need to sort the names if we deploy across more than one zone to get the 
+  //Todo Maybe address this in the naming module 
+  virtualmachine_names = local.anydb_ha && length(local.zones) > 1 ? (
+    sort(concat(var.naming.virtualmachine_names.ANYDB, var.naming.virtualmachine_names.ANYDB_HA))) : (
+    concat(var.naming.virtualmachine_names.ANYDB, var.naming.virtualmachine_names.ANYDB_HA)
+  )
   storageaccount_names = var.naming.storageaccount_names.SDU
   resource_suffixes    = var.naming.resource_suffixes
 
@@ -49,6 +54,19 @@ locals {
   vnet_nr_parts   = length(split("-", local.vnet_sap_name))
   // Default naming of vnet has multiple parts. Taking the second-last part as the name 
   vnet_sap_name_prefix = try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? split("-", local.vnet_sap_name)[(local.vnet_nr_parts - 2)] : local.vnet_sap_name
+
+  // Admin subnet
+  var_sub_admin    = try(var.infrastructure.vnets.sap.subnet_admin, {})
+  sub_admin_arm_id = try(local.var_sub_admin.arm_id, "")
+  sub_admin_exists = length(local.sub_admin_arm_id) > 0 ? true : false
+  sub_admin_name   = local.sub_admin_exists ? try(split("/", local.sub_admin_arm_id)[10], "") : try(local.var_sub_admin.name, format("%s%s", local.prefix, local.resource_suffixes.admin-subnet))
+  sub_admin_prefix = try(local.var_sub_admin.prefix, "")
+
+  // Admin NSG
+  var_sub_admin_nsg    = try(var.infrastructure.vnets.sap.subnet_admin.nsg, {})
+  sub_admin_nsg_arm_id = try(local.var_sub_admin_nsg.arm_id, "")
+  sub_admin_nsg_exists = length(local.sub_admin_nsg_arm_id) > 0 ? true : false
+  sub_admin_nsg_name   = local.sub_admin_nsg_exists ? try(split("/", local.sub_admin_nsg_arm_id)[8], "") : try(local.var_sub_admin_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.admin-subnet-nsg))
 
   // DB subnet
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
@@ -69,6 +87,9 @@ locals {
   anydb          = try(local.anydb-databases[0], {})
   anydb_platform = try(local.anydb.platform, "NONE")
   anydb_version  = try(local.anydb.db_version, "")
+
+  // Dual network cards
+  use_two_network_cards = try(local.anydb.dual_nics, false)
 
   // Zones
   zones            = try(local.anydb.zones, [])
