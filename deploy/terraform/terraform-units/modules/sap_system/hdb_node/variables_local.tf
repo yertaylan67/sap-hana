@@ -39,7 +39,7 @@ locals {
   sizes      = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : local.disk_sizes))
 
   db_server_count      = length(var.naming.virtualmachine_names.HANA)
-  virtualmachine_names = concat(var.naming.virtualmachine_names.HANA, var.naming.virtualmachine_names.HANA_HA)
+  virtualmachine_names = sort(concat(var.naming.virtualmachine_names.HANA, var.naming.virtualmachine_names.HANA_HA))
   storageaccount_names = var.naming.storageaccount_names.SDU
   resource_suffixes    = var.naming.resource_suffixes
 
@@ -247,6 +247,7 @@ locals {
   data_disk_list = flatten([
     for vm_counter, hdb_vm in local.hdb_vms : [
       for idx, datadisk in local.data-disk-per-dbnode : {
+        vm_index                  = vm_counter
         name                      = format("%s-%s", hdb_vm.name, datadisk.suffix)
         vm_index                  = vm_counter
         caching                   = datadisk.caching
