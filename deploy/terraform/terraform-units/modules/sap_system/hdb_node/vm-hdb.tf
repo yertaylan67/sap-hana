@@ -125,19 +125,6 @@ resource "azurerm_lb_rule" "hdb" {
 
 // VIRTUAL MACHINES ================================================================================================
 
-# Creates managed data disk
-resource "azurerm_managed_disk" "data-disk" {
-  count                = local.enable_deployment ? length(local.data-disk-list) : 0
-  name                 = local.data-disk-list[count.index].name
-  location             = var.resource-group[0].location
-  resource_group_name  = var.resource-group[0].name
-  create_option        = "Empty"
-  storage_account_type = local.data-disk-list[count.index].storage_account_type
-  disk_size_gb         = local.data-disk-list[count.index].disk_size_gb
-  zones                = [azurerm_linux_virtual_machine.vm-dbnode[local.data-disk-list[count.index].vm_index].zone]
-
-}
-
 # Manages Linux Virtual Machine for HANA DB servers
 resource "azurerm_linux_virtual_machine" "vm-dbnode" {
   count               = local.enable_deployment ? length(local.hdb_vms) : 0
@@ -206,7 +193,7 @@ resource "azurerm_linux_virtual_machine" "vm-dbnode" {
 }
 // MANAGED DISKS ======================================================================================
 
-// Creates managed data disk
+# Creates managed data disk
 resource "azurerm_managed_disk" "data-disk" {
   count                = local.enable_deployment ? length(local.data_disk_list) : 0
   name                 = local.data_disk_list[count.index].name
@@ -215,10 +202,7 @@ resource "azurerm_managed_disk" "data-disk" {
   create_option        = "Empty"
   storage_account_type = local.data_disk_list[count.index].storage_account_type
   disk_size_gb         = local.data_disk_list[count.index].disk_size_gb
-  disk_iops_read_write = local.data_disk_list[count.index].disk_iops_read_write
-  disk_mbps_read_write = local.data_disk_list[count.index].disk_mbps_read_write
-  zones                = [azurerm_linux_virtual_machine.vm-dbnode[floor(count.index / length(local.data-disk-per-dbnode))].zone]
-
+  zones                = [azurerm_linux_virtual_machine.vm-dbnode[local.data_disk_list[count.index].vm_index].zone]
 }
 
 // Manages attaching a Disk to a Virtual Machine
