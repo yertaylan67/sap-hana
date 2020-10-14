@@ -20,13 +20,10 @@ variable naming {
 
 locals {
 
-  db_server_count = length(var.naming.virtualmachine_names.ANYDB)
-  // We need to sort the names if we deploy across more than one zone to get the 
-  //Todo Maybe address this in the naming module 
-  virtualmachine_names = local.anydb_ha && length(local.zones) > 1 ? (
-    sort(concat(var.naming.virtualmachine_names.ANYDB, var.naming.virtualmachine_names.ANYDB_HA))) : (
-    concat(var.naming.virtualmachine_names.ANYDB, var.naming.virtualmachine_names.ANYDB_HA)
-  )
+  db_server_count      = length(var.naming.virtualmachine_names.ANYDB) / 2
+  computer_names       = var.naming.virtualmachine_names.ANYDB
+  virtualmachine_names = local.zonal_deployment ? var.naming.virtualmachine_names.ANYDB_ZONAL : var.naming.virtualmachine_names.ANYDB
+
   storageaccount_names = var.naming.storageaccount_names.SDU
   resource_suffixes    = var.naming.resource_suffixes
 
@@ -163,15 +160,15 @@ locals {
   )
 
   dbnodes = flatten([[for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
-    name         = try("${dbnode.name}-0", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.virtualmachine_names[idx], local.resource_suffixes.vm) : format("%s%s", local.virtualmachine_names[idx], local.resource_suffixes.vm)))
-    computername = try("${dbnode.name}-0", format("%s%s", local.virtualmachine_names[idx], local.resource_suffixes.vm))
+    name         = try("${dbnode.name}-0", format("%s_%s%s", local.prefix, local.virtualmachine_names[idx], local.resource_suffixes.vm))
+    computername = try("${dbnode.name}-0", local.computer_names[idx], local.resource_suffixes.vm)
     role         = try(dbnode.role, "worker"),
     db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[0]
     }
     ],
     [for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
-      name         = try("${dbnode.name}-1", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.virtualmachine_names[idx + local.db_server_count], local.resource_suffixes.vm) : format("%s%s", local.virtualmachine_names[idx + local.db_server_count], local.resource_suffixes.vm)))
-      computername = try("${dbnode.name}-1", format("%s%s", local.virtualmachine_names[idx + local.db_server_count], local.resource_suffixes.vm))
+      name         = try("${dbnode.name}-1", format("%s_%s%s", local.prefix, local.virtualmachine_names[idx + local.db_server_count], local.resource_suffixes.vm))
+      computername = try("${dbnode.name}-1", local.computer_names[idx + local.db_server_count], local.resource_suffixes.vm)
       role         = try(dbnode.role, "worker"),
       db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[1],
       } if local.anydb_ha

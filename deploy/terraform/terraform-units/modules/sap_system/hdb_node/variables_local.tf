@@ -29,8 +29,10 @@ variable naming {
 // Set defaults
 locals {
 
-  db_server_count      = length(var.naming.virtualmachine_names.HANA)
-  virtualmachine_names = sort(concat(var.naming.virtualmachine_names.HANA, var.naming.virtualmachine_names.HANA_HA))
+  db_server_count      = length(var.naming.virtualmachine_names.HANA) / 2
+  computer_names       = var.naming.virtualmachine_names.HANA
+  virtualmachine_names = local.zonal_deployment ? var.naming.virtualmachine_names.HANA_ZONAL : var.naming.virtualmachine_names.HANA
+
   storageaccount_names = var.naming.storageaccount_names.SDU
   resource_suffixes    = var.naming.resource_suffixes
 
@@ -124,16 +126,16 @@ locals {
   shine                  = try(local.hdb.shine, { email = "shinedemo@microsoft.com" })
 
   dbnodes = flatten([[for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
-    name         = try("${dbnode.name}-0", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.virtualmachine_names[idx], local.resource_suffixes.vm) : format("%s%s", local.virtualmachine_names[idx], local.resource_suffixes.vm)))
-    computername = try("${dbnode.name}-0", format("%s%s", local.virtualmachine_names[idx], local.resource_suffixes.vm))
+    name         = try("${dbnode.name}-0", format("%s_%s%s", local.prefix, local.virtualmachine_names[idx], local.resource_suffixes.vm))
+    computername = try("${dbnode.name}-0", local.computer_names[idx], local.resource_suffixes.vm)
     role         = try(dbnode.role, "worker")
     admin_nic_ip = lookup(dbnode, "admin_nic_ips", [false, false])[0]
     db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[0]
     }
     ],
     [for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
-      name         = try("${dbnode.name}-1", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.virtualmachine_names[idx + local.db_server_count], local.resource_suffixes.vm) : format("%s%s", local.virtualmachine_names[idx + local.db_server_count], local.resource_suffixes.vm)))
-      computername = try("${dbnode.name}-1", format("%s%s", local.virtualmachine_names[idx + local.db_server_count], local.resource_suffixes.vm))
+      name         = try("${dbnode.name}-1", format("%s_%s%s", local.prefix, local.virtualmachine_names[idx + local.db_server_count], local.resource_suffixes.vm))
+      computername = try("${dbnode.name}-1", local.computer_names[idx + local.db_server_count])
       role         = try(dbnode.role, "worker")
       admin_nic_ip = lookup(dbnode, "admin_nic_ips", [false, false])[1]
       db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[1]
