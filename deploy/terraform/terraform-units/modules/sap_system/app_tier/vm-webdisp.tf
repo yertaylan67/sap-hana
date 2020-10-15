@@ -133,13 +133,10 @@ resource "azurerm_managed_disk" "web" {
   create_option        = "Empty"
   storage_account_type = local.web-data-disks[count.index].storage_account_type
   disk_size_gb         = local.web-data-disks[count.index].disk_size_gb
-  zones = local.web_zonal_deployment ? (
-    local.webdispatcher_count == local.web_zone_count ? (
-      upper(local.app_ostype) == "LINUX" ? (
-        [azurerm_linux_virtual_machine.web[local.web-data-disks[count.index].vm_index].zone]) : (
-        [azurerm_windows_virtual_machine.web[local.web-data-disks[count.index].vm_index].zone]
-      )) : (
-      null
+  zones = local.web_zonal_deployment && (local.webdispatcher_count == local.web_zone_count) ? (
+    upper(local.app_ostype) == "LINUX" ? (
+      [azurerm_linux_virtual_machine.web[local.web-data-disks[count.index].vm_index].zone]) : (
+      [azurerm_windows_virtual_machine.web[local.web-data-disks[count.index].vm_index].zone]
     )) : (
     null
   )

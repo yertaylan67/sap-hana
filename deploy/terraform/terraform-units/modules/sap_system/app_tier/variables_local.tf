@@ -33,9 +33,9 @@ locals {
   disk_sizes = "${path.module}/../../../../../configs/app_sizes.json"
   sizes      = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : local.disk_sizes))
 
-  app_virtualmachine_names = var.naming.virtualmachine_names.APP
-  scs_virtualmachine_names = var.naming.virtualmachine_names.SCS
-  web_virtualmachine_names = var.naming.virtualmachine_names.WEB
+  app_virtualmachine_names = var.naming.virtualmachine_names.APP_COMPUTERNAME
+  scs_virtualmachine_names = var.naming.virtualmachine_names.SCS_COMPUTERNAME
+  web_virtualmachine_names = var.naming.virtualmachine_names.WEB_COMPUTERNAME   
   resource_suffixes        = var.naming.resource_suffixes
 
   region  = try(var.infrastructure.region, "")

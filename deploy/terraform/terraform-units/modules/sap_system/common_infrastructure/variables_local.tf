@@ -1,3 +1,9 @@
+/*
+Description:
+
+  Define local variables.
+*/
+
 variable "is_single_node_hana" {
   description = "Checks if single node hana architecture scenario is being deployed"
   default     = false
@@ -37,7 +43,7 @@ locals {
   vnet_prefix          = var.naming.prefix.VNET
   storageaccount_name  = var.naming.storageaccount_names.SDU
   keyvault_names       = var.naming.keyvault_names.SDU
-  virtualmachine_names = var.naming.virtualmachine_names.ISCSI
+  virtualmachine_names = var.naming.virtualmachine_names.ISCSI_COMPUTERNAME 
   resource_suffixes    = var.naming.resource_suffixes
 
   //Filter the list of databases to only HANA platform entries

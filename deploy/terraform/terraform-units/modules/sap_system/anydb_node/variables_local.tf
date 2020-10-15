@@ -30,8 +30,8 @@ locals {
   disk_sizes = "${path.module}/../../../../../configs/anydb_sizes.json"
   sizes      = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : local.disk_sizes))
 
-  computer_names       = var.naming.virtualmachine_names.ANYDB
-  virtualmachine_names = local.zonal_deployment ? var.naming.virtualmachine_names.ANYDB_ZONAL : var.naming.virtualmachine_names.ANYDB
+  computer_names       = var.naming.virtualmachine_names.ANYDB_COMPUTERNAME 
+  virtualmachine_names = var.naming.virtualmachine_names.ANYDB_VMNAME
 
   storageaccount_names = var.naming.storageaccount_names.SDU
   resource_suffixes    = var.naming.resource_suffixes
