@@ -69,6 +69,7 @@ module "sap_namegenerator" {
   app_server_count = local.app_server_count
   web_server_count = local.webdispatcher_count
   scs_server_count = local.scs_server_count
+  zones            = local.zones
 }
 
 // Create Jumpboxes
