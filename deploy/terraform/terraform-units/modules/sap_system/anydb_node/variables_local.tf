@@ -30,13 +30,9 @@ locals {
   disk_sizes = "${path.module}/../../../../../configs/anydb_sizes.json"
   sizes      = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : local.disk_sizes))
 
-  db_server_count = length(var.naming.virtualmachine_names.ANYDB)
-  // We need to sort the names if we deploy across more than one zone to get the 
-  //Todo Maybe address this in the naming module 
-  virtualmachine_names = local.anydb_ha && length(local.zones) > 1 ? (
-    sort(concat(var.naming.virtualmachine_names.ANYDB, var.naming.virtualmachine_names.ANYDB_HA))) : (
-    concat(var.naming.virtualmachine_names.ANYDB, var.naming.virtualmachine_names.ANYDB_HA)
-  )
+  computer_names       = var.naming.virtualmachine_names.ANYDB
+  virtualmachine_names = local.zonal_deployment ? var.naming.virtualmachine_names.ANYDB_ZONAL : var.naming.virtualmachine_names.ANYDB
+
   storageaccount_names = var.naming.storageaccount_names.SDU
   resource_suffixes    = var.naming.resource_suffixes
 
@@ -44,6 +40,11 @@ locals {
   sap_sid = upper(try(var.application.sid, ""))
   prefix  = try(var.infrastructure.resource_group.name, var.naming.prefix.SDU)
   rg_name = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, local.resource_suffixes.sdu-rg))
+
+  // Zones
+  zones            = try(local.anydb.zones, [])
+  zonal_deployment = length(local.zones) > 0 ? true : false
+  db_zone_count    = try(length(local.zones), 1)
 
   # SAP vnet
   var_infra       = try(var.infrastructure, {})
@@ -91,10 +92,6 @@ locals {
   // Dual network cards
   use_two_network_cards = try(local.anydb.dual_nics, false)
 
-  // Zones
-  zones            = try(local.anydb.zones, [])
-  zonal_deployment = length(local.zones) > 0 ? true : false
-
   // Filter the list of databases to only AnyDB platform entries
   // Supported databases: Oracle, DB2, SQLServer, ASE 
   anydb-databases = [
@@ -116,6 +113,9 @@ locals {
   anydb_ha     = try(local.anydb.high_availability, false)
   db_sid       = lower(substr(local.anydb_platform, 0, 3))
   loadbalancer = try(local.anydb.loadbalancer, {})
+
+  node_count      = try(length(var.databases[0].dbnodes), 0)
+  db_server_count = local.anydb_ha ? local.node_count * 2 : local.node_count
 
   authentication = try(local.anydb.authentication,
     {
@@ -186,15 +186,15 @@ locals {
   )
 
   dbnodes = flatten([[for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
-    name         = try("${dbnode.name}-0", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.virtualmachine_names[idx], local.resource_suffixes.vm) : format("%s%s", local.virtualmachine_names[idx], local.resource_suffixes.vm)))
-    computername = try("${dbnode.name}-0", format("%s%s", local.virtualmachine_names[idx], local.resource_suffixes.vm))
+    name         = try("${dbnode.name}-0", format("%s_%s%s", local.prefix, local.virtualmachine_names[idx], local.resource_suffixes.vm))
+    computername = try("${dbnode.name}-0", local.computer_names[idx], local.resource_suffixes.vm)
     role         = try(dbnode.role, "worker"),
     db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[0]
     }
     ],
     [for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
-      name         = try("${dbnode.name}-1", (length(local.prefix) > 0 ? format("%s_%s%s", local.prefix, local.virtualmachine_names[idx + local.db_server_count], local.resource_suffixes.vm) : format("%s%s", local.virtualmachine_names[idx + local.db_server_count], local.resource_suffixes.vm)))
-      computername = try("${dbnode.name}-1", format("%s%s", local.virtualmachine_names[idx + local.db_server_count], local.resource_suffixes.vm))
+      name         = try("${dbnode.name}-1", format("%s_%s%s", local.prefix, local.virtualmachine_names[idx + local.node_count], local.resource_suffixes.vm))
+      computername = try("${dbnode.name}-1", local.computer_names[idx + local.node_count], local.resource_suffixes.vm)
       role         = try(dbnode.role, "worker"),
       db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[1],
       } if local.anydb_ha
