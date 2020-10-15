@@ -38,12 +38,15 @@ locals {
   // Zones
   app_zones            = try(var.application.app_zones, [])
   app_zonal_deployment = length(local.app_zones) > 0 ? true : false
+  app_zone_count       = length(local.app_zones)
 
   scs_zones            = try(var.application.scs_zones, [])
   scs_zonal_deployment = length(local.scs_zones) > 0 ? true : false
+  scs_zone_count       = length(local.scs_zones)
 
   web_zones            = try(var.application.web_zones, [])
   web_zonal_deployment = length(local.web_zones) > 0 ? true : false
+  web_zone_count       = length(local.web_zones)
 
   # SAP vnet
   var_infra       = try(var.infrastructure, {})

@@ -20,7 +20,6 @@ variable naming {
 
 locals {
 
-  db_server_count      = length(var.naming.virtualmachine_names.ANYDB) / 2
   computer_names       = var.naming.virtualmachine_names.ANYDB
   virtualmachine_names = local.zonal_deployment ? var.naming.virtualmachine_names.ANYDB_ZONAL : var.naming.virtualmachine_names.ANYDB
 
@@ -35,6 +34,7 @@ locals {
   // Zones
   zones            = try(local.anydb.zones, [])
   zonal_deployment = length(local.zones) > 0 ? true : false
+  db_zone_count    = try(length(local.zones), 1)
 
   # SAP vnet
   var_infra       = try(var.infrastructure, {})
@@ -65,16 +65,16 @@ locals {
   // PPG Information
   ppgId = lookup(var.infrastructure, "ppg", false) != false ? (var.ppg[0].id) : null
 
-  anydb          = try(local.anydb-databases[0], {})
-  anydb_platform = try(local.anydb.platform, "NONE")
-  anydb_version  = try(local.anydb.db_version, "")
-
   // Filter the list of databases to only AnyDB platform entries
   // Supported databases: Oracle, DB2, SQLServer, ASE 
   anydb-databases = [
     for database in var.databases : database
     if contains(["ORACLE", "DB2", "SQLSERVER", "ASE"], upper(try(database.platform, "NONE")))
   ]
+
+  anydb          = try(local.anydb-databases[0], {})
+  anydb_platform = try(local.anydb.platform, "NONE")
+  anydb_version  = try(local.anydb.db_version, "")
 
   // Enable deployment based on length of local.anydb-databases
   enable_deployment = (length(local.anydb-databases) > 0) ? true : false
@@ -90,6 +90,9 @@ locals {
   anydb_ha     = try(local.anydb.high_availability, false)
   db_sid       = lower(substr(local.anydb_platform, 0, 3))
   loadbalancer = try(local.anydb.loadbalancer, {})
+
+  node_count      = try(length(var.databases[0].dbnodes), 0)
+  db_server_count = local.anydb_ha ? local.node_count * 2 : local.node_count
 
   authentication = try(local.anydb.authentication,
     {
@@ -167,14 +170,16 @@ locals {
     }
     ],
     [for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
-      name         = try("${dbnode.name}-1", format("%s_%s%s", local.prefix, local.virtualmachine_names[idx + local.db_server_count], local.resource_suffixes.vm))
-      computername = try("${dbnode.name}-1", local.computer_names[idx + local.db_server_count], local.resource_suffixes.vm)
+      name         = try("${dbnode.name}-1", format("%s_%s%s", local.prefix, local.virtualmachine_names[idx + local.node_count], local.resource_suffixes.vm))
+      computername = try("${dbnode.name}-1", local.computer_names[idx + local.node_count], local.resource_suffixes.vm)
       role         = try(dbnode.role, "worker"),
       db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[1],
       } if local.anydb_ha
     ]
     ]
   )
+
+
 
   anydb_vms = [
     for idx, dbnode in local.dbnodes : {

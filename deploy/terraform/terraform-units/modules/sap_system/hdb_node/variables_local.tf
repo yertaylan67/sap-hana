@@ -29,7 +29,6 @@ variable naming {
 // Set defaults
 locals {
 
-  db_server_count      = length(var.naming.virtualmachine_names.HANA) / 2
   computer_names       = var.naming.virtualmachine_names.HANA
   virtualmachine_names = local.zonal_deployment ? var.naming.virtualmachine_names.HANA_ZONAL : var.naming.virtualmachine_names.HANA
 
@@ -91,6 +90,7 @@ locals {
   // Zones
   zones            = try(local.hdb.zones, [])
   zonal_deployment = length(local.zones) > 0 ? true : false
+  db_zone_count    = try(length(local.zones), 1)
 
   hdb_platform = try(local.hdb.platform, "NONE")
   hdb_version  = try(local.hdb.db_version, "2.00.043")
@@ -110,6 +110,9 @@ locals {
       "type"     = "key"
       "username" = "azureadm"
   })
+
+  node_count      = try(length(local.hdb.dbnodes), 0)
+  db_server_count = local.hdb_ha ? local.node_count * 2 : local.node_count
 
   hdb_ins                = try(local.hdb.instance, {})
   hdb_sid                = try(local.hdb_ins.sid, local.sid) // HANA database sid from the Databases array for use as reference to LB/AS
@@ -134,8 +137,8 @@ locals {
     }
     ],
     [for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
-      name         = try("${dbnode.name}-1", format("%s_%s%s", local.prefix, local.virtualmachine_names[idx + local.db_server_count], local.resource_suffixes.vm))
-      computername = try("${dbnode.name}-1", local.computer_names[idx + local.db_server_count])
+      name         = try("${dbnode.name}-1", format("%s_%s%s", local.prefix, local.virtualmachine_names[idx + local.node_count], local.resource_suffixes.vm))
+      computername = try("${dbnode.name}-1", local.computer_names[idx + local.node_count])
       role         = try(dbnode.role, "worker")
       admin_nic_ip = lookup(dbnode, "admin_nic_ips", [false, false])[1]
       db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[1]

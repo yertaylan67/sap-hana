@@ -68,6 +68,7 @@ resource "azurerm_lb" "hdb" {
   name                = format("%s%s", local.prefix, local.resource_suffixes.db-alb)
   resource_group_name = var.resource-group[0].name
   location            = var.resource-group[0].location
+  sku                 = local.zonal_deployment ? "Standard" : "Basic"
 
   frontend_ip_configuration {
     name                          = format("%s%s", local.prefix, local.resource_suffixes.db-alb-feip)
@@ -125,19 +126,6 @@ resource "azurerm_lb_rule" "hdb" {
 
 # VIRTUAL MACHINES ================================================================================================
 
-# Creates managed data disk
-resource "azurerm_managed_disk" "data-disk" {
-  count                = local.enable_deployment ? length(local.data-disk-list) : 0
-  name                 = local.data-disk-list[count.index].name
-  location             = var.resource-group[0].location
-  resource_group_name  = var.resource-group[0].name
-  create_option        = "Empty"
-  storage_account_type = local.data-disk-list[count.index].storage_account_type
-  disk_size_gb         = local.data-disk-list[count.index].disk_size_gb
-  zones                = [azurerm_linux_virtual_machine.vm-dbnode[local.data-disk-list[count.index].vm_index].zone]
-
-}
-
 # Manages Linux Virtual Machine for HANA DB servers
 resource "azurerm_linux_virtual_machine" "vm-dbnode" {
   count               = local.enable_deployment ? length(local.hdb_vms) : 0
@@ -147,14 +135,11 @@ resource "azurerm_linux_virtual_machine" "vm-dbnode" {
   resource_group_name = var.resource-group[0].name
 
   //If more than one servers are deployed into a single zone put them in an availability set and not a zone
-  availability_set_id = length(local.hdb_vms) == length(local.zones) ? null : (
-    length(local.zones) > 1 ? (
-      azurerm_availability_set.hdb[count.index % length(local.zones)].id) : (
-      azurerm_availability_set.hdb[0].id
-    )
+  availability_set_id = length(local.hdb_vms) == local.db_zone_count ? null : (
+    azurerm_availability_set.hdb[count.index % local.db_zone_count].id
   )
-  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % length(local.zones)].id : var.ppg[0].id
-  zone                         = length(local.hdb_vms) == length(local.zones) ? local.zones[count.index % length(local.zones)] : null
+  proximity_placement_group_id = var.ppg[count.index % local.db_zone_count].id
+  zone                         = length(local.hdb_vms) == local.db_zone_count ? local.zones[count.index % local.db_zone_count] : null
 
   network_interface_ids = [
     azurerm_network_interface.nics-dbnodes-admin[count.index].id,
@@ -197,6 +182,19 @@ resource "azurerm_linux_virtual_machine" "vm-dbnode" {
   boot_diagnostics {
     storage_account_uri = var.storage-bootdiag.primary_blob_endpoint
   }
+}
+
+# Creates managed data disk
+resource "azurerm_managed_disk" "data-disk" {
+  count                = local.enable_deployment ? length(local.data-disk-list) : 0
+  name                 = local.data-disk-list[count.index].name
+  location             = var.resource-group[0].location
+  resource_group_name  = var.resource-group[0].name
+  create_option        = "Empty"
+  storage_account_type = local.data-disk-list[count.index].storage_account_type
+  disk_size_gb         = local.data-disk-list[count.index].disk_size_gb
+  zones                = local.db_server_count == local.db_zone_count ? [azurerm_linux_virtual_machine.vm-dbnode[local.data-disk-list[count.index].vm_index].zone] : null
+
 }
 
 # Manages attaching a Disk to a Virtual Machine
