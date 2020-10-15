@@ -132,6 +132,14 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
   availability_set_id = local.zonal_deployment ? (
     local.db_server_count == local.db_zone_count ? null : azurerm_availability_set.anydb[count.index % local.db_zone_count].id) : (
     azurerm_availability_set.anydb[0].id
+<<<<<<< HEAD
+=======
+  )
+
+  zone = local.zonal_deployment ? (
+    local.db_server_count == local.db_zone_count ? local.zones[count.index % local.db_zone_count] : null) : (
+    null
+>>>>>>> fixed the crashes when zones are not provided
   )
 
   zone = local.zonal_deployment ? (
