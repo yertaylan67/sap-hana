@@ -86,6 +86,7 @@ resource "azurerm_lb_backend_address_pool" "hdb" {
   name                = format("%s%s", local.prefix, local.resource_suffixes.db-alb-bepool)
   resource_group_name = var.resource-group[0].name
   loadbalancer_id     = azurerm_lb.hdb[count.index].id
+
 }
 
 resource "azurerm_lb_probe" "hdb" {
@@ -123,7 +124,7 @@ resource "azurerm_lb_rule" "hdb" {
   enable_floating_ip             = true
 }
 
-// VIRTUAL MACHINES ================================================================================================
+# VIRTUAL MACHINES ================================================================================================
 
 # Manages Linux Virtual Machine for HANA DB servers
 resource "azurerm_linux_virtual_machine" "vm-dbnode" {
@@ -135,15 +136,15 @@ resource "azurerm_linux_virtual_machine" "vm-dbnode" {
 
   //If more than one servers are deployed into a single zone put them in an availability set and not a zone
 
-  availability_set_id = local.enable_ultradisk || local.zonal_deployment ? (
+  availability_set_id = local.zonal_deployment ? (
     length(local.hdb_vms) == local.db_zone_count ? (
       null) : (
       azurerm_availability_set.hdb[count.index % local.db_zone_count].id
     )) : (
     azurerm_availability_set.hdb[0].id
   )
-  proximity_placement_group_id = local.enable_ultradisk || local.zonal_deployment ? var.ppg[count.index % local.db_zone_count].id : var.ppg[0].id
-  zone = local.enable_ultradisk || local.zonal_deployment ? (
+  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % local.db_zone_count].id : var.ppg[0].id
+  zone = local.zonal_deployment ? (
     length(local.hdb_vms) == local.db_zone_count ? local.zones[count.index % local.db_zone_count] : null) : (
     null
   )
@@ -156,10 +157,6 @@ resource "azurerm_linux_virtual_machine" "vm-dbnode" {
   admin_username                  = local.hdb_vms[count.index].authentication.username
   admin_password                  = lookup(local.hdb_vms[count.index].authentication, "password", null)
   disable_password_authentication = local.hdb_vms[count.index].authentication.type != "password" ? true : false
-
-  additional_capabilities {
-    ultra_ssd_enabled = local.enable_ultradisk
-  }
 
   dynamic "os_disk" {
     iterator = disk
@@ -190,22 +187,25 @@ resource "azurerm_linux_virtual_machine" "vm-dbnode" {
     public_key = file(var.sshkey.path_to_public_key)
   }
 
+  additional_capabilities {
+    ultra_ssd_enabled = local.enable_ultradisk
+  }
+
   boot_diagnostics {
     storage_account_uri = var.storage-bootdiag.primary_blob_endpoint
   }
 }
-// MANAGED DISKS ======================================================================================
 
 # Creates managed data disk
 resource "azurerm_managed_disk" "data-disk" {
-  count                = local.enable_deployment ? length(local.data_disk_list) : 0
-  name                 = local.data_disk_list[count.index].name
+  count                = local.enable_deployment ? length(local.data-disk-list) : 0
+  name                 = local.data-disk-list[count.index].name
   location             = var.resource-group[0].location
   resource_group_name  = var.resource-group[0].name
   create_option        = "Empty"
   storage_account_type = local.data-disk-list[count.index].storage_account_type
   disk_size_gb         = local.data-disk-list[count.index].disk_size_gb
-  zones = local.enable_ultradisk || local.zonal_deployment ? (
+  zones = local.zonal_deployment ? (
     local.db_server_count == local.db_zone_count ? (
       [azurerm_linux_virtual_machine.vm-dbnode[local.data-disk-list[count.index].vm_index].zone]) : (
       null
@@ -216,10 +216,10 @@ resource "azurerm_managed_disk" "data-disk" {
 
 # Manages attaching a Disk to a Virtual Machine
 resource "azurerm_virtual_machine_data_disk_attachment" "vm-dbnode-data-disk" {
-  count                     = local.enable_deployment ? length(local.data_disk_list) : 0
+  count                     = local.enable_deployment ? length(local.data-disk-list) : 0
   managed_disk_id           = azurerm_managed_disk.data-disk[count.index].id
-  virtual_machine_id        = azurerm_linux_virtual_machine.vm-dbnode[local.data_disk_list[count.index].vm_index].id
-  caching                   = local.data_disk_list[count.index].caching
-  write_accelerator_enabled = local.data_disk_list[count.index].write_accelerator_enabled
-  lun                       = local.data_disk_list[count.index].lun
+  virtual_machine_id        = azurerm_linux_virtual_machine.vm-dbnode[local.data-disk-list[count.index].vm_index].id
+  caching                   = local.data-disk-list[count.index].caching
+  write_accelerator_enabled = local.data-disk-list[count.index].write_accelerator_enabled
+  lun                       = count.index
 }

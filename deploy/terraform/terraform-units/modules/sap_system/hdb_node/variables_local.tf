@@ -35,11 +35,10 @@ variable "custom_disk_sizes_filename" {
 locals {
   // Imports database sizing information
 
-  disk_sizes = "${path.module}/../../../../../configs/hdb_sizes.json"
-  sizes      = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : local.disk_sizes))
+  sizes      = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : "${path.module}/../../../../../configs/hdb_sizes.json"))
 
-  computer_names       = var.naming.virtualmachine_names.HANA
-  virtualmachine_names = local.zonal_deployment ? var.naming.virtualmachine_names.HANA_ZONAL : var.naming.virtualmachine_names.HANA
+  computer_names       = var.naming.virtualmachine_names.HANA_COMPUTERNAME
+  virtualmachine_names = var.naming.virtualmachine_names.HANA_VMNAME
 
   storageaccount_names = var.naming.storageaccount_names.SDU
   resource_suffixes    = var.naming.resource_suffixes
