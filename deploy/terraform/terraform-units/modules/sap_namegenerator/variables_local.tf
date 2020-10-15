@@ -238,6 +238,7 @@ variable resource_suffixes {
 variable zones {
   type        = list(string)
   description = "List of availability zones"
+  default = []
 }
 
 locals {
