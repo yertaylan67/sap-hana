@@ -238,6 +238,7 @@ variable resource_suffixes {
 variable zones {
   type        = list(string)
   description = "List of availability zones"
+  default = []
 }
 
 locals {
@@ -251,6 +252,6 @@ locals {
   random_id_verified    = upper(substr(var.random_id, 0, var.sapautomation_name_limits.random_id_length))
   random_id_vm_verified = lower(substr(var.random_id, 0, var.sapautomation_name_limits.random_id_length))
 
-  zonal_deployment = length(var.zones) > 0 ? true : false
+  zonal_deployment = try(length(var.zones),0) > 0 ? true : false
 }
 

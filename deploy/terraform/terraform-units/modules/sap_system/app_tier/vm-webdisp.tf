@@ -32,9 +32,11 @@ resource "azurerm_linux_virtual_machine" "web" {
       azurerm_availability_set.web[0].id
     )
   )
-
-  proximity_placement_group_id = var.ppg[count.index % local.web_zone_count].id 
-  zone                         = local.webdispatcher_count == local.web_zone_count ? local.web_zones[count.index % local.web_zone_count] : null
+  proximity_placement_group_id = local.web_zonal_deployment ? var.ppg[count.index % local.web_zone_count].id : var.ppg[0].id
+  zone = local.web_zonal_deployment ? (
+    local.webdispatcher_count == local.web_zone_count ? local.web_zones[count.index % local.web_zone_count] : null) : (
+    null
+  )
 
   network_interface_ids = [
     azurerm_network_interface.web[count.index].id
@@ -86,8 +88,11 @@ resource "azurerm_windows_virtual_machine" "web" {
       azurerm_availability_set.web[0].id
     )
   )
-  proximity_placement_group_id = var.ppg[count.index % local.web_zone_count].id
-  zone                         = local.webdispatcher_count == local.web_zone_count ? local.web_zones[count.index % local.web_zone_count] : null
+  proximity_placement_group_id = local.web_zonal_deployment ? var.ppg[count.index % local.web_zone_count].id : var.ppg[0].id
+  zone = local.web_zonal_deployment ? (
+    local.webdispatcher_count == local.web_zone_count ? local.web_zones[count.index % local.web_zone_count] : null) : (
+    null
+  )
 
   network_interface_ids = [
     azurerm_network_interface.web[count.index].id
@@ -128,12 +133,14 @@ resource "azurerm_managed_disk" "web" {
   create_option        = "Empty"
   storage_account_type = local.web-data-disks[count.index].disk_type
   disk_size_gb         = local.web-data-disks[count.index].size_gb
-  zones = local.webdispatcher_count == local.web_zone_count ? (
-    upper(local.app_ostype) == "LINUX" ? (
-    [azurerm_linux_virtual_machine.web[local.web-data-disks[count.index].vm_index].zone]) : (
-    [azurerm_windows_virtual_machine.web[local.web-data-disks[count.index].vm_index].zone]
-    )
-    ) : (
+  zones = local.web_zonal_deployment ? (
+    local.webdispatcher_count == local.web_zone_count ? (
+      upper(local.app_ostype) == "LINUX" ? (
+        [azurerm_linux_virtual_machine.web[local.web-data-disks[count.index].vm_index].zone]) : (
+        [azurerm_windows_virtual_machine.web[local.web-data-disks[count.index].vm_index].zone]
+      )) : (
+      null
+    )) : (
     null
   )
 }

@@ -31,14 +31,21 @@ resource "azurerm_linux_virtual_machine" "scs" {
   resource_group_name = var.resource-group[0].name
 
   //If more than one servers are deployed into a zone put them in an availability set and not a zone
-  availability_set_id = local.scs_server_count == local.scs_zone_count ? null : (
-    local.scs_zone_count > 1 ? (
-      azurerm_availability_set.scs[count.index % local.scs_zone_count].id) : (
-      azurerm_availability_set.scs[0].id
+  availability_set_id = local.scs_zonal_deployment ? (
+    local.scs_server_count == local.scs_zone_count ? null : (
+      local.scs_zone_count > 1 ? (
+        azurerm_availability_set.scs[count.index % local.scs_zone_count].id) : (
+        azurerm_availability_set.scs[0].id
+      )
     )
+    ) : (
+    azurerm_availability_set.app[0].id
   )
-  proximity_placement_group_id = var.ppg[count.index % local.scs_zone_count].id
-  zone                         = local.scs_server_count == local.scs_zone_count ? local.scs_zones[count.index % local.scs_zone_count] : null
+  proximity_placement_group_id = local.scs_zonal_deployment ? var.ppg[count.index % local.scs_zone_count].id : var.ppg[0].id
+  zone = local.scs_zonal_deployment ? (
+    local.scs_server_count == local.scs_zone_count ? local.scs_zones[count.index % local.scs_zone_count] : null) : (
+    null
+  )
 
   network_interface_ids = [
     azurerm_network_interface.scs[count.index].id
@@ -84,15 +91,21 @@ resource "azurerm_windows_virtual_machine" "scs" {
   resource_group_name = var.resource-group[0].name
 
   //If more than one servers are deployed into a zone put them in an availability set and not a zone
-  //If more than one servers are deployed into a zone put them in an availability set and not a zone
-  availability_set_id = local.scs_server_count == local.scs_zone_count ? null : (
-    local.scs_zone_count > 1 ? (
-      azurerm_availability_set.scs[count.index % local.scs_zone_count].id) : (
-      azurerm_availability_set.scs[0].id
+  availability_set_id = local.scs_zonal_deployment ? (
+    local.scs_server_count == local.scs_zone_count ? null : (
+      local.scs_zone_count > 1 ? (
+        azurerm_availability_set.scs[count.index % local.scs_zone_count].id) : (
+        azurerm_availability_set.scs[0].id
+      )
     )
+    ) : (
+    azurerm_availability_set.app[0].id
   )
-  proximity_placement_group_id = var.ppg[count.index % local.scs_zone_count].id
-  zone                         = local.scs_server_count == local.scs_zone_count ? local.scs_zones[count.index % local.scs_zone_count] : null
+  proximity_placement_group_id = local.scs_zonal_deployment ? var.ppg[count.index % local.scs_zone_count].id : var.ppg[0].id
+  zone = local.scs_zonal_deployment ? (
+    local.scs_server_count == local.scs_zone_count ? local.scs_zones[count.index % local.scs_zone_count] : null) : (
+    null
+  )
 
   network_interface_ids = [
     azurerm_network_interface.scs[count.index].id
@@ -133,12 +146,14 @@ resource "azurerm_managed_disk" "scs" {
   create_option        = "Empty"
   storage_account_type = local.scs-data-disks[count.index].disk_type
   disk_size_gb         = local.scs-data-disks[count.index].size_gb
-  zones = local.scs_server_count == local.scs_zone_count ? (
-    upper(local.app_ostype) == "LINUX" ? (
-      [azurerm_linux_virtual_machine.scs[local.scs-data-disks[count.index].vm_index].zone]) : (
-      [azurerm_windows_virtual_machine.scs[local.scs-data-disks[count.index].vm_index].zone]
-    )
-    ) : (
+  zones = local.scs_zonal_deployment ? (
+    local.scs_server_count == local.scs_zone_count ? (
+      upper(local.app_ostype) == "LINUX" ? (
+        [azurerm_linux_virtual_machine.scs[local.scs-data-disks[count.index].vm_index].zone]) : (
+        [azurerm_windows_virtual_machine.scs[local.scs-data-disks[count.index].vm_index].zone]
+      )) : (
+      null
+    )) : (
     null
   )
 }
