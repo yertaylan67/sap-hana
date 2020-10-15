@@ -191,13 +191,13 @@ resource "azurerm_linux_virtual_machine" "vm-dbnode" {
 
 # Creates managed data disk
 resource "azurerm_managed_disk" "data-disk" {
-  count                = local.enable_deployment ? length(local.data-disk-list) : 0
-  name                 = local.data-disk-list[count.index].name
+  count                = local.enable_deployment ? length(local.data_disk_list) : 0
+  name                 = local.data_disk_list[count.index].name
   location             = var.resource-group[0].location
   resource_group_name  = var.resource-group[0].name
   create_option        = "Empty"
-  storage_account_type = local.data-disk-list[count.index].storage_account_type
-  disk_size_gb         = local.data-disk-list[count.index].disk_size_gb
+  storage_account_type = local.data_disk_list[count.index].storage_account_type
+  disk_size_gb         = local.data_disk_list[count.index].disk_size_gb
   zones                = local.enable_ultradisk || (local.db_server_count == local.db_zone_count) ? [azurerm_linux_virtual_machine.vm-dbnode[local.data-disk-list[count.index].vm_index].zone] : null
 
 }
