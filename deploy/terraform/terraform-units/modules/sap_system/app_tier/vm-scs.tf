@@ -144,8 +144,8 @@ resource "azurerm_managed_disk" "scs" {
   location             = var.resource-group[0].location
   resource_group_name  = var.resource-group[0].name
   create_option        = "Empty"
-  storage_account_type = local.scs-data-disks[count.index].disk_type
-  disk_size_gb         = local.scs-data-disks[count.index].size_gb
+  storage_account_type = local.scs-data-disks[count.index].storage_account_type
+  disk_size_gb         = local.scs-data-disks[count.index].disk_size_gb
   zones = local.scs_zonal_deployment ? (
     local.scs_server_count == local.scs_zone_count ? (
       upper(local.app_ostype) == "LINUX" ? (
