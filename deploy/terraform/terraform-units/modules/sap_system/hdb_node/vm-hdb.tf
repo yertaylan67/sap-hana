@@ -208,30 +208,12 @@ resource "azurerm_managed_disk" "data-disk" {
   )
 }
 
-# Creates managed data disk
-resource "azurerm_managed_disk" "data-disk" {
-  count                = local.enable_deployment ? length(local.data-disk-list) : 0
-  name                 = local.data-disk-list[count.index].name
-  location             = var.resource-group[0].location
-  resource_group_name  = var.resource-group[0].name
-  create_option        = "Empty"
-  storage_account_type = local.data-disk-list[count.index].storage_account_type
-  disk_size_gb         = local.data-disk-list[count.index].disk_size_gb
-  zones = local.zonal_deployment ? (
-    local.db_server_count == local.db_zone_count ? (
-      [azurerm_linux_virtual_machine.vm-dbnode[local.data-disk-list[count.index].vm_index].zone]) : (
-      null
-    )) : (
-    null
-  )
-}
-
 # Manages attaching a Disk to a Virtual Machine
 resource "azurerm_virtual_machine_data_disk_attachment" "vm-dbnode-data-disk" {
   count                     = local.enable_deployment ? length(local.data_disk_list) : 0
   managed_disk_id           = azurerm_managed_disk.data-disk[count.index].id
-  virtual_machine_id        = azurerm_linux_virtual_machine.vm-dbnode[local.data-disk-list[count.index].vm_index].id
-  caching                   = local.data-disk-list[count.index].caching
-  write_accelerator_enabled = local.data-disk-list[count.index].write_accelerator_enabled
+  virtual_machine_id        = azurerm_linux_virtual_machine.vm-dbnode[local.data_disk_list[count.index].vm_index].id
+  caching                   = local.data_disk_list[count.index].caching
+  write_accelerator_enabled = local.data_disk_list[count.index].write_accelerator_enabled
   lun                       = count.index
 }
