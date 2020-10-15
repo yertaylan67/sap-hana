@@ -140,9 +140,9 @@ resource "azurerm_linux_virtual_machine" "vm-dbnode" {
       null) : (
       azurerm_availability_set.hdb[count.index % local.db_zone_count].id
     )) : (
-    azurerm_availability_set.hdb[0]
+    azurerm_availability_set.hdb[0].id
   )
-  proximity_placement_group_id = local.enable_ultradisk || local.zonal_deployment ? var.ppg[count.index % local.db_zone_count].id : var.ppg[0]
+  proximity_placement_group_id = local.enable_ultradisk || local.zonal_deployment ? var.ppg[count.index % local.db_zone_count].id : var.ppg[0].id
   zone = local.enable_ultradisk || local.zonal_deployment ? (
     length(local.hdb_vms) == local.db_zone_count ? local.zones[count.index % local.db_zone_count] : null) : (
     null
