@@ -30,8 +30,7 @@ variable "custom_disk_sizes_filename" {
 
 locals {
   // Imports Disk sizing sizing information
-  disk_sizes = "${path.module}/../../../../../configs/app_sizes.json"
-  sizes      = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : local.disk_sizes))
+  sizes      = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : "${path.module}/../../../../../configs/app_sizes.json"))
 
   app_virtualmachine_names = var.naming.virtualmachine_names.APP_COMPUTERNAME
   scs_virtualmachine_names = var.naming.virtualmachine_names.SCS_COMPUTERNAME
