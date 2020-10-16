@@ -198,8 +198,8 @@ resource "azurerm_linux_virtual_machine" "vm-dbnode" {
 
 # Creates managed data disk
 resource "azurerm_managed_disk" "data-disk" {
-  count                = local.enable_deployment ? length(local.data-disk-list) : 0
-  name                 = local.data-disk-list[count.index].name
+  count                = local.enable_deployment ? length(local.data_disk_list) : 0
+  name                 = local.data_disk_list[count.index].name
   location             = var.resource-group[0].location
   resource_group_name  = var.resource-group[0].name
   create_option        = "Empty"
@@ -216,7 +216,7 @@ resource "azurerm_managed_disk" "data-disk" {
 
 # Manages attaching a Disk to a Virtual Machine
 resource "azurerm_virtual_machine_data_disk_attachment" "vm-dbnode-data-disk" {
-  count                     = local.enable_deployment ? length(local.data-disk-list) : 0
+  count                     = local.enable_deployment ? length(local.data_disk_list) : 0
   managed_disk_id           = azurerm_managed_disk.data-disk[count.index].id
   virtual_machine_id        = azurerm_linux_virtual_machine.vm-dbnode[local.data_disk_list[count.index].vm_index].id
   caching                   = local.data_disk_list[count.index].caching

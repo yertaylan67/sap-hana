@@ -63,15 +63,13 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
     azurerm_availability_set.anydb[0].id
   )
 
-  zone = local.zonal_deployment ? (
-    local.db_server_count == local.db_zone_count ? local.zones[count.index % local.db_zone_count] : null) : (
-    null
-  )
+  zone = local.zonal_deployment && (local.db_server_count == local.db_zone_count) ? local.zones[count.index % local.db_zone_count] : null
 
   network_interface_ids = local.use_two_network_cards ? (
     [azurerm_network_interface.anydb[count.index].id, azurerm_network_interface.anydb-admin[count.index].id]) : (
     [azurerm_network_interface.anydb[count.index].id]
   )
+
   size = local.anydb_vms[count.index].size
 
   source_image_id = local.anydb_custom_image ? local.anydb_os.source_image_id : null
@@ -132,30 +130,16 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
   availability_set_id = local.zonal_deployment ? (
     local.db_server_count == local.db_zone_count ? null : azurerm_availability_set.anydb[count.index % local.db_zone_count].id) : (
     azurerm_availability_set.anydb[0].id
-<<<<<<< HEAD
-=======
   )
 
-  zone = local.zonal_deployment ? (
-    local.db_server_count == local.db_zone_count ? local.zones[count.index % local.db_zone_count] : null) : (
-    null
->>>>>>> fixed the crashes when zones are not provided
-  )
+  zone = local.zonal_deployment && (local.db_server_count == local.db_zone_count) ? local.zones[count.index % local.db_zone_count] : null
 
-  zone = local.zonal_deployment ? (
-    local.db_server_count == local.db_zone_count ? local.zones[count.index % local.db_zone_count] : null) : (
-    null
-  )
-
-<<<<<<< HEAD
   network_interface_ids = local.use_two_network_cards ? (
     [azurerm_network_interface.anydb[count.index].id, azurerm_network_interface.anydb-admin[count.index].id]) : (
     [azurerm_network_interface.anydb[count.index].id]
   )
   size = local.anydb_vms[count.index].size
 
-=======
->>>>>>> fa92f5533fe88d504024e86ed627f1871467775d
   source_image_id = local.anydb_custom_image ? local.anydb_os.source_image_id : null
 
   dynamic "source_image_reference" {
