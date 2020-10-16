@@ -33,14 +33,15 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
   location            = var.resource-group[0].location
 
   //If more than one servers are deployed into a single zone put them in an availability set and not a zone
-  proximity_placement_group_id = local.enable_ultradisk || local.zonal_deployment ? var.ppg[count.index % local.db_zone_count].id : var.ppg[0].id
+  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % local.db_zone_count].id : var.ppg[0].id
   //If more than one servers are deployed into a single zone put them in an availability set and not a zone
-  availability_set_id = local.enable_ultradisk || (local.zonal_deployment && (local.db_server_count == local.db_zone_count)) ? (
-    null) : (
-    azurerm_availability_set.anydb[count.index % local.db_zone_count].id
+  availability_set_id = local.zonal_deployment ? (
+    local.db_server_count == local.db_zone_count ? null : azurerm_availability_set.anydb[count.index % local.db_zone_count].id) : (
+    azurerm_availability_set.anydb[0].id
   )
-  zone = local.enable_ultradisk || (local.zonal_deployment && (local.db_server_count == local.db_zone_count)) ? (
-    local.zones[count.index % local.db_zone_count]) : (
+
+  zone = local.zonal_deployment ? (
+    local.db_server_count == local.db_zone_count ? local.zones[count.index % local.db_zone_count] : null) : (
     null
   )
 
@@ -70,10 +71,6 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
     }
   }
 
-  additional_capabilities {
-    ultra_ssd_enabled = local.enable_ultradisk
-  }
-
   admin_username                  = local.authentication.username
   admin_password                  = local.authentication.type == "password" ? try(local.authentication.password, null) : null
   disable_password_authentication = local.authentication.type != "password" ? true : false
@@ -81,6 +78,10 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
   admin_ssh_key {
     username   = local.authentication.username
     public_key = file(var.sshkey.path_to_public_key)
+  }
+
+  additional_capabilities {
+    ultra_ssd_enabled = local.enable_ultradisk
   }
 
   boot_diagnostics {
@@ -100,14 +101,15 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
   resource_group_name = var.resource-group[0].name
   location            = var.resource-group[0].location
 
-  proximity_placement_group_id = local.enable_ultradisk || local.zonal_deployment ? var.ppg[count.index % local.db_zone_count].id : var.ppg[0].id
+  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % local.db_zone_count].id : var.ppg[0].id
   //If more than one servers are deployed into a single zone put them in an availability set and not a zone
-  availability_set_id = local.enable_ultradisk || (local.zonal_deployment && (local.db_server_count == local.db_zone_count)) ? (
-    null) : (
-    azurerm_availability_set.anydb[count.index % local.db_zone_count].id
+  availability_set_id = local.zonal_deployment ? (
+    local.db_server_count == local.db_zone_count ? null : azurerm_availability_set.anydb[count.index % local.db_zone_count].id) : (
+    azurerm_availability_set.anydb[0].id
   )
-  zone = local.enable_ultradisk || (local.zonal_deployment && (local.db_server_count == local.db_zone_count)) ? (
-    local.zones[count.index % local.db_zone_count]) : (
+
+  zone = local.zonal_deployment ? (
+    local.db_server_count == local.db_zone_count ? local.zones[count.index % local.db_zone_count] : null) : (
     null
   )
 
@@ -137,12 +139,12 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
     }
   }
 
+  admin_username = local.authentication.username
+  admin_password = try(local.authentication.password, null)
+
   additional_capabilities {
     ultra_ssd_enabled = local.enable_ultradisk
   }
-
-  admin_username = local.authentication.username
-  admin_password = try(local.authentication.password, null)
 
   boot_diagnostics {
     storage_account_uri = var.storage-bootdiag.primary_blob_endpoint
@@ -163,10 +165,13 @@ resource "azurerm_managed_disk" "disks" {
   storage_account_type = local.anydb_disks[count.index].storage_account_type
   disk_size_gb         = local.anydb_disks[count.index].disk_size_gb
 
-  zones = local.enable_ultradisk || (local.zonal_deployment && (local.db_server_count == local.db_zone_count)) ? (
-    upper(local.anydb_ostype) == "LINUX" ? (
-      [azurerm_linux_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].zone]) : (
-      [azurerm_windows_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].zone]
+  zones = local.zonal_deployment ? (
+    local.db_server_count == local.db_zone_count ? (
+      upper(local.anydb_ostype) == "LINUX" ? (
+        [azurerm_linux_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].zone]) : (
+        [azurerm_windows_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].zone]
+      )) : (
+      null
     )) : (
     null
   )
@@ -182,5 +187,5 @@ resource "azurerm_virtual_machine_data_disk_attachment" "vm-disks" {
   )
   caching                   = local.anydb_disks[count.index].caching
   write_accelerator_enabled = local.anydb_disks[count.index].write_accelerator_enabled
-  lun                       = local.anydb_disks[count.index].lun
+  lun                       = count.index
 }
