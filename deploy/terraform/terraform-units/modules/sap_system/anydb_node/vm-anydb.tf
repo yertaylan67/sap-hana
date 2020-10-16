@@ -26,7 +26,7 @@ resource "azurerm_network_interface" "anydb" {
 
 # Creates the DB traffic NIC and private IP address for database nodes
 resource "azurerm_network_interface" "anydb-admin" {
-  count                         = local.enable_deployment ? length(local.anydb_vms) : 0
+  count                         = local.enable_deployment && local.use_two_network_cards ? local.db_server_count : 0
   name                          = format("%s%s", local.anydb_vms[count.index].name, local.resource_suffixes.admin-nic)
   location                      = var.resource-group[0].location
   resource_group_name           = var.resource-group[0].name
@@ -147,12 +147,15 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
     null
   )
 
+<<<<<<< HEAD
   network_interface_ids = local.use_two_network_cards ? (
     [azurerm_network_interface.anydb[count.index].id, azurerm_network_interface.anydb-admin[count.index].id]) : (
     [azurerm_network_interface.anydb[count.index].id]
   )
   size = local.anydb_vms[count.index].size
 
+=======
+>>>>>>> fa92f5533fe88d504024e86ed627f1871467775d
   source_image_id = local.anydb_custom_image ? local.anydb_os.source_image_id : null
 
   dynamic "source_image_reference" {

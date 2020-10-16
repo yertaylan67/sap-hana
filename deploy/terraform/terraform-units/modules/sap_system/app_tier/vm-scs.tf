@@ -60,11 +60,15 @@ resource "azurerm_linux_virtual_machine" "scs" {
 
   //If more than one servers are deployed into a zone put them in an availability set and not a zone
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> fa92f5533fe88d504024e86ed627f1871467775d
   availability_set_id = local.scs_zonal_deployment && (local.scs_server_count == local.scs_zone_count) ? (
     null) : (
     local.scs_zone_count > 1 ? (
       azurerm_availability_set.scs[count.index % local.scs_zone_count].id) : (
       azurerm_availability_set.scs[0].id
+<<<<<<< HEAD
 =======
   availability_set_id = local.scs_zonal_deployment ? (
     local.scs_server_count == local.scs_zone_count ? null : (
@@ -73,13 +77,13 @@ resource "azurerm_linux_virtual_machine" "scs" {
         azurerm_availability_set.scs[0].id
       )
 >>>>>>> fixed the crashes when zones are not provided
+=======
+>>>>>>> fa92f5533fe88d504024e86ed627f1871467775d
     )
-    ) : (
-    azurerm_availability_set.app[0].id
   )
   proximity_placement_group_id = local.scs_zonal_deployment ? var.ppg[count.index % local.scs_zone_count].id : var.ppg[0].id
-  zone = local.scs_zonal_deployment ? (
-    local.scs_server_count == local.scs_zone_count ? local.scs_zones[count.index % local.scs_zone_count] : null) : (
+  zone = local.scs_zonal_deployment && (local.scs_server_count == local.scs_zone_count) ? (
+    local.scs_zones[count.index % local.scs_zone_count]) : (
     null
   )
 <<<<<<< HEAD
@@ -137,11 +141,15 @@ resource "azurerm_windows_virtual_machine" "scs" {
 
   //If more than one servers are deployed into a zone put them in an availability set and not a zone
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> fa92f5533fe88d504024e86ed627f1871467775d
   availability_set_id = local.scs_zonal_deployment && (local.scs_server_count == local.scs_zone_count) ? (
     null) : (
     local.scs_zone_count > 1 ? (
       azurerm_availability_set.scs[count.index % local.scs_zone_count].id) : (
       azurerm_availability_set.scs[0].id
+<<<<<<< HEAD
 =======
   availability_set_id = local.scs_zonal_deployment ? (
     local.scs_server_count == local.scs_zone_count ? null : (
@@ -150,13 +158,13 @@ resource "azurerm_windows_virtual_machine" "scs" {
         azurerm_availability_set.scs[0].id
       )
 >>>>>>> fixed the crashes when zones are not provided
+=======
+>>>>>>> fa92f5533fe88d504024e86ed627f1871467775d
     )
-    ) : (
-    azurerm_availability_set.app[0].id
   )
   proximity_placement_group_id = local.scs_zonal_deployment ? var.ppg[count.index % local.scs_zone_count].id : var.ppg[0].id
-  zone = local.scs_zonal_deployment ? (
-    local.scs_server_count == local.scs_zone_count ? local.scs_zones[count.index % local.scs_zone_count] : null) : (
+  zone = local.scs_zonal_deployment && (local.scs_server_count == local.scs_zone_count) ? (
+    local.scs_zones[count.index % local.scs_zone_count]) : (
     null
   )
 <<<<<<< HEAD
@@ -207,12 +215,16 @@ resource "azurerm_managed_disk" "scs" {
   resource_group_name  = var.resource-group[0].name
   create_option        = "Empty"
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> fa92f5533fe88d504024e86ed627f1871467775d
   storage_account_type = local.scs-data-disks[count.index].storage_account_type
   disk_size_gb         = local.scs-data-disks[count.index].disk_size_gb
   zones = local.scs_zonal_deployment && (local.scs_server_count == local.scs_zone_count) ? (
     upper(local.app_ostype) == "LINUX" ? (
       [azurerm_linux_virtual_machine.scs[local.scs-data-disks[count.index].vm_index].zone]) : (
       [azurerm_windows_virtual_machine.scs[local.scs-data-disks[count.index].vm_index].zone]
+<<<<<<< HEAD
 =======
   storage_account_type = local.scs-data-disks[count.index].disk_type
   disk_size_gb         = local.scs-data-disks[count.index].size_gb
@@ -224,6 +236,8 @@ resource "azurerm_managed_disk" "scs" {
       )) : (
       null
 >>>>>>> fixed the crashes when zones are not provided
+=======
+>>>>>>> fa92f5533fe88d504024e86ed627f1871467775d
     )) : (
     null
   )
