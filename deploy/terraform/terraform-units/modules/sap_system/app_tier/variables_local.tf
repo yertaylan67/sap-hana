@@ -131,7 +131,7 @@ locals {
   web_admin_nic_ips        = try(var.application.web_admin_nic_ips, [])
 
   // Dual network cards
-  use_two_network_cards = try(var.application.dual_nics, false)
+  apptier_dual_nics = try(var.application.dual_nics, false)
 
   app_ostype = try(var.application.os.os_type, "Linux")
   app_oscode = upper(local.app_ostype) == "LINUX" ? "l" : "w"

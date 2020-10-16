@@ -22,7 +22,7 @@ resource "azurerm_network_interface" "scs" {
 
 # Create Admin NICs
 resource "azurerm_network_interface" "scs-admin" {
-  count                         = local.enable_deployment && local.use_two_network_cards ? (local.scs_high_availability ? 2 : 1) : 0
+  count                         = local.enable_deployment && local.apptier_dual_nics ? (local.scs_high_availability ? 2 : 1) : 0
   name                          = format("%s_%s%s", local.prefix, local.scs_virtualmachine_names[count.index], local.resource_suffixes.admin-nic)
   location                      = var.resource-group[0].location
   resource_group_name           = var.resource-group[0].name
@@ -72,8 +72,8 @@ resource "azurerm_linux_virtual_machine" "scs" {
     null
   )
 
-  network_interface_ids = local.use_two_network_cards ? (
-    [azurerm_network_interface.scs[count.index].id, azurerm_network_interface.scs-admin[count.index].id]) : (
+  network_interface_ids = local.apptier_dual_nics ? (
+    [azurerm_network_interface.scs-admin[count.index].id, azurerm_network_interface.scs[count.index].id]) : (
     [azurerm_network_interface.scs[count.index].id]
   )
   
@@ -131,8 +131,8 @@ resource "azurerm_windows_virtual_machine" "scs" {
     null
   )
 
-  network_interface_ids = local.use_two_network_cards ? (
-    [azurerm_network_interface.scs[count.index].id, azurerm_network_interface.scs-admin[count.index].id]) : (
+  network_interface_ids = local.apptier_dual_nics ? (
+    [azurerm_network_interface.scs-admin[count.index].id, azurerm_network_interface.scs[count.index].id]) : (
     [azurerm_network_interface.scs[count.index].id]
   )
   

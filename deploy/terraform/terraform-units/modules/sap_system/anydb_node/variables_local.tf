@@ -89,7 +89,7 @@ locals {
   anydb_version  = try(local.anydb.db_version, "")
 
   // Dual network cards
-  use_two_network_cards = try(local.anydb.dual_nics, false)
+  anydb_dual_nics = try(local.anydb.dual_nics, false)
 
   // Filter the list of databases to only AnyDB platform entries
   // Supported databases: Oracle, DB2, SQLServer, ASE 

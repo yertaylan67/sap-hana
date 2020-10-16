@@ -20,7 +20,7 @@ resource "azurerm_network_interface" "web" {
 
 # Create Application NICs
 resource "azurerm_network_interface" "web-admin" {
-  count                         = local.enable_deployment && local.use_two_network_cards ? local.webdispatcher_count : 0
+  count                         = local.enable_deployment && local.apptier_dual_nics ? local.webdispatcher_count : 0
   name                          = format("%s_%s%s", local.prefix, local.web_virtualmachine_names[count.index], local.resource_suffixes.admin-nic)
   location                      = var.resource-group[0].location
   resource_group_name           = var.resource-group[0].name
@@ -60,8 +60,8 @@ resource "azurerm_linux_virtual_machine" "web" {
     null
   )
 
-  network_interface_ids = local.use_two_network_cards ? (
-    [azurerm_network_interface.web[count.index].id, azurerm_network_interface.web-admin[count.index].id]) : (
+  network_interface_ids = local.apptier_dual_nics ? (
+    [azurerm_network_interface.web-admin[count.index].id, azurerm_network_interface.web[count.index].id]) : (
     [azurerm_network_interface.web[count.index].id]
   )
 
@@ -118,8 +118,8 @@ resource "azurerm_windows_virtual_machine" "web" {
     null
   )
 
-  network_interface_ids = local.use_two_network_cards ? (
-    [azurerm_network_interface.web[count.index].id, azurerm_network_interface.web-admin[count.index].id]) : (
+  network_interface_ids = local.apptier_dual_nics ? (
+    [azurerm_network_interface.web-admin[count.index].id, azurerm_network_interface.web[count.index].id]) : (
     [azurerm_network_interface.web[count.index].id]
   )
 
