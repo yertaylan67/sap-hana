@@ -97,7 +97,7 @@ locals {
   db_sid       = lower(substr(local.anydb_platform, 0, 3))
   loadbalancer = try(local.anydb.loadbalancer, {})
 
-  node_count      = try(length(var.databases[0].dbnodes), 0)
+  node_count      = try(length(var.databases[0].dbnodes), 1)
   db_server_count = local.anydb_ha ? local.node_count * 2 : local.node_count
 
   authentication = try(local.anydb.authentication,
