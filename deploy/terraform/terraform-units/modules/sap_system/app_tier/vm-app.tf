@@ -62,8 +62,7 @@ resource "azurerm_linux_virtual_machine" "app" {
   proximity_placement_group_id = local.app_zonal_deployment ? var.ppg[count.index % local.app_zone_count].id : var.ppg[0].id
   zone = local.app_zonal_deployment && (local.application_server_count == local.app_zone_count) ? (
     local.app_zones[count.index % local.app_zone_count]) : (
-    null
-  )
+  null)
 
   network_interface_ids = local.use_two_network_cards ? (
     [azurerm_network_interface.app[count.index].id, azurerm_network_interface.app-admin[count.index].id]) : (
@@ -118,12 +117,10 @@ resource "azurerm_windows_virtual_machine" "app" {
       azurerm_availability_set.app[0].id
     )
   )
-
   proximity_placement_group_id = local.app_zonal_deployment ? var.ppg[count.index % local.app_zone_count].id : var.ppg[0].id
   zone = local.app_zonal_deployment && (local.application_server_count == local.app_zone_count) ? (
     local.app_zones[count.index % local.app_zone_count]) : (
-    null
-  )
+  null)
 
   network_interface_ids = local.use_two_network_cards ? (
     [azurerm_network_interface.app[count.index].id, azurerm_network_interface.app-admin[count.index].id]) : (
