@@ -119,7 +119,7 @@ locals {
       "username" = "azureadm"
   })
 
-  node_count      = try(length(local.hdb.dbnodes), 0)
+  node_count      = try(length(local.hdb.dbnodes), 1)
   db_server_count = local.hdb_ha ? local.node_count * 2 : local.node_count
 
   hdb_ins                = try(local.hdb.instance, {})
