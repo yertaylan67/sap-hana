@@ -35,7 +35,7 @@ resource "azurerm_network_interface" "scs-admin" {
       cidrhost(local.sub_admin_exists ?
         data.azurerm_subnet.sap-admin[0].address_prefixes[0] :
         azurerm_subnet.sap-admin[0].address_prefixes[0],
-        tonumber(count.index) + local.ip_offsets.scs_vm
+        tonumber(count.index) + 20
       )
     )
     private_ip_address_allocation = "static"
