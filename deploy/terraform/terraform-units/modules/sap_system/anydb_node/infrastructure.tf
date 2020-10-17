@@ -60,7 +60,7 @@ resource "azurerm_availability_set" "anydb" {
 
 # Creates admin subnet of SAP VNET
 resource "azurerm_subnet" "anydb-admin" {
-  count                = local.enable_deployment && local.use_two_network_cards ? (local.sub_admin_exists ? 0 : 1) : 0
+  count                = local.enable_deployment && local.anydb_dual_nics ? (local.sub_admin_exists ? 0 : 1) : 0
   name                 = local.sub_admin_name
   resource_group_name  = var.vnet-sap[0].resource_group_name
   virtual_network_name = var.vnet-sap[0].name
@@ -69,7 +69,7 @@ resource "azurerm_subnet" "anydb-admin" {
 
 # Imports data of existing SAP admin subnet
 data "azurerm_subnet" "anydb-admin" {
-  count                = local.enable_deployment  && local.use_two_network_cards ? (local.sub_admin_exists ? 1 : 0) : 0
+  count                = local.enable_deployment  && local.anydb_dual_nics ? (local.sub_admin_exists ? 1 : 0) : 0
   name                 = split("/", local.sub_admin_arm_id)[10]
   resource_group_name  = split("/", local.sub_admin_arm_id)[4]
   virtual_network_name = split("/", local.sub_admin_arm_id)[8]
