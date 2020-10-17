@@ -81,13 +81,19 @@ locals {
   sap_sid        = upper(try(var.application.sid, local.db_sid))
 
   app_ostype          = try(var.application.os.os_type, "LINUX")
+  anchor              = try(local.var_infra.anchor_vms, {})
+  anchor_ostype       = upper(try(local.anchor.os.os_type, "LINUX"))
   db_ostype           = try(var.databases[0].os.os_type, "LINUX")
   db_server_count     = try(length(var.databases[0].dbnodes), 1)
   app_server_count    = try(var.application.application_server_count, 0)
   webdispatcher_count = try(var.application.webdispatcher_count, 0)
   scs_server_count    = try(var.application.scs_high_availability, false) ? 2 : 1
 
-  zones = try (var.databases[0].zones, [])
-  
+
+  db_zones  = try(var.databases[0].zones, [])
+  app_zones = try(var.application.app_zones, [])
+  scs_zones = try(var.application.scs_zones, [])
+  web_zones = try(var.application.web_zones, [])
+  zones     = distinct(concat(local.db_zones, local.app_zones, local.scs_zones, local.web_zones))
 
 }

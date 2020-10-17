@@ -39,7 +39,7 @@ resource "azurerm_linux_virtual_machine" "anchor" {
   disable_password_authentication = true
 
   os_disk {
-    name                 = format("%s_%s%s", local.prefix, local.anchor_virtualmachine_names[count.index], local.resource_suffixes.os_disk)
+    name                 = format("%s_%s%s", local.prefix, local.anchor_virtualmachine_names[count.index], local.resource_suffixes.osdisk)
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
@@ -89,7 +89,7 @@ resource "azurerm_windows_virtual_machine" "anchor" {
   admin_password = local.anchor_authentication.password
 
   os_disk {
-    name                 = format("%s_%s%s", local.prefix, local.anchor_virtualmachine_names[count.index], local.resource_suffixes.os_disk)
+    name                 = format("%s_%s%s", local.prefix, local.anchor_virtualmachine_names[count.index], local.resource_suffixes.osdisk)
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
   }
