@@ -6,6 +6,10 @@ locals {
   db_platformcode = substr(var.db_platform, 0, 3)
 
   anchor_server_names = [for idx in range(length(var.zones)) :
+    format("%sanchorz%s%02d%s%s", lower(var.sap_sid), var.zones[idx % length(var.zones)], idx, local.anchor_oscode, local.random_id_vm_verified)
+  ]
+
+  anchor_server_vm_names = [for idx in range(length(var.zones)) :
     format("%sanchor_z%s_%02d%s%s", lower(var.sap_sid), var.zones[idx % length(var.zones)], idx, local.anchor_oscode, local.random_id_vm_verified)
   ]
 

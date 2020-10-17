@@ -52,7 +52,8 @@ locals {
   storageaccount_name         = var.naming.storageaccount_names.SDU
   keyvault_names              = var.naming.keyvault_names.SDU
   virtualmachine_names        = var.naming.virtualmachine_names.ISCSI_COMPUTERNAME
-  anchor_virtualmachine_names = var.naming.virtualmachine_names.ANCHOR_COMPUTERNAME
+  anchor_virtualmachine_names = var.naming.virtualmachine_names.ANCHOR_VMNAME
+  anchor_computer_names       = var.naming.virtualmachine_names.ANCHOR_COMPUTERNAME
   resource_suffixes           = var.naming.resource_suffixes
 
   //Filter the list of databases to only HANA platform entries

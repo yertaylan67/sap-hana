@@ -25,7 +25,7 @@ resource "azurerm_network_interface" "anchor" {
 resource "azurerm_linux_virtual_machine" "anchor" {
   count                        = local.zonal_deployment && (local.anchor_ostype == "LINUX") ? length(local.zones) : 0
   name                         = format("%s_%s%s", local.prefix, local.anchor_virtualmachine_names[count.index], local.resource_suffixes.vm)
-  computer_name                = local.anchor_virtualmachine_names[count.index]
+  computer_name                = local.anchor_computer_names[count.index]
   resource_group_name          = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
   location                     = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
   proximity_placement_group_id = azurerm_proximity_placement_group.ppg[count.index].id
@@ -74,7 +74,7 @@ resource "azurerm_linux_virtual_machine" "anchor" {
 resource "azurerm_windows_virtual_machine" "anchor" {
   count                        = local.zonal_deployment && (local.anchor_ostype == "WINDOWS") ? length(local.zones) : 0
   name                         = format("%s_%s%s", local.prefix, local.anchor_virtualmachine_names[count.index], local.resource_suffixes.vm)
-  computer_name                = local.anchor_virtualmachine_names[count.index]
+  computer_name                = local.anchor_computer_names[count.index]
   resource_group_name          = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
   location                     = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
   proximity_placement_group_id = azurerm_proximity_placement_group.ppg[count.index].id

@@ -23,6 +23,7 @@ output naming {
     }
     virtualmachine_names = {
       ANCHOR_COMPUTERNAME = local.anchor_server_names
+      ANCHOR_VMNAME       = local.anchor_server_vm_names
       ANYDB_COMPUTERNAME  = concat(local.anydb_computer_names, local.anydb_computer_names_ha)
       ANYDB_VMNAME        = concat(local.anydb_vm_names, local.anydb_vm_names_ha)
       APP_COMPUTERNAME    = local.app_server_names
