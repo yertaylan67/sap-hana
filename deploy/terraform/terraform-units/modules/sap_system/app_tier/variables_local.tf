@@ -30,11 +30,11 @@ variable "custom_disk_sizes_filename" {
 
 locals {
   // Imports Disk sizing sizing information
-  sizes      = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : "${path.module}/../../../../../configs/app_sizes.json"))
+  sizes = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : "${path.module}/../../../../../configs/app_sizes.json"))
 
   app_virtualmachine_names = var.naming.virtualmachine_names.APP_COMPUTERNAME
   scs_virtualmachine_names = var.naming.virtualmachine_names.SCS_COMPUTERNAME
-  web_virtualmachine_names = var.naming.virtualmachine_names.WEB_COMPUTERNAME   
+  web_virtualmachine_names = var.naming.virtualmachine_names.WEB_COMPUTERNAME
   resource_suffixes        = var.naming.resource_suffixes
 
   region  = try(var.infrastructure.region, "")
@@ -138,10 +138,12 @@ locals {
 
   // OS image for all SCS VMs
   // If custom image is used, we do not overwrite os reference with default value
-  scs_custom_image = try(var.application.scs_os.source_image_id, "") != "" ? true : false
+  // If no publisher or no custom image is specified use the custom image from the app if specified
+  scs_publisher_empty = try(var.application.scs_os.publisher, "") == "" ? true : false
+  scs_custom_image    = try(var.application.scs_os.source_image_id, "") && local.scs_publisher_empty && local.app_custom_image ? true : false
 
   scs_os = {
-    "source_image_id" = local.scs_custom_image ? var.application.scs_os.source_image_id : ""
+    "source_image_id" = local.scs_custom_image ? try(var.application.scs_os.source_image_id, var.application.os.source_image_id) : ""
     "publisher"       = try(var.application.scs_os.publisher, local.scs_custom_image ? "" : local.app_os.publisher)
     "offer"           = try(var.application.scs_os.offer, local.scs_custom_image ? "" : local.app_os.offer)
     "sku"             = try(var.application.scs_os.sku, local.scs_custom_image ? "" : local.app_os.sku)
@@ -150,7 +152,9 @@ locals {
 
   // OS image for all WebDispatcher VMs
   // If custom image is used, we do not overwrite os reference with default value
-  web_custom_image = try(var.application.web_os.source_image_id, "") != "" ? true : false
+  // If no publisher or no custom image is specified use the custom image from the app if specified
+  web_publisher_empty = try(var.application.web_os.publisher, "") == "" ? true : false
+  web_custom_image    = try(var.application.web_os.source_image_id, "") && local.web_publisher_empty && local.app_custom_image ? true : false
 
   web_os = {
     "source_image_id" = local.web_custom_image ? var.application.web_os.source_image_id : ""
