@@ -136,6 +136,31 @@ locals {
     "version"         = try(var.application.os.version, local.app_custom_image ? "" : "latest")
   }
 
+  // OS image for all SCS VMs
+  // If custom image is used, we do not overwrite os reference with default value
+  scs_custom_image = try(var.application.scs_os.source_image_id, "") != "" ? true : false
+
+  scs_os = {
+    "source_image_id" = local.scs_custom_image ? var.application.scs_os.source_image_id : ""
+    "publisher"       = try(var.application.scs_os.publisher, local.scs_custom_image ? "" : local.app_os.publisher)
+    "offer"           = try(var.application.scs_os.offer, local.scs_custom_image ? "" : local.app_os.offer)
+    "sku"             = try(var.application.scs_os.sku, local.scs_custom_image ? "" : local.app_os.sku)
+    "version"         = try(var.application.scs_os.version, local.scs_custom_image ? "" : local.app_os.version)
+  }
+
+  // OS image for all WebDispatcher VMs
+  // If custom image is used, we do not overwrite os reference with default value
+  web_custom_image = try(var.application.web_os.source_image_id, "") != "" ? true : false
+
+  web_os = {
+    "source_image_id" = local.web_custom_image ? var.application.web_os.source_image_id : ""
+    "publisher"       = try(var.application.web_os.publisher, local.web_custom_image ? "" : local.app_os.publisher)
+    "offer"           = try(var.application.web_os.offer, local.web_custom_image ? "" : local.app_os.offer)
+    "sku"             = try(var.application.web_os.sku, local.web_custom_image ? "" : local.app_os.sku)
+    "version"         = try(var.application.web_os.version, local.web_custom_image ? "" : local.app_os.version)
+  }
+
+
 }
 
 
