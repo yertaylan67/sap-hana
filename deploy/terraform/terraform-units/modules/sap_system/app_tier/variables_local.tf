@@ -140,7 +140,7 @@ locals {
   // If custom image is used, we do not overwrite os reference with default value
   // If no publisher or no custom image is specified use the custom image from the app if specified
   scs_publisher_empty = try(var.application.scs_os.publisher, "") == "" ? true : false
-  scs_custom_image    = try(var.application.scs_os.source_image_id, "") && local.scs_publisher_empty && local.app_custom_image ? true : false
+  scs_custom_image    = try(var.application.scs_os.source_image_id, "") == "" && ! local.app_custom_image ? false : true
 
   scs_os = {
     "source_image_id" = local.scs_custom_image ? try(var.application.scs_os.source_image_id, var.application.os.source_image_id) : ""
@@ -154,7 +154,7 @@ locals {
   // If custom image is used, we do not overwrite os reference with default value
   // If no publisher or no custom image is specified use the custom image from the app if specified
   web_publisher_empty = try(var.application.web_os.publisher, "") == "" ? true : false
-  web_custom_image    = try(var.application.web_os.source_image_id, "") && local.web_publisher_empty && local.app_custom_image ? true : false
+  web_custom_image    = try(var.application.web_os.source_image_id, "") == "" && ! local.app_custom_image ? false : true
 
   web_os = {
     "source_image_id" = local.web_custom_image ? var.application.web_os.source_image_id : ""
@@ -163,10 +163,7 @@ locals {
     "sku"             = try(var.application.web_os.sku, local.web_custom_image ? "" : local.app_os.sku)
     "version"         = try(var.application.web_os.version, local.web_custom_image ? "" : local.app_os.version)
   }
-
-
 }
-
 
 locals {
   // Subnet IP Offsets
