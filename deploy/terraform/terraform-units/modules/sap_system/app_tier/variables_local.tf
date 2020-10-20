@@ -49,12 +49,14 @@ locals {
   // Imports Disk sizing sizing information
   sizes = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : "${path.module}/../../../../../configs/app_sizes.json"))
 
+
   app_computer_names       = var.naming.virtualmachine_names.APP_COMPUTERNAME
   app_virtualmachine_names = var.naming.virtualmachine_names.APP_VMNAME
   scs_computer_names       = var.naming.virtualmachine_names.SCS_COMPUTERNAME
   scs_virtualmachine_names = var.naming.virtualmachine_names.SCS_VMNAME
   web_computer_names       = var.naming.virtualmachine_names.WEB_COMPUTERNAME
   web_virtualmachine_names = var.naming.virtualmachine_names.WEB_VMNAME
+
   resource_suffixes        = var.naming.resource_suffixes
 
   region  = try(var.infrastructure.region, "")
@@ -192,7 +194,7 @@ locals {
   // OS image for all WebDispatcher VMs
   // If custom image is used, we do not overwrite os reference with default value
   // If no publisher or no custom image is specified use the custom image from the app if specified
-  web_custom_image = try(var.application.web_os.source_image_id, "") == "" && ! local.app_custom_image ? false : true
+  web_custom_image    = try(var.application.web_os.source_image_id, "") == "" && ! local.app_custom_image ? false : true
 
   web_os = {
     "source_image_id" = local.web_custom_image ? var.application.web_os.source_image_id : ""
