@@ -53,13 +53,13 @@ locals {
   deployer_vnet           = try(local.deployer.vnet, "")
   deployer_prefix         = upper(format("%s-%s-%s", local.deployer_environment, local.deployer_location_short, substr(local.deployer_vnet, 0, 7)))
   // If custom names are used for deployer, providing resource_group_name and msi_name will override the naming convention
-  deployer_rg_name = try(local.deployer.resource_group_name, format("%s-INFRASTRUCTURE", local.deployer_prefix))
+  deployer_rg_name = try(local.deployer.resource_group_name, module.sap_namegenerator.naming.prefix.DEPLOYER)
 
   // Retrieve the arm_id of deployer's Key Vault from deployer's terraform.tfstate
   deployer_key_vault_arm_id = try(data.terraform_remote_state.deployer.outputs.deployer_kv_user_arm_id, "")
 
   // Locate the tfstate storage account
-  tfstate_resource_id          = try(var.tfstate_resource_id, "")
+  tfstate_resource_id          = var.tfstate_resource_id
   saplib_subscription_id       = split("/", local.tfstate_resource_id)[2]
   saplib_resource_group_name   = split("/", local.tfstate_resource_id)[4]
   tfstate_storage_account_name = split("/", local.tfstate_resource_id)[8]
