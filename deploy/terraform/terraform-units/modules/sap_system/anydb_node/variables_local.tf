@@ -86,6 +86,9 @@ locals {
     if contains(["ORACLE", "DB2", "SQLSERVER", "ASE"], upper(try(database.platform, "NONE")))
   ]
 
+  node_count      = try(length(var.databases[0].dbnodes), 1)
+  db_server_count = local.anydb_ha ? local.node_count * 2 : local.node_count
+
   anydb          = try(local.anydb-databases[0], {})
   anydb_platform = try(local.anydb.platform, "NONE")
   anydb_version  = try(local.anydb.db_version, "")
@@ -100,7 +103,7 @@ locals {
   */
   kv_landscape_id    = try(local.var_infra.landscape.key_vault_arm_id, "")
   secret_sid_pk_name = try(local.var_infra.landscape.sid_public_key_secret_name, "")
-
+  
   // Define this variable to make it easier when implementing existing kv.
   sid_kv_user = try(var.sid_kv_user[0], null)
 

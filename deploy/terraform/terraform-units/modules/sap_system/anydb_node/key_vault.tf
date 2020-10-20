@@ -1,6 +1,6 @@
 // retrieve public key from sap landscape's Key vault
 data "azurerm_key_vault_secret" "sid_pk" {
-  count        = local.enable_auth_key ? 1 : 0
+  count        = local.enable_auth_key && (length(local.secret_sid_pk_name) > 0) ? 1 : 0
   name         = local.secret_sid_pk_name
   key_vault_id = local.kv_landscape_id
 }
@@ -23,7 +23,7 @@ resource "random_password" "password" {
 resource "azurerm_key_vault_secret" "auth_username" {
   depends_on   = [var.sid_kv_user_msi]
   count        = local.enable_auth_password ? 1 : 0
-  name         = format("%s-%s-xdb-auth-username", local.prefix, local.sid)
+  name         = format("%s-xdb-auth-username", replace(local.prefix,"_","-"))
   value        = local.sid_auth_username
   key_vault_id = local.sid_kv_user.id
 }
@@ -32,7 +32,7 @@ resource "azurerm_key_vault_secret" "auth_username" {
 resource "azurerm_key_vault_secret" "auth_password" {
   depends_on   = [var.sid_kv_user_msi]
   count        = local.enable_auth_password ? 1 : 0
-  name         = format("%s-%s-xdb-auth-password", local.prefix, local.sid)
+  name         = format("%s-xdb-auth-password", replace(local.prefix,"_","-"))
   value        = local.sid_auth_password
   key_vault_id = local.sid_kv_user.id
 }

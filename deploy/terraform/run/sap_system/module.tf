@@ -29,7 +29,6 @@ module "saplibrary" {
   naming         = module.sap_namegenerator.naming
 }
 
-
 module "common_infrastructure" {
   source              = "../../terraform-units/modules/sap_system/common_infrastructure"
   is_single_node_hana = "true"
@@ -46,6 +45,10 @@ module "common_infrastructure" {
   subnet-mgmt         = module.deployer.subnet-mgmt
   nsg-mgmt            = module.deployer.nsg-mgmt
   naming              = module.sap_namegenerator.naming
+  deployer-uai        = module.deployer.deployer-uai
+  // Comment out code with users.object_id for the time being.
+  // deployer_user       = module.deployer.deployer_user
+
 }
 
 module "sap_namegenerator" {
@@ -73,9 +76,6 @@ module "sap_namegenerator" {
   scs_zones        = local.scs_zones
   web_zones        = local.web_zones
   db_zones         = local.db_zones
-  deployer-uai        = module.deployer.deployer-uai
-  // Comment out code with users.object_id for the time being.
-  // deployer_user       = module.deployer.deployer_user
 }
 
 // Create Jumpboxes

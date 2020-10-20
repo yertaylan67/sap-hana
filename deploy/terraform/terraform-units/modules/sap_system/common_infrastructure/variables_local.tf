@@ -27,9 +27,12 @@ variable "nsg-mgmt" {
 
 variable naming {
   description = "Defines the names for the resources"
+}
+
 variable "deployer-uai" {
   description = "Details of the UAI used by deployer(s)"
 }
+
 /* Comment out code with users.object_id for the time being
 variable "deployer_user" {
   description = "Details of the users"
@@ -56,11 +59,12 @@ locals {
   zones            = distinct(concat(local.db_zones, local.app_zones, local.scs_zones, local.web_zones))
   zonal_deployment = length(local.zones) > 0 ? true : false
 
-  vnet_prefix          = var.naming.prefix.VNET
-  storageaccount_name  = var.naming.storageaccount_names.SDU
-  keyvault_names       = var.naming.keyvault_names.SDU
-  virtualmachine_names = var.naming.virtualmachine_names.ISCSI_COMPUTERNAME
-  resource_suffixes    = var.naming.resource_suffixes
+  vnet_prefix              = var.naming.prefix.VNET
+  storageaccount_name      = var.naming.storageaccount_names.SDU
+  keyvault_names           = var.naming.keyvault_names.SDU
+  landscape_keyvault_names = var.naming.keyvault_names.VNET
+  virtualmachine_names     = var.naming.virtualmachine_names.ISCSI_COMPUTERNAME
+  resource_suffixes        = var.naming.resource_suffixes
 
   //Filter the list of databases to only HANA platform entries
   hana-databases = [
@@ -116,19 +120,19 @@ locals {
   // Post fix for all deployed resources
   postfix = random_id.saplandscape.hex
 
-/* Comment out code with users.object_id for the time being
+  /* Comment out code with users.object_id for the time being
   // Additional users add to user KV
   kv_users = var.deployer_user
 */
   // kv for sap landscape
-  kv_prefix       = upper(format("%s%s%s", substr(local.environment, 0, 5), local.location_short, substr(local.vnet_sap_name_prefix, 0, 7)))
-  kv_private_name = format("%sprvt%s", local.kv_prefix, upper(substr(local.postfix, 0, 3)))
-  kv_user_name    = format("%suser%s", local.kv_prefix, upper(substr(local.postfix, 0, 3)))
+  kv_prefix       = var.naming.prefix.VNET
+  kv_private_name = local.landscape_keyvault_names[0]
+  kv_user_name    = local.landscape_keyvault_names[1]
 
   // key vault naming for sap system
-  sid_kv_prefix       = upper(format("%s%s%s", substr(local.environment, 0, 5), local.location_short, substr(local.vnet_sap_name_prefix, 0, 7)))
-  sid_kv_private_name = format("%s%sp%s", local.kv_prefix, local.sid, upper(substr(local.postfix, 0, 3)))
-  sid_kv_user_name    = format("%s%su%s", local.kv_prefix, local.sid, upper(substr(local.postfix, 0, 3)))
+  sid_kv_prefix       = var.naming.prefix.SDU
+  sid_kv_private_name = local.keyvault_names[0]
+  sid_kv_user_name    = local.keyvault_names[1]
 
   /* 
      TODO: currently sap landscape and sap system haven't been decoupled. 

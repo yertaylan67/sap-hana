@@ -102,14 +102,27 @@ locals {
   sub_db_nsg_exists = length(local.sub_db_nsg_arm_id) > 0 ? true : false
   sub_db_nsg_name   = local.sub_db_nsg_exists ? try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.db-subnet-nsg))
 
+  // Filter the list of databases to only HANA platform entries
   hdb_list = [
     for db in var.databases : db
     if try(db.platform, "NONE") == "HANA"
   ]
 
   enable_deployment = (length(local.hdb_list) > 0) ? true : false
+  node_count      = try(length(var.databases[0].dbnodes), 1)
+  db_server_count = local.hdb_ha ? local.node_count * 2 : local.node_count
 
-  // Filter the list of databases to only HANA platform entries
+  /* 
+     TODO: currently sap landscape and sap system haven't been decoupled. 
+     The key vault information of sap landscape will be obtained via input json.
+     At phase 2, the logic will be updated and the key vault information will be obtained from tfstate file of sap landscape.  
+  */
+  kv_landscape_id    = try(local.var_infra.landscape.key_vault_arm_id, "")
+  secret_sid_pk_name = try(local.var_infra.landscape.sid_public_key_secret_name, "")
+  
+  // Define this variable to make it easier when implementing existing kv.
+  sid_kv_user = try(var.sid_kv_user[0], null)
+
   hdb = try(local.hdb_list[0], {})
 
   // Zones

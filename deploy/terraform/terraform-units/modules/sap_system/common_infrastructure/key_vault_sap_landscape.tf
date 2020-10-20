@@ -85,7 +85,7 @@ resource "tls_private_key" "iscsi" {
 resource "azurerm_key_vault_secret" "iscsi_ppk" {
   depends_on   = [azurerm_key_vault_access_policy.kv_user_msi]
   count        = (local.enable_landscape_kv && local.enable_iscsi_auth_key) ? 1 : 0
-  name         = format("%s-iscsi-sshkey", local.prefix)
+  name         = format("%s-iscsi-sshkey", replace(local.prefix,"_","-"))
   value        = local.iscsi_private_key
   key_vault_id = azurerm_key_vault.kv_user[0].id
 }
@@ -93,7 +93,7 @@ resource "azurerm_key_vault_secret" "iscsi_ppk" {
 resource "azurerm_key_vault_secret" "iscsi_pk" {
   depends_on   = [azurerm_key_vault_access_policy.kv_user_msi]
   count        = (local.enable_landscape_kv && local.enable_iscsi_auth_key) ? 1 : 0
-  name         = format("%s-iscsi-sshkey-pub", local.prefix)
+  name         = format("%s-iscsi-sshkey-pub", replace(local.prefix,"_","-"))
   value        = local.iscsi_public_key
   key_vault_id = azurerm_key_vault.kv_user[0].id
 }
@@ -105,7 +105,7 @@ resource "azurerm_key_vault_secret" "iscsi_pk" {
 resource "azurerm_key_vault_secret" "iscsi_username" {
   depends_on   = [azurerm_key_vault_access_policy.kv_user_msi]
   count        = (local.enable_landscape_kv && local.enable_iscsi_auth_password) ? 1 : 0
-  name         = format("%s-iscsi-username", local.prefix)
+  name         = format("%s-iscsi-username", replace(local.prefix,"_","-"))
   value        = local.iscsi_auth_username
   key_vault_id = azurerm_key_vault.kv_user[0].id
 }
@@ -113,7 +113,7 @@ resource "azurerm_key_vault_secret" "iscsi_username" {
 resource "azurerm_key_vault_secret" "iscsi_password" {
   depends_on   = [azurerm_key_vault_access_policy.kv_user_msi]
   count        = (local.enable_landscape_kv && local.enable_iscsi_auth_password) ? 1 : 0
-  name         = format("%s-iscsi-password", local.prefix)
+  name         = format("%s-iscsi-password", replace(local.prefix,"_","-"))
   value        = local.iscsi_auth_password
   key_vault_id = azurerm_key_vault.kv_user[0].id
 }
@@ -138,7 +138,7 @@ resource "tls_private_key" "sid" {
 resource "azurerm_key_vault_secret" "sid_ppk" {
   depends_on   = [azurerm_key_vault_access_policy.kv_user_msi]
   count        = local.enable_landscape_kv ? 1 : 0
-  name         = format("%s-sid-sshkey", local.prefix)
+  name         = format("%s-sid-sshkey", replace(local.prefix,"_","-"))
   value        = local.sid_private_key
   key_vault_id = azurerm_key_vault.kv_user[0].id
 }
@@ -146,7 +146,7 @@ resource "azurerm_key_vault_secret" "sid_ppk" {
 resource "azurerm_key_vault_secret" "sid_pk" {
   depends_on   = [azurerm_key_vault_access_policy.kv_user_msi]
   count        = local.enable_landscape_kv ? 1 : 0
-  name         = format("%s-sid-sshkey-pub", local.prefix)
+  name         = format("%s-sid-sshkey-pub", replace(local.prefix,"_","-"))
   value        = local.sid_public_key
   key_vault_id = azurerm_key_vault.kv_user[0].id
 }
