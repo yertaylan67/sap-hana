@@ -27,6 +27,7 @@ variable "custom_disk_sizes_filename" {
   description = "Disk size json file"
   default     = ""
 }
+
 variable "deployer-uai" {
   description = "Details of the UAI used by deployer(s)"
 }
@@ -159,7 +160,6 @@ locals {
   app_ostype = try(var.application.os.os_type, "Linux")
   app_oscode = upper(local.app_ostype) == "LINUX" ? "l" : "w"
 
-
   // OS image for all Application Tier VMs
   // If custom image is used, we do not overwrite os reference with default value
   app_custom_image = try(var.application.os.source_image_id, "") != "" ? true : false
@@ -176,33 +176,32 @@ locals {
     { authentication = local.authentication }
   )
 
-// OS image for all SCS VMs
-// If custom image is used, we do not overwrite os reference with default value
-// If no publisher or no custom image is specified use the custom image from the app if specified
-scs_custom_image = try(var.application.scs_os.source_image_id, "") == "" && ! local.app_custom_image ? false : true
+  // OS image for all SCS VMs
+  // If custom image is used, we do not overwrite os reference with default value
+  // If no publisher or no custom image is specified use the custom image from the app if specified
+  scs_custom_image = try(var.application.scs_os.source_image_id, "") == "" && ! local.app_custom_image ? false : true
 
-scs_os = {
-  "source_image_id" = local.scs_custom_image ? try(var.application.scs_os.source_image_id, var.application.os.source_image_id) : ""
-  "publisher"       = try(var.application.scs_os.publisher, local.scs_custom_image ? "" : local.app_os.publisher)
-  "offer"           = try(var.application.scs_os.offer, local.scs_custom_image ? "" : local.app_os.offer)
-  "sku"             = try(var.application.scs_os.sku, local.scs_custom_image ? "" : local.app_os.sku)
-  "version"         = try(var.application.scs_os.version, local.scs_custom_image ? "" : local.app_os.version)
-}
+  scs_os = {
+    "source_image_id" = local.scs_custom_image ? try(var.application.scs_os.source_image_id, var.application.os.source_image_id) : ""
+    "publisher"       = try(var.application.scs_os.publisher, local.scs_custom_image ? "" : local.app_os.publisher)
+    "offer"           = try(var.application.scs_os.offer, local.scs_custom_image ? "" : local.app_os.offer)
+    "sku"             = try(var.application.scs_os.sku, local.scs_custom_image ? "" : local.app_os.sku)
+    "version"         = try(var.application.scs_os.version, local.scs_custom_image ? "" : local.app_os.version)
+  }
 
-// OS image for all WebDispatcher VMs
-// If custom image is used, we do not overwrite os reference with default value
-// If no publisher or no custom image is specified use the custom image from the app if specified
-web_custom_image = try(var.application.web_os.source_image_id, "") == "" && ! local.app_custom_image ? false : true
+  // OS image for all WebDispatcher VMs
+  // If custom image is used, we do not overwrite os reference with default value
+  // If no publisher or no custom image is specified use the custom image from the app if specified
+  web_custom_image = try(var.application.web_os.source_image_id, "") == "" && ! local.app_custom_image ? false : true
 
-web_os = {
-  "source_image_id" = local.web_custom_image ? var.application.web_os.source_image_id : ""
-  "publisher"       = try(var.application.web_os.publisher, local.web_custom_image ? "" : local.app_os.publisher)
-  "offer"           = try(var.application.web_os.offer, local.web_custom_image ? "" : local.app_os.offer)
-  "sku"             = try(var.application.web_os.sku, local.web_custom_image ? "" : local.app_os.sku)
-  "version"         = try(var.application.web_os.version, local.web_custom_image ? "" : local.app_os.version)
-}
+  web_os = {
+    "source_image_id" = local.web_custom_image ? var.application.web_os.source_image_id : ""
+    "publisher"       = try(var.application.web_os.publisher, local.web_custom_image ? "" : local.app_os.publisher)
+    "offer"           = try(var.application.web_os.offer, local.web_custom_image ? "" : local.app_os.offer)
+    "sku"             = try(var.application.web_os.sku, local.web_custom_image ? "" : local.app_os.sku)
+    "version"         = try(var.application.web_os.version, local.web_custom_image ? "" : local.app_os.version)
+  }
 
-locals {
   // Subnet IP Offsets
   // Note: First 4 IP addresses in a subnet are reserved by Azure
   ip_offsets = {
