@@ -1,16 +1,5 @@
 /*
 Description:
-<<<<<<< HEAD
-=======
-
-  Define local variables.
-*/
-
-// Input arguments 
-variable "region_mapping" {
-  type        = map(string)
-  description = "Region Mapping: Full = Single CHAR, 4-CHAR"
->>>>>>> d06fbf063bfb86d9df3e7d45be2cc5c535bcba02
 
   Define local variables.
 */
@@ -82,15 +71,14 @@ locals {
   deployer_environment    = try(local.deployer.environment, "")
   deployer_location_short = try(var.region_mapping[local.deployer.region], "unkn")
   deployer_vnet           = try(local.deployer.vnet, "")
-  deployer_prefix         = upper(format("%s-%s-%s", local.deployer_environment, local.deployer_location_short, substr(local.deployer_vnet, 0, 7)))
+  deployer_prefix         = var.naming.prefix.DEPLOYER
 
   // Comment out code with users.object_id for the time being.
   // deployer_users_id = try(local.deployer.users.object_id, [])
 
   // key vault for saplibrary
-  kv_prefix       = upper(format("%s%s", substr(local.environment, 0, 5), local.location_short))
-  kv_private_name = format("%sSAPLIBprvt%s", local.kv_prefix, local.postfix)
-  kv_user_name    = format("%sSAPLIBuser%s", local.kv_prefix, local.postfix)
+  kv_private_name = local.keyvault_names[0]
+  kv_user_name    = local.keyvault_names[1]
 
   // spn
   spn = try(var.spn, {})

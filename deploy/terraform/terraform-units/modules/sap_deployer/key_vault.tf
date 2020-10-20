@@ -3,7 +3,7 @@ data "azurerm_client_config" "deployer" {}
 
 resource "azurerm_key_vault" "kv_prvt" {
   count                      = local.enable_deployers ? 1 : 0
-  name                       = format("%sprvt%s", local.kv_prefix, upper(substr(local.postfix, 0, 3)))
+  name                       = local.keyvault_names[0]
   location                   = azurerm_resource_group.deployer[0].location
   resource_group_name        = azurerm_resource_group.deployer[0].name
   tenant_id                  = data.azurerm_client_config.deployer.tenant_id
@@ -29,7 +29,7 @@ resource "azurerm_key_vault_access_policy" "kv_prvt_msi" {
 // Create user KV with access policy
 resource "azurerm_key_vault" "kv_user" {
   count                      = local.enable_deployers ? 1 : 0
-  name                       = format("%suser%s", local.kv_prefix, upper(substr(local.postfix, 0, 3)))
+  name                       = local.keyvault_names[1]
   location                   = azurerm_resource_group.deployer[0].location
   resource_group_name        = azurerm_resource_group.deployer[0].name
   tenant_id                  = data.azurerm_client_config.deployer.tenant_id
@@ -114,16 +114,16 @@ resource "tls_private_key" "deployer" {
 resource "azurerm_key_vault_secret" "ppk" {
   depends_on   = [azurerm_key_vault_access_policy.kv_user_pre_deployer[0]]
   count        = (local.enable_deployers && local.enable_key) ? 1 : 0
-  name         = format("%s-sshkey", local.prefix)
-  value        = local.private_key
+  name         = format("%s-sshkey", replace(local.prefix,"_",""))
+  value        = trimspace(local.private_key)
   key_vault_id = azurerm_key_vault.kv_user[0].id
 }
 
 resource "azurerm_key_vault_secret" "pk" {
   depends_on   = [azurerm_key_vault_access_policy.kv_user_pre_deployer[0]]
   count        = (local.enable_deployers && local.enable_key) ? 1 : 0
-  name         = format("%s-sshkey-pub", local.prefix)
-  value        = local.public_key
+  name         = format("%s-sshkey-pub", replace(local.prefix,"_",""))
+  value        = trimspace(local.public_key)
   key_vault_id = azurerm_key_vault.kv_user[0].id
 }
 
@@ -142,7 +142,7 @@ resource "random_password" "deployer" {
 resource "azurerm_key_vault_secret" "pwd" {
   depends_on   = [azurerm_key_vault_access_policy.kv_user_pre_deployer[0]]
   count        = (local.enable_deployers && local.enable_password) ? 1 : 0
-  name         = format("%s-password", local.prefix)
+  name         = format("%s-password", replace(local.prefix,"_",""))
   value        = local.password
   key_vault_id = azurerm_key_vault.kv_user[0].id
 }
