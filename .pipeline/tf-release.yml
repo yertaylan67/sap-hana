@@ -64,6 +64,12 @@ stages:
       - template: templates/util/collect-deployer-info.yml
         parameters:
           deployer_env: "UNIT"
+<<<<<<< HEAD
+=======
+      - template: templates/util/add-agent-to-deployer-nsg.yml
+        parameters:
+          deployer_env: "UNIT"
+>>>>>>> d06fbf063bfb86d9df3e7d45be2cc5c535bcba02
       - template: templates/deployer/post-deployer-steps.yml
         parameters:
           deployer_env: "UNIT"
@@ -83,6 +89,7 @@ stages:
       - template: templates/saplib/create-saplib-steps.yml
         parameters:
           branch_name: $(sourceBranchName)
+          deployer_env: "UNIT"
           saplib_env: "UNIT"
       - template: templates/saplib/post-saplib-steps.yml
         parameters:

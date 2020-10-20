@@ -24,6 +24,14 @@ variable "custom_disk_sizes_filename" {
   default     = ""
 }
 
+variable "sid_kv_user" {
+  description = "Details of the user keyvault for sap_system"
+}
+
+variable "sid_kv_user_msi" {
+  description = "Azurerm_key_vault_access_policy is required to save secrets in KV"
+}
+
 locals {
   // Imports database sizing information
 
@@ -45,7 +53,7 @@ locals {
   zonal_deployment = length(local.zones) > 0 ? true : false
   db_zone_count    = try(length(local.zones), 1)
 
-  # SAP vnet
+  // SAP vnet
   var_infra       = try(var.infrastructure, {})
   var_vnet_sap    = try(local.var_infra.vnets.sap, {})
   vnet_sap_arm_id = try(local.var_vnet_sap.arm_id, "")
@@ -85,6 +93,17 @@ locals {
   // Enable deployment based on length of local.anydb-databases
   enable_deployment = (length(local.anydb-databases) > 0) ? true : false
 
+  /* 
+     TODO: currently sap landscape and sap system haven't been decoupled. 
+     The key vault information of sap landscape will be obtained via input json.
+     At phase 2, the logic will be updated and the key vault information will be obtained from tfstate file of sap landscape.  
+  */
+  kv_landscape_id    = try(local.var_infra.landscape.key_vault_arm_id, "")
+  secret_sid_pk_name = try(local.var_infra.landscape.sid_public_key_secret_name, "")
+
+  // Define this variable to make it easier when implementing existing kv.
+  sid_kv_user = try(var.sid_kv_user[0], null)
+
   // If custom image is used, we do not overwrite os reference with default value
   anydb_custom_image = try(local.anydb.os.source_image_id, "") != "" ? true : false
 
@@ -94,20 +113,24 @@ locals {
   anydb_sku    = try(lookup(local.sizes, local.anydb_size).compute.vm_size, "Standard_E4s_v3")
   anydb_fs     = try(local.anydb.filesystem, "xfs")
   anydb_ha     = try(local.anydb.high_availability, false)
-  db_sid       = lower(substr(local.anydb_platform, 0, 3))
+  anydb_sid    = (length(local.anydb-databases) > 0) ? try(local.anydb.instance.sid, lower(substr(local.anydb_platform, 0, 3))) : lower(substr(local.anydb_platform, 0, 3))
+  anydb_cred   = try(local.anydb.credentials, {})
   loadbalancer = try(local.anydb.loadbalancer, {})
 
-  node_count      = try(length(var.databases[0].dbnodes), 1)
-  db_server_count = local.anydb_ha ? local.node_count * 2 : local.node_count
+  sid_auth_type        = try(local.anydb.authentication.type, "key")
+  enable_auth_password = local.enable_deployment && local.sid_auth_type == "password"
+  enable_auth_key      = local.enable_deployment && local.sid_auth_type == "key"
+  sid_auth_username    = try(local.anydb.authentication.username, "azureadm")
+  sid_auth_password    = local.enable_auth_password ? try(local.anydb.authentication.password, random_password.password[0].result) : ""
+
+  db_systemdb_password = "db_systemdb_password"
 
   authentication = try(local.anydb.authentication,
     {
-      "type"     = upper(local.anydb_ostype) == "LINUX" ? "key" : "password"
-      "username" = "azureadm"
+      "type"     = local.sid_auth_type
+      "username" = local.sid_auth_username
+      "password" = local.sid_auth_password
   })
-
-  anydb_cred           = try(local.anydb.credentials, {})
-  db_systemdb_password = try(local.anydb_cred.db_systemdb_password, "")
 
   // Default values in case not provided
   os_defaults = {

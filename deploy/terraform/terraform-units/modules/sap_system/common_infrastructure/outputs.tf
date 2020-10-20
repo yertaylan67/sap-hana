@@ -37,3 +37,19 @@ output "software_w_defaults" {
 output "random_id" {
   value = random_id.random_id.hex
 }
+
+output "sid_kv_user" {
+  value = local.enable_sid_deployment ? azurerm_key_vault.sid_kv_user : null
+}
+
+output "sid_kv_prvt" {
+  value = local.enable_sid_deployment ? azurerm_key_vault.sid_kv_prvt : null
+}
+
+/*
+ To force dependency between kv access policy and secrets. Expected behavior:
+ https://github.com/terraform-providers/terraform-provider-azurerm/issues/4971
+*/
+output "sid_kv_user_msi" {
+  value = azurerm_key_vault_access_policy.sid_kv_user_msi
+}

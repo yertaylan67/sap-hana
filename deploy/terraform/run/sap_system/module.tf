@@ -73,6 +73,9 @@ module "sap_namegenerator" {
   scs_zones        = local.scs_zones
   web_zones        = local.web_zones
   db_zones         = local.db_zones
+  deployer-uai        = module.deployer.deployer-uai
+  // Comment out code with users.object_id for the time being.
+  // deployer_user       = module.deployer.deployer_user
 }
 
 // Create Jumpboxes
@@ -115,6 +118,11 @@ module "hdb_node" {
   ppg                        = module.common_infrastructure.ppg
   naming                     = module.sap_namegenerator.naming
   custom_disk_sizes_filename = var.db_disk_sizes_filename
+   sid_kv_user      = module.common_infrastructure.sid_kv_user
+  sid_kv_user_msi  = module.common_infrastructure.sid_kv_user_msi
+  deployer-uai     = module.deployer.deployer-uai
+  // Comment out code with users.object_id for the time being.
+  // deployer_user    = module.deployer.deployer_user
 }
 
 // Create Application Tier nodes
@@ -135,6 +143,11 @@ module "app_tier" {
   ppg                        = module.common_infrastructure.ppg
   naming                     = module.sap_namegenerator.naming
   custom_disk_sizes_filename = var.app_disk_sizes_filename
+  sid_kv_user      = module.common_infrastructure.sid_kv_user
+  sid_kv_user_msi  = module.common_infrastructure.sid_kv_user_msi
+  deployer-uai     = module.deployer.deployer-uai
+  // Comment out code with users.object_id for the time being.  
+  // deployer_user    = module.deployer.deployer_user
 }
 
 // Create anydb database nodes
@@ -154,12 +167,14 @@ module "anydb_node" {
   ppg                        = module.common_infrastructure.ppg
   naming                     = module.sap_namegenerator.naming
   custom_disk_sizes_filename = var.db_disk_sizes_filename
+  sid_kv_user      = module.common_infrastructure.sid_kv_user
+  sid_kv_user_msi  = module.common_infrastructure.sid_kv_user_msi
 }
 
 // Generate output files
 module "output_files" {
   source                       = "../../terraform-units/modules/sap_system/output_files"
-  application                  = var.application
+  application                  = module.app_tier.application
   databases                    = var.databases
   infrastructure               = var.infrastructure
   jumpboxes                    = var.jumpboxes

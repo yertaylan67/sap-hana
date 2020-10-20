@@ -32,6 +32,23 @@ variable "custom_disk_sizes_filename" {
   default     = ""
 }
 
+variable "deployer-uai" {
+  description = "Details of the UAI used by deployer(s)"
+}
+
+variable "deployer_user" {
+  description = "Details of the users"
+  default     = []
+}
+
+variable "sid_kv_user" {
+  description = "Details of the user keyvault for sap_system"
+}
+
+variable "sid_kv_user_msi" {
+  description = "Azurerm_key_vault_access_policy is required to save secrets in KV"
+}
+
 locals {
   // Imports database sizing information
 
@@ -113,28 +130,33 @@ locals {
   hdb_size = try(local.hdb.size, "Demo")
   hdb_fs   = try(local.hdb.filesystem, "xfs")
   hdb_ha   = try(local.hdb.high_availability, false)
-  hdb_auth = try(local.hdb.authentication,
-    {
-      "type"     = "key"
-      "username" = "azureadm"
-  })
 
-  node_count      = try(length(local.hdb.dbnodes), 1)
-  db_server_count = local.hdb_ha ? local.node_count * 2 : local.node_count
+  sid_auth_type        = try(local.hdb.authentication.type, "key")
+  enable_auth_password = local.enable_deployment && local.sid_auth_type == "password"
+  enable_auth_key      = local.enable_deployment && local.sid_auth_type == "key"
+  sid_auth_username    = try(local.hdb.authentication.username, "azureadm")
+  sid_auth_password    = local.enable_auth_password ? try(local.hdb.authentication.password, random_password.password[0].result) : ""
 
-  hdb_ins                = try(local.hdb.instance, {})
-  hdb_sid                = try(local.hdb_ins.sid, local.sid) // HANA database sid from the Databases array for use as reference to LB/AS
-  hdb_nr                 = try(local.hdb_ins.instance_number, "00")
-  hdb_cred               = try(local.hdb.credentials, {})
-  db_systemdb_password   = try(local.hdb_cred.db_systemdb_password, "")
-  os_sidadm_password     = try(local.hdb_cred.os_sidadm_password, "")
-  os_sapadm_password     = try(local.hdb_cred.os_sapadm_password, "")
-  xsa_admin_password     = try(local.hdb_cred.xsa_admin_password, "")
-  cockpit_admin_password = try(local.hdb_cred.cockpit_admin_password, "")
-  ha_cluster_password    = try(local.hdb_cred.ha_cluster_password, "")
-  components             = merge({ hana_database = [] }, try(local.hdb.components, {}))
-  xsa                    = try(local.hdb.xsa, { routing = "ports" })
-  shine                  = try(local.hdb.shine, { email = "shinedemo@microsoft.com" })
+  db_systemdb_password   = "db_systemdb_password"
+  os_sidadm_password     = "os_sidadm_password"
+  os_sapadm_password     = "os_sapadm_password"
+  xsa_admin_password     = "xsa_admin_password"
+  cockpit_admin_password = "cockpit_admin_password"
+  ha_cluster_password    = "ha_cluster_password"
+
+  hdb_auth = {
+    "type"     = local.sid_auth_type
+    "username" = local.sid_auth_username
+    "password" = local.sid_auth_password
+  }
+
+  hdb_ins = try(local.hdb.instance, {})
+  hdb_sid = try(local.hdb_ins.sid, local.sid) // HANA database sid from the Databases array for use as reference to LB/AS
+  hdb_nr  = try(local.hdb_ins.instance_number, "01")
+
+  components = merge({ hana_database = [] }, try(local.hdb.components, {}))
+  xsa        = try(local.hdb.xsa, { routing = "ports" })
+  shine      = try(local.hdb.shine, { email = "shinedemo@microsoft.com" })
 
   dbnodes = flatten([[for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
     name         = try("${dbnode.name}-0", format("%s_%s%s", local.prefix, local.virtualmachine_names[idx], local.resource_suffixes.vm))

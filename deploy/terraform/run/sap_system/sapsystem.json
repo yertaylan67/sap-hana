@@ -1,10 +1,14 @@
 {
   "infrastructure": {
     "region": "eastus",
-    "environment": "global",
+    "environment": "np",
     "resource_group": {
       "is_existing": "false",
       "arm_id": ""
+    },
+    "landscape": {
+      "key_vault_arm_id": "",
+      "sid_public_key_secret_name": ""
     },
     "vnets": {
       "management": {
@@ -77,10 +81,6 @@
       "saplib_tfstate_key": ""
     },
     "downloader": {
-      "credentials": {
-        "sap_user": "<sap_user>",
-        "sap_password": "<sap_password>"
-      },
       "scenarios": [
         {
           "scenario_type": "DB",
@@ -89,10 +89,6 @@
         }
       ]
     }
-  },
-  "sshkey": {
-    "path_to_public_key": "sshkey.pub",
-    "path_to_private_key": "sshkey"
   },
   "options": {
     "enable_secure_transfer": true,

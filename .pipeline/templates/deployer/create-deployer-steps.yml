@@ -35,6 +35,12 @@ steps:
         nsg: {
           allowed_ips: [$prefix, $agent_ip]
         }
+      }' \
+      | jq '. += {
+        sshkey: {
+          path_to_public_key: "sshkey.pub",
+          path_to_private_key: "sshkey"
+        }
       }' > ${input}
 
       cat ${input}

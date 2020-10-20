@@ -40,8 +40,9 @@ resource "azurerm_linux_virtual_machine" "app" {
   ]
 
   size                            = local.app_sizing.compute.vm_size
-  admin_username                  = local.authentication.username
-  disable_password_authentication = true
+  admin_username                  = local.sid_auth_username
+  disable_password_authentication = ! local.enable_auth_password
+  admin_password                  = local.sid_auth_password
 
   os_disk {
     name                 = format("%s_%s%s", local.prefix, local.app_virtualmachine_names[count.index], local.resource_suffixes.osdisk)
@@ -61,9 +62,12 @@ resource "azurerm_linux_virtual_machine" "app" {
     }
   }
 
-  admin_ssh_key {
-    username   = local.authentication.username
-    public_key = file(var.sshkey.path_to_public_key)
+  dynamic "admin_ssh_key" {
+    for_each = range(local.enable_auth_password ? 0 : 1)
+    content {
+      username   = local.sid_auth_username
+      public_key = data.azurerm_key_vault_secret.sid_pk[0].value
+    }
   }
 
   boot_diagnostics {
@@ -97,8 +101,8 @@ resource "azurerm_windows_virtual_machine" "app" {
   ]
 
   size           = local.app_sizing.compute.vm_size
-  admin_username = local.authentication.username
-  admin_password = local.authentication.password
+  admin_username = local.sid_auth_username
+  admin_password = local.sid_auth_password
 
   os_disk {
     name                 = format("%s_%s%s", local.prefix, local.app_virtualmachine_names[count.index], local.resource_suffixes.osdisk)
