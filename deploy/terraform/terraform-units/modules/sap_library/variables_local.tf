@@ -68,9 +68,7 @@ locals {
 
     // deployer
   deployer                = try(var.deployer, {})
-  deployer_environment    = try(local.deployer.environment, "")
-  deployer_location_short = try(var.region_mapping[local.deployer.region], "unkn")
-  deployer_vnet           = try(local.deployer.vnet, "")
+  deployer_vnet           = local.deployer.vnet
   deployer_prefix         = var.naming.prefix.DEPLOYER
 
   // Comment out code with users.object_id for the time being.
