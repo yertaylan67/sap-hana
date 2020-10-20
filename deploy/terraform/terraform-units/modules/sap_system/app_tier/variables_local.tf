@@ -180,7 +180,6 @@ locals {
   // OS image for all SCS VMs
   // If custom image is used, we do not overwrite os reference with default value
   // If no publisher or no custom image is specified use the custom image from the app if specified
-  scs_publisher_empty = try(var.application.scs_os.publisher, "") == "" ? true : false
   scs_custom_image    = try(var.application.scs_os.source_image_id, "") == "" && ! local.app_custom_image ? false : true
 
   scs_os = {
@@ -194,7 +193,6 @@ locals {
   // OS image for all WebDispatcher VMs
   // If custom image is used, we do not overwrite os reference with default value
   // If no publisher or no custom image is specified use the custom image from the app if specified
-  web_publisher_empty = try(var.application.web_os.publisher, "") == "" ? true : false
   web_custom_image    = try(var.application.web_os.source_image_id, "") == "" && ! local.app_custom_image ? false : true
 
   web_os = {
@@ -204,7 +202,7 @@ locals {
     "sku"             = try(var.application.web_os.sku, local.web_custom_image ? "" : local.app_os.sku)
     "version"         = try(var.application.web_os.version, local.web_custom_image ? "" : local.app_os.version)
   }
-}
+
 
 locals {
   // Subnet IP Offsets
