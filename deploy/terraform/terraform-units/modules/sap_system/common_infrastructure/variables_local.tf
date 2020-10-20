@@ -29,6 +29,10 @@ variable naming {
   description = "Defines the names for the resources"
 }
 
+variable "spn" {
+  description = "Current SPN used to authenticate to Azure"
+}
+
 variable "deployer-uai" {
   description = "Details of the UAI used by deployer(s)"
 }
@@ -377,5 +381,8 @@ locals {
   software = merge(var.software, {
     downloader = local.downloader
   })
+
+  // SPN
+  spn = try(var.spn, {})
 
 }

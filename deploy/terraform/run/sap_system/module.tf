@@ -46,6 +46,7 @@ module "common_infrastructure" {
   nsg-mgmt            = module.deployer.nsg-mgmt
   naming              = module.sap_namegenerator.naming
   deployer-uai        = module.deployer.deployer-uai
+  spn                 = local.spn
   // Comment out code with users.object_id for the time being.
   // deployer_user       = module.deployer.deployer_user
 
@@ -118,9 +119,9 @@ module "hdb_node" {
   ppg                        = module.common_infrastructure.ppg
   naming                     = module.sap_namegenerator.naming
   custom_disk_sizes_filename = var.db_disk_sizes_filename
-   sid_kv_user      = module.common_infrastructure.sid_kv_user
-  sid_kv_user_msi  = module.common_infrastructure.sid_kv_user_msi
-  deployer-uai     = module.deployer.deployer-uai
+  sid_kv_user                = module.common_infrastructure.sid_kv_user
+  sid_kv_user_spn            = module.common_infrastructure.sid_kv_user_spn
+  deployer-uai               = module.deployer.deployer-uai
   // Comment out code with users.object_id for the time being.
   // deployer_user    = module.deployer.deployer_user
 }
@@ -143,9 +144,9 @@ module "app_tier" {
   ppg                        = module.common_infrastructure.ppg
   naming                     = module.sap_namegenerator.naming
   custom_disk_sizes_filename = var.app_disk_sizes_filename
-  sid_kv_user      = module.common_infrastructure.sid_kv_user
-  sid_kv_user_msi  = module.common_infrastructure.sid_kv_user_msi
-  deployer-uai     = module.deployer.deployer-uai
+  sid_kv_user                = module.common_infrastructure.sid_kv_user
+  sid_kv_user_spn            = module.common_infrastructure.sid_kv_user_spn
+  deployer-uai               = module.deployer.deployer-uai
   // Comment out code with users.object_id for the time being.  
   // deployer_user    = module.deployer.deployer_user
 }
@@ -167,8 +168,8 @@ module "anydb_node" {
   ppg                        = module.common_infrastructure.ppg
   naming                     = module.sap_namegenerator.naming
   custom_disk_sizes_filename = var.db_disk_sizes_filename
-  sid_kv_user      = module.common_infrastructure.sid_kv_user
-  sid_kv_user_msi  = module.common_infrastructure.sid_kv_user_msi
+  sid_kv_user                = module.common_infrastructure.sid_kv_user
+  sid_kv_user_spn            = module.common_infrastructure.sid_kv_user_spn
 }
 
 // Generate output files
