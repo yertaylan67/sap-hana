@@ -203,7 +203,6 @@ locals {
     "version"         = try(var.application.web_os.version, local.web_custom_image ? "" : local.app_os.version)
   }
 
-
 locals {
   // Subnet IP Offsets
   // Note: First 4 IP addresses in a subnet are reserved by Azure
