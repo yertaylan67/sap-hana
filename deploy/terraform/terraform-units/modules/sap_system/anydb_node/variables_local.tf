@@ -35,10 +35,13 @@ variable "sid_kv_user_spn" {
 locals {
   // Imports database sizing information
 
-  sizes      = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : "${path.module}/../../../../../configs/anydb_sizes.json"))
+  sizes = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : "${path.module}/../../../../../configs/anydb_sizes.json"))
 
   computer_names       = var.naming.virtualmachine_names.ANYDB_COMPUTERNAME
   virtualmachine_names = var.naming.virtualmachine_names.ANYDB_VMNAME
+
+  observer_computer_names       = var.naming.virtualmachine_names.OBSERVER_COMPUTERNAME
+  observer_virtualmachine_names = var.naming.virtualmachine_names.OBSERVER_VMNAME
 
   storageaccount_names = var.naming.storageaccount_names.SDU
   resource_suffixes    = var.naming.resource_suffixes
@@ -176,6 +179,14 @@ locals {
     "sku"             = try(local.anydb.os.sku, local.anydb_custom_image ? "" : local.os_defaults[upper(local.anydb_platform)].sku)
     "version"         = try(local.anydb.os.version, local.anydb_custom_image ? "" : local.os_defaults[upper(local.anydb_platform)].version)
   }
+
+  //Observer VM
+  observer                = try(local.anydb.observer, {})
+  deploy_observer         = upper(local.anydb_platform) == "ORACLE" && local.anydb_ha
+  observer_size           = "Standard_D4s_v3"
+  observer_authentication = local.authentication
+  observer_custom_image   = local.anydb_custom_image
+  observer_os             = local.anydb_os
 
   // Update database information with defaults
   anydb_database = merge(local.anydb,
