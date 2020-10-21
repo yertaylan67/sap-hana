@@ -63,12 +63,13 @@ locals {
   zones            = distinct(concat(local.db_zones, local.app_zones, local.scs_zones, local.web_zones))
   zonal_deployment = length(local.zones) > 0 ? true : false
 
-  vnet_prefix              = var.naming.prefix.VNET
-  storageaccount_name      = var.naming.storageaccount_names.SDU
-  keyvault_names           = var.naming.keyvault_names.SDU
-  landscape_keyvault_names = var.naming.keyvault_names.VNET
-  virtualmachine_names     = var.naming.virtualmachine_names.ISCSI_COMPUTERNAME
-  resource_suffixes        = var.naming.resource_suffixes
+  vnet_prefix                 = var.naming.prefix.VNET
+  storageaccount_name         = var.naming.storageaccount_names.SDU
+  keyvault_names              = var.naming.keyvault_names.SDU
+  virtualmachine_names        = var.naming.virtualmachine_names.ISCSI_COMPUTERNAME
+  anchor_virtualmachine_names = var.naming.virtualmachine_names.ANCHOR_VMNAME
+  anchor_computer_names       = var.naming.virtualmachine_names.ANCHOR_COMPUTERNAME
+  resource_suffixes           = var.naming.resource_suffixes
 
   //Filter the list of databases to only HANA platform entries
   hana-databases = [
@@ -108,6 +109,27 @@ locals {
   enable_sid_deployment = local.enable_hdb_deployment || local.enable_app_deployment || local.enable_xdb_deployment
 
   var_infra = try(var.infrastructure, {})
+
+  //Anchor VM
+  anchor      = try(local.var_infra.anchor_vms, {})
+  anchor_size = try(local.anchor.sku, "Standard_D8s_v3")
+  anchor_authentication = try(local.anchor.authentication,
+    {
+      "type"     = "key"
+      "username" = "azureadm"
+  })
+
+  anchor_custom_image = try(local.anchor.os.source_image_id, "") != "" ? true : false
+
+  anchor_os = {
+    "source_image_id" = local.anchor_custom_image ? local.anchor.os.source_image_id : ""
+    "publisher"       = try(local.anchor.os.publisher, local.anchor_custom_image ? "" : "suse")
+    "offer"           = try(local.anchor.os.offer, local.anchor_custom_image ? "" : "sles-sap-12-sp5")
+    "sku"             = try(local.anchor.os.sku, local.anchor_custom_image ? "" : "gen1")
+    "version"         = try(local.anchor.os.version, local.anchor_custom_image ? "" : "latest")
+  }
+  anchor_ostype           = upper(try(local.anchor.os.os_type, "LINUX"))
+  anchor_enable_ultradisk = try(local.anchor.support_ultra, [false, false, false])
 
   //Resource group
   var_rg    = try(local.var_infra.resource_group, {})
