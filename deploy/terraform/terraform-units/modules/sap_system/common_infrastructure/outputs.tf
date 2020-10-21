@@ -39,5 +39,5 @@ output "random_id" {
 }
 
 output "admin_subnet" {
-  value = local.sub_admin_exists ? data.azurerm_subnet.admin : azurerm_subnet.admin
+  value = local.sub_admin_exists ? data.azurerm_subnet.admin[0] : azurerm_subnet.admin[0]
 }
