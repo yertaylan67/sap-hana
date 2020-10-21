@@ -1,6 +1,6 @@
 # Creates admin subnet of SAP VNET
 resource "azurerm_subnet" "sap-admin" {
-  count                = local.enable_deployment && local.apptier_dual_nics ? (local.sub_admin_exists ? 0 : 1) : 0
+  count                = local.enable_deployment && local.apptier_dual_nics && ! local.sub_admin_exists ? 1 : 0
   name                 = local.sub_admin_name
   resource_group_name  = var.vnet-sap[0].resource_group_name
   virtual_network_name = var.vnet-sap[0].name
