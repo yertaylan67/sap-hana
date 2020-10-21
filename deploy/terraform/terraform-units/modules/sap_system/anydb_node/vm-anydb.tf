@@ -32,7 +32,6 @@ resource "azurerm_network_interface" "anydb_admin" {
   resource_group_name           = var.resource-group[0].name
   enable_accelerated_networking = true
 
-
   ip_configuration {
     primary   = true
     name      = "ipconfig1"
