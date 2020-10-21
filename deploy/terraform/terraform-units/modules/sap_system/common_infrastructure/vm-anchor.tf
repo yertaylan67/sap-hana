@@ -1,5 +1,5 @@
 data "azurerm_subnet" "anchor" {
-  count                = local.zonal_deployment ? (local.sub_admin_exists ? 1 : 0) : 0
+  count                = local.zonal_deployment && local.sub_admin_exists ? 1 : 0
   name                 = split("/", local.sub_admin_arm_id)[10]
   resource_group_name  = split("/", local.sub_admin_arm_id)[4]
   virtual_network_name = split("/", local.sub_admin_arm_id)[8]
@@ -114,4 +114,3 @@ resource "azurerm_windows_virtual_machine" "anchor" {
     storage_account_uri = azurerm_storage_account.storage-bootdiag.primary_blob_endpoint
   }
 }
-
