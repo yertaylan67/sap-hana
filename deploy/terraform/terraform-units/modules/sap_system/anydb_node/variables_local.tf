@@ -230,6 +230,7 @@ locals {
     computername = try("${dbnode.name}-0", local.computer_names[idx], local.resource_suffixes.vm)
     role         = try(dbnode.role, "worker"),
     db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[0]
+    admin_nic_ip    = lookup(dbnode, "admin_nic_ips", [false, false])[0]
     }
     ],
     [for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
@@ -237,6 +238,7 @@ locals {
       computername = try("${dbnode.name}-1", local.computer_names[idx + local.node_count], local.resource_suffixes.vm)
       role         = try(dbnode.role, "worker"),
       db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[1],
+      admin_nic_ip    = lookup(dbnode, "admin_nic_ips", [false, false])[1]
       } if local.anydb_ha
     ]
     ]
