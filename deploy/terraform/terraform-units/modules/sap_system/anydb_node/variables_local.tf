@@ -24,10 +24,14 @@ variable "custom_disk_sizes_filename" {
   default     = ""
 }
 
+variable "admin_subnet" {
+  description = "Information about SAP admin subnet"
+}
+
 locals {
   // Imports database sizing information
 
-  sizes      = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : "${path.module}/../../../../../configs/anydb_sizes.json"))
+  sizes = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : "${path.module}/../../../../../configs/anydb_sizes.json"))
 
   computer_names       = var.naming.virtualmachine_names.ANYDB_COMPUTERNAME
   virtualmachine_names = var.naming.virtualmachine_names.ANYDB_VMNAME

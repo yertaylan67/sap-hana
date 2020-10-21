@@ -2,7 +2,7 @@
 # RESOURCES
 #############################################################################
 
-resource "azurerm_network_interface" "anydb" {
+resource "azurerm_network_interface" "anydb_db" {
   count               = local.enable_deployment ? local.db_server_count : 0
   name                = format("%s%s", local.anydb_vms[count.index].name, local.resource_suffixes.db-nic)
   location            = var.resource-group[0].location
@@ -25,23 +25,21 @@ resource "azurerm_network_interface" "anydb" {
 }
 
 # Creates the DB traffic NIC and private IP address for database nodes
-resource "azurerm_network_interface" "anydb-admin" {
+resource "azurerm_network_interface" "anydb_admin" {
   count                         = local.enable_deployment && local.anydb_dual_nics ? local.db_server_count : 0
   name                          = format("%s%s", local.anydb_vms[count.index].name, local.resource_suffixes.admin-nic)
   location                      = var.resource-group[0].location
   resource_group_name           = var.resource-group[0].name
   enable_accelerated_networking = true
 
+
   ip_configuration {
     primary   = true
     name      = "ipconfig1"
-    subnet_id = local.sub_admin_exists ? data.azurerm_subnet.anydb-admin[0].id : azurerm_subnet.anydb-admin[0].id
+    subnet_id = var.admin_subnet.id
     private_ip_address = try(local.anydb_vms[count.index].admin_nic_ip, false) != false ? (
       local.anydb_vms[count.index].admin_nic_ip) : (
-      cidrhost((local.sub_admin_exists ? (
-        data.azurerm_subnet.anydb-admin[0].address_prefixes[0]) : (
-        azurerm_subnet.anydb-admin[0].address_prefixes[0])
-      ), tonumber(count.index) + 10)
+      cidrhost(var.admin_subnet.address_prefixes[0], tonumber(count.index) + 10)
     )
     private_ip_address_allocation = "static"
   }
@@ -66,8 +64,8 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
   zone = local.zonal_deployment && (local.db_server_count == local.db_zone_count) ? local.zones[count.index % local.db_zone_count] : null
 
   network_interface_ids = local.anydb_dual_nics ? (
-    [azurerm_network_interface.anydb-admin[count.index].id, azurerm_network_interface.anydb[count.index].id]) : (
-    [azurerm_network_interface.anydb[count.index].id]
+    [azurerm_network_interface.anydb_admin[count.index].id, azurerm_network_interface.anydb_db[count.index].id]) : (
+    [azurerm_network_interface.anydb_db[count.index].id]
   )
 
   size = local.anydb_vms[count.index].size
@@ -135,8 +133,8 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
   zone = local.zonal_deployment && (local.db_server_count == local.db_zone_count) ? local.zones[count.index % local.db_zone_count] : null
 
   network_interface_ids = local.anydb_dual_nics ? (
-    [azurerm_network_interface.anydb-admin[count.index].id, azurerm_network_interface.anydb[count.index].id]) : (
-    [azurerm_network_interface.anydb[count.index].id]
+    [azurerm_network_interface.anydb_admin[count.index].id, azurerm_network_interface.anydb_db[count.index].id]) : (
+    [azurerm_network_interface.anydb_db[count.index].id]
   )
   size = local.anydb_vms[count.index].size
 

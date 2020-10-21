@@ -32,6 +32,10 @@ variable "custom_disk_sizes_filename" {
   default     = ""
 }
 
+variable "admin_subnet" {
+  description = "Information about SAP admin subnet"
+}
+
 locals {
   // Imports database sizing information
 

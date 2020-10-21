@@ -28,11 +28,9 @@ resource "azurerm_network_interface" "web-admin" {
 
   ip_configuration {
     name      = "IPConfig1"
-    subnet_id = local.sub_admin_exists ? data.azurerm_subnet.sap-admin[0].id : azurerm_subnet.sap-admin[0].id
+    subnet_id = var.admin_subnet.id
     private_ip_address = try(local.web_admin_nic_ips[count.index],
-      cidrhost(local.sub_admin_exists ?
-        data.azurerm_subnet.sap-admin[0].address_prefixes[0] :
-        azurerm_subnet.sap-admin[0].address_prefixes[0], tonumber(count.index) + 25
+      cidrhost(var.admin_subnet.address_prefixes[0], tonumber(count.index) + 25
       )
     )
     private_ip_address_allocation = "static"

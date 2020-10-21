@@ -41,7 +41,6 @@ module "common_infrastructure" {
   software            = var.software
   ssh-timeout         = var.ssh-timeout
   sshkey              = var.sshkey
-  subnet-sap-admin    = module.hdb_node.subnet-sap-admin
   vnet-mgmt           = module.deployer.vnet-mgmt
   subnet-mgmt         = module.deployer.subnet-mgmt
   nsg-mgmt            = module.deployer.nsg-mgmt
@@ -112,6 +111,7 @@ module "hdb_node" {
   ppg                        = module.common_infrastructure.ppg
   naming                     = module.sap_namegenerator.naming
   custom_disk_sizes_filename = var.db_disk_sizes_filename
+  admin_subnet               = module.common_infrastructure.admin_subnet
 }
 
 // Create Application Tier nodes
@@ -132,6 +132,7 @@ module "app_tier" {
   ppg                        = module.common_infrastructure.ppg
   naming                     = module.sap_namegenerator.naming
   custom_disk_sizes_filename = var.app_disk_sizes_filename
+  admin_subnet               = module.common_infrastructure.admin_subnet
 }
 
 // Create anydb database nodes
@@ -151,6 +152,7 @@ module "anydb_node" {
   ppg                        = module.common_infrastructure.ppg
   naming                     = module.sap_namegenerator.naming
   custom_disk_sizes_filename = var.db_disk_sizes_filename
+  admin_subnet               = module.common_infrastructure.admin_subnet
 }
 
 // Generate output files
