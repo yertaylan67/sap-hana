@@ -75,8 +75,8 @@ locals {
   // deployer_users_id = try(local.deployer.users.object_id, [])
 
   // key vault for saplibrary
-  kv_private_name = local.keyvault_names[0]
-  kv_user_name    = local.keyvault_names[1]
+  kv_private_name = local.keyvault_names.privileged_access
+  kv_user_name    = local.keyvault_names.user_access
 
   // spn
   spn = try(var.spn, {})

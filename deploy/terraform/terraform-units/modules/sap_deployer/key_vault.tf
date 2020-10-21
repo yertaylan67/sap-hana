@@ -3,7 +3,7 @@ data "azurerm_client_config" "deployer" {}
 
 resource "azurerm_key_vault" "kv_prvt" {
   count                      = local.enable_deployers ? 1 : 0
-  name                       = local.keyvault_names[0]
+  name                       = local.keyvault_names.privileged_access
   location                   = azurerm_resource_group.deployer[0].location
   resource_group_name        = azurerm_resource_group.deployer[0].name
   tenant_id                  = data.azurerm_client_config.deployer.tenant_id
@@ -29,7 +29,7 @@ resource "azurerm_key_vault_access_policy" "kv_prvt_msi" {
 // Create user KV with access policy
 resource "azurerm_key_vault" "kv_user" {
   count                      = local.enable_deployers ? 1 : 0
-  name                       = local.keyvault_names[1]
+  name                       = local.keyvault_names.user_access
   location                   = azurerm_resource_group.deployer[0].location
   resource_group_name        = azurerm_resource_group.deployer[0].name
   tenant_id                  = data.azurerm_client_config.deployer.tenant_id

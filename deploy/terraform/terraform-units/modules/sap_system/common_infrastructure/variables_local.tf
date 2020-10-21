@@ -66,6 +66,7 @@ locals {
   vnet_prefix                 = var.naming.prefix.VNET
   storageaccount_name         = var.naming.storageaccount_names.SDU
   keyvault_names              = var.naming.keyvault_names.SDU
+  landscape_keyvault_names = var.naming.keyvault_names.VNET
   virtualmachine_names        = var.naming.virtualmachine_names.ISCSI_COMPUTERNAME
   anchor_virtualmachine_names = var.naming.virtualmachine_names.ANCHOR_VMNAME
   anchor_computer_names       = var.naming.virtualmachine_names.ANCHOR_COMPUTERNAME
@@ -152,13 +153,13 @@ locals {
 */
   // kv for sap landscape
   kv_prefix       = var.naming.prefix.VNET
-  kv_private_name = local.landscape_keyvault_names[0]
-  kv_user_name    = local.landscape_keyvault_names[1]
+  kv_private_name = local.landscape_keyvault_names.privileged_access
+  kv_user_name    = local.landscape_keyvault_names.user_access
 
   // key vault naming for sap system
   sid_kv_prefix       = var.naming.prefix.SDU
-  sid_kv_private_name = local.keyvault_names[0]
-  sid_kv_user_name    = local.keyvault_names[1]
+  sid_kv_private_name = local.keyvault_names.privileged_access
+  sid_kv_user_name    = local.keyvault_names.user_access
 
   /* 
      TODO: currently sap landscape and sap system haven't been decoupled. 
