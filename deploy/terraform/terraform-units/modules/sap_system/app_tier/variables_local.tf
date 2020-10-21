@@ -110,6 +110,19 @@ locals {
   // Default naming of vnet has multiple parts. Taking the second-last part as the name 
   vnet_sap_name_prefix = try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? split("-", local.vnet_sap_name)[(local.vnet_nr_parts - 2)] : local.vnet_sap_name
 
+  // Admin subnet
+  var_sub_admin    = try(var.infrastructure.vnets.sap.subnet_admin, {})
+  sub_admin_arm_id = try(local.var_sub_admin.arm_id, "")
+  sub_admin_exists = length(local.sub_admin_arm_id) > 0 ? true : false
+  sub_admin_name   = local.sub_admin_exists ? try(split("/", local.sub_admin_arm_id)[10], "") : try(local.var_sub_admin.name, format("%s%s", local.prefix, local.resource_suffixes.admin-subnet))
+  sub_admin_prefix = try(local.var_sub_admin.prefix, "")
+
+  // Admin NSG
+  var_sub_admin_nsg    = try(var.infrastructure.vnets.sap.subnet_admin.nsg, {})
+  sub_admin_nsg_arm_id = try(local.var_sub_admin_nsg.arm_id, "")
+  sub_admin_nsg_exists = length(local.sub_admin_nsg_arm_id) > 0 ? true : false
+  sub_admin_nsg_name   = local.sub_admin_nsg_exists ? try(split("/", local.sub_admin_nsg_arm_id)[8], "") : try(local.var_sub_admin_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.admin-subnet-nsg))
+
   // APP subnet
   var_sub_app    = try(var.infrastructure.vnets.sap.subnet_app, {})
   sub_app_arm_id = try(local.var_sub_app.arm_id, "")
@@ -154,10 +167,16 @@ locals {
   webdispatcher_count      = try(var.application.webdispatcher_count, 0)
   vm_sizing                = try(var.application.vm_sizing, "Default")
   app_nic_ips              = try(var.application.app_nic_ips, [])
+  app_admin_nic_ips        = try(var.application.app_admin_nic_ips, [])
   scs_lb_ips               = try(var.application.scs_lb_ips, [])
   scs_nic_ips              = try(var.application.scs_nic_ips, [])
+  scs_admin_nic_ips        = try(var.application.scs_admin_nic_ips, [])
   web_lb_ips               = try(var.application.web_lb_ips, [])
   web_nic_ips              = try(var.application.web_nic_ips, [])
+  web_admin_nic_ips        = try(var.application.web_admin_nic_ips, [])
+
+  // Dual network cards
+  apptier_dual_nics = try(var.application.dual_nics, false)
 
   app_ostype = try(var.application.os.os_type, "Linux")
   app_oscode = upper(local.app_ostype) == "LINUX" ? "l" : "w"

@@ -24,6 +24,29 @@ resource "azurerm_network_interface" "anydb" {
   }
 }
 
+# Creates the DB traffic NIC and private IP address for database nodes
+resource "azurerm_network_interface" "anydb-admin" {
+  count                         = local.enable_deployment && local.anydb_dual_nics ? local.db_server_count : 0
+  name                          = format("%s%s", local.anydb_vms[count.index].name, local.resource_suffixes.admin-nic)
+  location                      = var.resource-group[0].location
+  resource_group_name           = var.resource-group[0].name
+  enable_accelerated_networking = true
+
+  ip_configuration {
+    primary   = true
+    name      = "ipconfig1"
+    subnet_id = local.sub_admin_exists ? data.azurerm_subnet.anydb-admin[0].id : azurerm_subnet.anydb-admin[0].id
+    private_ip_address = try(local.anydb_vms[count.index].admin_nic_ip, false) != false ? (
+      local.anydb_vms[count.index].admin_nic_ip) : (
+      cidrhost((local.sub_admin_exists ? (
+        data.azurerm_subnet.anydb-admin[0].address_prefixes[0]) : (
+        azurerm_subnet.anydb-admin[0].address_prefixes[0])
+      ), tonumber(count.index) + 10)
+    )
+    private_ip_address_allocation = "static"
+  }
+}
+
 // Section for Linux Virtual machine 
 resource "azurerm_linux_virtual_machine" "dbserver" {
   count               = local.enable_deployment ? ((upper(local.anydb_ostype) == "LINUX") ? local.db_server_count : 0) : 0
@@ -40,8 +63,12 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
 
   zone = local.enable_ultradisk || local.db_server_count == local.db_zone_count ? local.zones[count.index % local.db_zone_count] : null
 
-  network_interface_ids = [azurerm_network_interface.anydb[count.index].id]
-  size                  = local.anydb_vms[count.index].size
+  network_interface_ids = local.anydb_dual_nics ? (
+    [azurerm_network_interface.anydb-admin[count.index].id, azurerm_network_interface.anydb[count.index].id]) : (
+    [azurerm_network_interface.anydb[count.index].id]
+  )
+
+  size = local.anydb_vms[count.index].size
 
   source_image_id = local.anydb_custom_image ? local.anydb_os.source_image_id : null
 
@@ -108,8 +135,11 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
 
   zone = local.enable_ultradisk || local.db_server_count == local.db_zone_count ? local.zones[count.index % local.db_zone_count] : null
 
-  network_interface_ids = [azurerm_network_interface.anydb[count.index].id]
-  size                  = local.anydb_vms[count.index].size
+  network_interface_ids = local.anydb_dual_nics ? (
+    [azurerm_network_interface.anydb-admin[count.index].id, azurerm_network_interface.anydb[count.index].id]) : (
+    [azurerm_network_interface.anydb[count.index].id]
+  )
+  size = local.anydb_vms[count.index].size
 
   source_image_id = local.anydb_custom_image ? local.anydb_os.source_image_id : null
 

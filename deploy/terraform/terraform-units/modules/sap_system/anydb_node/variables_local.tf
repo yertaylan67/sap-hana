@@ -66,6 +66,19 @@ locals {
   // Default naming of vnet has multiple parts. Taking the second-last part as the name 
   vnet_sap_name_prefix = try(substr(upper(local.vnet_sap_name), -5, 5), "") == "-VNET" ? split("-", local.vnet_sap_name)[(local.vnet_nr_parts - 2)] : local.vnet_sap_name
 
+  // Admin subnet
+  var_sub_admin    = try(var.infrastructure.vnets.sap.subnet_admin, {})
+  sub_admin_arm_id = try(local.var_sub_admin.arm_id, "")
+  sub_admin_exists = length(local.sub_admin_arm_id) > 0 ? true : false
+  sub_admin_name   = local.sub_admin_exists ? try(split("/", local.sub_admin_arm_id)[10], "") : try(local.var_sub_admin.name, format("%s%s", local.prefix, local.resource_suffixes.admin-subnet))
+  sub_admin_prefix = try(local.var_sub_admin.prefix, "")
+
+  // Admin NSG
+  var_sub_admin_nsg    = try(var.infrastructure.vnets.sap.subnet_admin.nsg, {})
+  sub_admin_nsg_arm_id = try(local.var_sub_admin_nsg.arm_id, "")
+  sub_admin_nsg_exists = length(local.sub_admin_nsg_arm_id) > 0 ? true : false
+  sub_admin_nsg_name   = local.sub_admin_nsg_exists ? try(split("/", local.sub_admin_nsg_arm_id)[8], "") : try(local.var_sub_admin_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.admin-subnet-nsg))
+
   // DB subnet
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
   sub_db_arm_id = try(local.var_sub_db.arm_id, "")
@@ -82,6 +95,13 @@ locals {
   // PPG Information
   ppgId = lookup(var.infrastructure, "ppg", false) != false ? (var.ppg[0].id) : null
 
+  anydb          = try(local.anydb-databases[0], {})
+  anydb_platform = try(local.anydb.platform, "NONE")
+  anydb_version  = try(local.anydb.db_version, "")
+
+  // Dual network cards
+  anydb_dual_nics = try(local.anydb.dual_nics, false)
+
   // Filter the list of databases to only AnyDB platform entries
   // Supported databases: Oracle, DB2, SQLServer, ASE 
   anydb-databases = [
@@ -91,10 +111,6 @@ locals {
 
   node_count      = try(length(var.databases[0].dbnodes), 1)
   db_server_count = local.anydb_ha ? local.node_count * 2 : local.node_count
-
-  anydb          = try(local.anydb-databases[0], {})
-  anydb_platform = try(local.anydb.platform, "NONE")
-  anydb_version  = try(local.anydb.db_version, "")
 
   // Enable deployment based on length of local.anydb-databases
   enable_deployment = (length(local.anydb-databases) > 0) ? true : false

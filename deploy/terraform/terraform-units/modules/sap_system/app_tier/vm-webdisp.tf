@@ -9,9 +9,31 @@ resource "azurerm_network_interface" "web" {
   ip_configuration {
     name      = "IPConfig1"
     subnet_id = local.sub_web_deployed.id
-    private_ip_address = try(local.web_nic_ips[count.index], local.sub_web_defined ? (
-      cidrhost(local.sub_web_prefix, (tonumber(count.index) + local.ip_offsets.web_vm))) : (
-      cidrhost(local.sub_app_prefix, (tonumber(count.index) * -1 + local.ip_offsets.web_vm)))
+    private_ip_address = try(local.web_nic_ips[count.index], local.sub_web_defined ?
+      cidrhost(local.sub_web_prefix, (tonumber(count.index) + local.ip_offsets.web_vm)) :
+      cidrhost(local.sub_app_prefix, (tonumber(count.index) * -1 + local.ip_offsets.web_vm)
+      )
+    )
+    private_ip_address_allocation = "static"
+  }
+}
+
+# Create Application NICs
+resource "azurerm_network_interface" "web-admin" {
+  count                         = local.enable_deployment && local.apptier_dual_nics ? local.webdispatcher_count : 0
+  name                          = format("%s_%s%s", local.prefix, local.web_virtualmachine_names[count.index], local.resource_suffixes.admin-nic)
+  location                      = var.resource-group[0].location
+  resource_group_name           = var.resource-group[0].name
+  enable_accelerated_networking = local.app_sizing.compute.accelerated_networking
+
+  ip_configuration {
+    name      = "IPConfig1"
+    subnet_id = local.sub_admin_exists ? data.azurerm_subnet.sap-admin[0].id : azurerm_subnet.sap-admin[0].id
+    private_ip_address = try(local.web_admin_nic_ips[count.index],
+      cidrhost(local.sub_admin_exists ?
+        data.azurerm_subnet.sap-admin[0].address_prefixes[0] :
+        azurerm_subnet.sap-admin[0].address_prefixes[0], tonumber(count.index) + 25
+      )
     )
     private_ip_address_allocation = "static"
   }
@@ -38,9 +60,11 @@ resource "azurerm_linux_virtual_machine" "web" {
     null
   )
 
-  network_interface_ids = [
-    azurerm_network_interface.web[count.index].id
-  ]
+  network_interface_ids = local.apptier_dual_nics ? (
+    [azurerm_network_interface.web-admin[count.index].id, azurerm_network_interface.web[count.index].id]) : (
+    [azurerm_network_interface.web[count.index].id]
+  )
+
   size                            = local.web_sizing.compute.vm_size
   admin_username                  = local.sid_auth_username
   disable_password_authentication = ! local.enable_auth_password
@@ -98,9 +122,11 @@ resource "azurerm_windows_virtual_machine" "web" {
     null
   )
 
-  network_interface_ids = [
-    azurerm_network_interface.web[count.index].id
-  ]
+  network_interface_ids = local.apptier_dual_nics ? (
+    [azurerm_network_interface.web-admin[count.index].id, azurerm_network_interface.web[count.index].id]) : (
+    [azurerm_network_interface.web[count.index].id]
+  )
+
   size           = local.web_sizing.compute.vm_size
   admin_username = local.sid_auth_username
   admin_password = local.sid_auth_password
