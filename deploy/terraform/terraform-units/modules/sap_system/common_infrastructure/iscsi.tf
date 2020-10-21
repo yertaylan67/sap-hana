@@ -56,7 +56,7 @@ resource "azurerm_network_security_rule" "iscsi" {
   source_port_range            = "*"
   destination_port_range       = "*"
   source_address_prefix        = "*"
-  destination_address_prefixes = try(var.subnet-sap-admin.address_prefixes, "*")
+  destination_address_prefixes = try(local.sub_admin_exists ? data.azurerm_subnet.admin[0].address_prefixes : azurerm_subnet.admin[0].address_prefixes, "*")
 }
 
 /*-----------------------------------------------------------------------------8
