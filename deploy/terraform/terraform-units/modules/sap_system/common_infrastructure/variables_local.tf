@@ -50,8 +50,6 @@ locals {
   virtualmachine_names = var.naming.virtualmachine_names.ISCSI_COMPUTERNAME
   resource_suffixes    = var.naming.resource_suffixes
 
-  enable_deployment = length(local.db_list) > 1 || try(var.application.enable_deployment,false) ? true : false
-
   //Filter the list of databases to only HANA platform entries
   hana-databases = [
     for database in var.databases : database
