@@ -35,6 +35,24 @@ data "azurerm_virtual_network" "vnet-sap" {
   resource_group_name = split("/", local.vnet_sap_arm_id)[4]
 }
 
+# Creates admin subnet of SAP VNET
+resource "azurerm_subnet" "admin" {
+  count               = local.enable_deployment ? (local.sub_admin_exists ? 0 : 1) : 0
+  name                = local.sub_admin_name
+  location            = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
+  resource_group_name = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
+  address_prefixes    = [local.sub_admin_prefix]
+}
+
+# Imports data of existing SAP admin subnet
+data "azurerm_subnet" "admin" {
+  count                = local.enable_deployment ? (local.sub_admin_exists ? 1 : 0) : 0
+  name                 = split("/", local.sub_admin_arm_id)[10]
+  resource_group_name  = split("/", local.sub_admin_arm_id)[4]
+  virtual_network_name = split("/", local.sub_admin_arm_id)[8]
+}
+
+
 # VNET PEERINGs ==================================================================================================
 
 # Peers management VNET to SAP VNET

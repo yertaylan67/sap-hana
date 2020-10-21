@@ -8,11 +8,9 @@ resource "azurerm_network_interface" "scs" {
 
   ip_configuration {
     name      = "IPConfig1"
-    subnet_id = local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].id : azurerm_subnet.subnet-sap-app[0].id
+    subnet_id = var.admin_subnet.id
     private_ip_address = try(local.scs_nic_ips[count.index],
-      cidrhost(local.sub_app_exists ?
-        data.azurerm_subnet.subnet-sap-app[0].address_prefixes[0] :
-        azurerm_subnet.subnet-sap-app[0].address_prefixes[0],
+      cidrhost(var.admin_subnet.address_prefixes[0],
         tonumber(count.index) + local.ip_offsets.app_vm
       )
     )
@@ -76,7 +74,7 @@ resource "azurerm_linux_virtual_machine" "scs" {
     [azurerm_network_interface.scs-admin[count.index].id, azurerm_network_interface.scs[count.index].id]) : (
     [azurerm_network_interface.scs[count.index].id]
   )
-  
+
   size                            = local.scs_sizing.compute.vm_size
   admin_username                  = local.sid_auth_username
   disable_password_authentication = ! local.enable_auth_password
@@ -139,7 +137,7 @@ resource "azurerm_windows_virtual_machine" "scs" {
     [azurerm_network_interface.scs-admin[count.index].id, azurerm_network_interface.scs[count.index].id]) : (
     [azurerm_network_interface.scs[count.index].id]
   )
-  
+
   size           = local.scs_sizing.compute.vm_size
   admin_username = local.sid_auth_username
   admin_password = local.sid_auth_password

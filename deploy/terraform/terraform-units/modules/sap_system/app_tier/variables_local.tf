@@ -44,6 +44,10 @@ variable "sid_kv_user" {
 variable "sid_kv_user_spn" {
   description = "Azurerm_key_vault_access_policy is required to save secrets in KV"
 }
+variable "admin_subnet" {
+  description = "Information about SAP admin subnet"
+}
+
 
 locals {
   // Imports Disk sizing sizing information
