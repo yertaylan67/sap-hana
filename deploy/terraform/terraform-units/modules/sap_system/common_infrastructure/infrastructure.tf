@@ -39,8 +39,8 @@ data "azurerm_virtual_network" "vnet-sap" {
 resource "azurerm_subnet" "admin" {
   count               = local.enable_deployment ? (local.sub_admin_exists ? 0 : 1) : 0
   name                = local.sub_admin_name
-  location            = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
   resource_group_name = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
+  virtual_network_name = local.vnet_sap_exists ? data.azurerm_virtual_network.vnet-sap.name : azurerm_virtual_network.vnet-sap.name 
   address_prefixes    = [local.sub_admin_prefix]
 }
 

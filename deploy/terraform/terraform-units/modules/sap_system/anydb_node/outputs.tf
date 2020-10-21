@@ -1,5 +1,5 @@
 output "nics-anydb" {
-  value = azurerm_network_interface.anydb
+  value = azurerm_network_interface.anydb_db
 }
 
 output "any-database-info" {

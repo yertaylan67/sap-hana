@@ -8,9 +8,11 @@ resource "azurerm_network_interface" "scs" {
 
   ip_configuration {
     name      = "IPConfig1"
-    subnet_id = var.admin_subnet.id
+    subnet_id = local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].id : azurerm_subnet.subnet-sap-app[0].id
     private_ip_address = try(local.scs_nic_ips[count.index],
-      cidrhost(var.admin_subnet.address_prefixes[0],
+      cidrhost(local.sub_app_exists ?
+        data.azurerm_subnet.subnet-sap-app[0].address_prefixes[0] :
+        azurerm_subnet.subnet-sap-app[0].address_prefixes[0],
         tonumber(count.index) + local.ip_offsets.app_vm
       )
     )
@@ -28,11 +30,9 @@ resource "azurerm_network_interface" "scs-admin" {
 
   ip_configuration {
     name      = "IPConfig1"
-    subnet_id = local.sub_admin_exists ? data.azurerm_subnet.sap-admin[0].id : azurerm_subnet.sap-admin[0].id
+    subnet_id = var.admin_subnet.id.id
     private_ip_address = try(local.scs_admin_nic_ips[count.index],
-      cidrhost(local.sub_admin_exists ?
-        data.azurerm_subnet.sap-admin[0].address_prefixes[0] :
-        azurerm_subnet.sap-admin[0].address_prefixes[0],
+      cidrhost(var.admin_subnet.id.address_prefixes[0],
         tonumber(count.index) + 20
       )
     )
@@ -74,7 +74,7 @@ resource "azurerm_linux_virtual_machine" "scs" {
     [azurerm_network_interface.scs-admin[count.index].id, azurerm_network_interface.scs[count.index].id]) : (
     [azurerm_network_interface.scs[count.index].id]
   )
-
+  
   size                            = local.scs_sizing.compute.vm_size
   admin_username                  = local.authentication.username
   disable_password_authentication = true
@@ -133,7 +133,7 @@ resource "azurerm_windows_virtual_machine" "scs" {
     [azurerm_network_interface.scs-admin[count.index].id, azurerm_network_interface.scs[count.index].id]) : (
     [azurerm_network_interface.scs[count.index].id]
   )
-
+  
   size           = local.scs_sizing.compute.vm_size
   admin_username = local.authentication.username
   admin_password = local.authentication.password
