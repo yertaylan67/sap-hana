@@ -192,16 +192,16 @@ locals {
     name         = try("${dbnode.name}-0", format("%s_%s%s", local.prefix, local.virtualmachine_names[idx], local.resource_suffixes.vm))
     computername = try("${dbnode.name}-0", local.computer_names[idx], local.resource_suffixes.vm)
     role         = try(dbnode.role, "worker"),
-    db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[0]
-    admin_nic_ip = lookup(dbnode, "admin_nic_ips", [false, false])[0]
+    db_nic_ip    = lookup(dbnode, "db_nic_ips", [null, null])[0]
+    admin_nic_ip = lookup(dbnode, "admin_nic_ips", [null, null])[0]
     }
     ],
     [for idx, dbnode in try(local.anydb.dbnodes, [{}]) : {
       name         = try("${dbnode.name}-1", format("%s_%s%s", local.prefix, local.virtualmachine_names[idx + local.node_count], local.resource_suffixes.vm))
       computername = try("${dbnode.name}-1", local.computer_names[idx + local.node_count], local.resource_suffixes.vm)
       role         = try(dbnode.role, "worker"),
-      db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[1],
-      admin_nic_ip = lookup(dbnode, "admin_nic_ips", [false, false])[1]
+      db_nic_ip    = lookup(dbnode, "db_nic_ips", [null, null])[1],
+      admin_nic_ip = lookup(dbnode, "admin_nic_ips", [null, null])[1]
       } if local.anydb_ha
     ]
     ]
@@ -213,6 +213,7 @@ locals {
       name           = dbnode.name
       computername   = dbnode.computername
       db_nic_ip      = dbnode.db_nic_ip
+      admin_nic_ip   = dbnode.admin_nic_ip
       size           = local.anydb_sku
       os             = local.anydb_ostype,
       authentication = local.authentication
