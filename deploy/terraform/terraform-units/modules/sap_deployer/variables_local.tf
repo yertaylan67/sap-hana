@@ -78,7 +78,7 @@ locals {
 
   deployers = [
     for idx, deployer in local.deployer_input : {
-      "name"                 = "deployer",
+      "name"                 = local.virtualmachine_names[idx],
       "destroy_after_deploy" = true,
       "size"                 = try(deployer.size, "Standard_D2s_v3"),
       "disk_type"            = try(deployer.disk_type, "StandardSSD_LRS")
