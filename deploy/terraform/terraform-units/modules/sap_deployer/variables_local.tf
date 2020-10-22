@@ -53,6 +53,9 @@ locals {
   // Deployer(s) information with default override
   enable_deployers = length(local.deployer_input) > 0 ? true : false
 
+  // Provide the ability to deploy without the VM
+  enable_vm        = try(local.deployer_input.deploy_vm, true)
+
   // Deployer(s) authentication method with default
   enable_password = contains(compact([
     for deployer in local.deployer_input :
