@@ -54,7 +54,7 @@ locals {
   enable_deployers = length(local.deployer_input) > 0 ? true : false
 
   // Provide the ability to deploy without the VM
-  enable_vm        = try(local.deployer_input.deploy_vm, true)
+  enable_vm        = try(local.deployer_input[0].deploy_vm, true)
 
   // Deployer(s) authentication method with default
   enable_password = contains(compact([
@@ -115,7 +115,7 @@ locals {
   // Deployer(s) information with updated pip
   deployers_updated = [
     for idx, deployer in local.deployers : merge({
-      "public_ip_address" = azurerm_public_ip.deployer[idx].ip_address
+      "public_ip_address" = local.enable_vm ? azurerm_public_ip.deployer[idx].ip_address : ""
     }, deployer)
   ]
 
@@ -135,7 +135,7 @@ locals {
   ]))
 
   // public ip address of the first deployer
-  deployer_public_ip_address = local.enable_deployers ? local.deployer_public_ip_address_list[0] : ""
+  deployer_public_ip_address = local.enable_deployers && local.enable_vm  ? local.deployer_public_ip_address_list[0] : ""
 
   // Comment out code with users.object_id for the time being.
   // deployer_users_id_list = distinct(compact(concat(local.deployer_users_id)))
