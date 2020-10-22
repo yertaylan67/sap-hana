@@ -54,7 +54,7 @@ locals {
   enable_deployers = length(local.deployer_input) > 0 ? true : false
 
   // Provide the ability to deploy without the VM
-  enable_vm        = try(local.deployer_input.deploy_vm, true)
+  enable_vm = try(local.deployer_input[0].deploy_vm, true)
 
   deployers = [
     for idx, deployer in local.deployer_input : {
@@ -87,7 +87,7 @@ locals {
   // Deployer(s) information with updated pip
   deployers_updated = [
     for idx, deployer in local.deployers : merge({
-      "public_ip_address" = azurerm_public_ip.deployer[idx].ip_address
+      "public_ip_address" = local.enable_vm ? azurerm_public_ip.deployer[idx].ip_address : ""
     }, deployer)
   ]
 
