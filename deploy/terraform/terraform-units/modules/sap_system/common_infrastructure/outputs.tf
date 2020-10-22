@@ -50,9 +50,6 @@ output "sid_kv_prvt" {
  To force dependency between kv access policy and secrets. Expected behavior:
  https://github.com/terraform-providers/terraform-provider-azurerm/issues/4971
 */
-output "sid_kv_user_spn" {
-  value = azurerm_key_vault_access_policy.sid_kv_user_spn
-}
 
 output "admin_subnet" {
   value = local.sub_admin_exists ? data.azurerm_subnet.admin[0] : azurerm_subnet.admin[0]

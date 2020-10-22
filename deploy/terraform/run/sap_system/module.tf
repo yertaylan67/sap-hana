@@ -107,7 +107,6 @@ module "hdb_node" {
   naming                     = module.sap_namegenerator.naming
   custom_disk_sizes_filename = var.db_disk_sizes_filename
   sid_kv_user                = module.common_infrastructure.sid_kv_user
-  sid_kv_user_spn            = module.common_infrastructure.sid_kv_user_spn
   deployer-uai               = module.deployer.deployer-uai
   // Comment out code with users.object_id for the time being.
   // deployer_user    = module.deployer.deployer_user
@@ -130,7 +129,7 @@ module "app_tier" {
   vnet-sap         = module.common_infrastructure.vnet-sap
   storage-bootdiag = module.common_infrastructure.storage-bootdiag
   ppg              = module.common_infrastructure.ppg
-  random-id        = module.common_infrastructure.random-id
+  naming           = module.sap_namegenerator.naming
   sid_kv_user      = module.common_infrastructure.sid_kv_user
   deployer-uai     = module.deployer.deployer-uai
   // Comment out code with users.object_id for the time being.  
@@ -153,8 +152,9 @@ module "anydb_node" {
   vnet-sap         = module.common_infrastructure.vnet-sap
   storage-bootdiag = module.common_infrastructure.storage-bootdiag
   ppg              = module.common_infrastructure.ppg
-  random-id        = module.common_infrastructure.random-id
+  naming           = module.sap_namegenerator.naming
   sid_kv_user      = module.common_infrastructure.sid_kv_user
+  // Comment out code with users.object_id for the time being.  
   admin_subnet     = module.common_infrastructure.admin_subnet
 }
 
