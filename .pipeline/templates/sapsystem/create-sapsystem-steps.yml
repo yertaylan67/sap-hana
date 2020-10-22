@@ -49,6 +49,13 @@ steps:
       sap_vnet_prefix_idx=${sap_vnet_prefix_parts[1]}
       unset IFS
 
+<<<<<<< HEAD
+=======
+      landscape_kv_arm_id=$(az keyvault list --resource-group ${saplandscape_rg} | jq -r "'".[] | select(.name | contains(\\\"user\\\")).id"'")
+      landscape_kv_name=$(az keyvault list --resource-group ${saplandscape_rg} | jq -r "'".[] | select(.name | contains(\\\"user\\\")).name"'")
+      sid_public_key_secret_name="${saplandscape_rg}-sid-sshkey-pub"
+
+>>>>>>> 6959b9cbe5e38ecbe07d6a3a6915094317152718
       # Modify environment value so it starts with u and with length of 5
       sapsystem_env=${{parameters.sapsystem_env}}
       sapsystem_isRelease=${sapsystem_env%%$buildId*}

@@ -13,6 +13,10 @@ variable "deployer_tfstate" {
   description = "terraform.tfstate of deployer"
 }
 
+variable "service_principal" {
+  description = "Current service principal used to authenticate to Azure"
+}
+
 locals {
 
   storageaccount_names = var.naming.storageaccount_names.LIBRARY
@@ -78,8 +82,8 @@ locals {
   kv_private_name = local.keyvault_names.privileged_access
   kv_user_name    = local.keyvault_names.user_access
 
-  // spn
-  spn = try(var.spn, {})
+  // Current service principal
+  service_principal = try(var.service_principal, {})
 
   // deployer terraform.tfstate
   deployer_tfstate          = var.deployer_tfstate

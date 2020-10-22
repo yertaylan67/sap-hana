@@ -26,8 +26,6 @@ variable "app_disk_sizes_filename" {
 # Set defaults
 locals {
 
-  ansible_path = "${module.saplibrary.environment}_${module.saplibrary.sid}"
-
   # Options
   enable_secure_transfer = try(var.options.enable_secure_transfer, true)
   ansible_execution      = try(var.options.ansible_execution, false)
@@ -121,6 +119,14 @@ locals {
     client_id       = data.azurerm_key_vault_secret.client_id.value,
     client_secret   = data.azurerm_key_vault_secret.client_secret.value,
     tenant_id       = data.azurerm_key_vault_secret.tenant_id.value,
+  }
+
+  service_principal = {
+    subscription_id = local.spn.subscription_id,
+    client_id       = local.spn.client_id,
+    client_secret   = local.spn.client_secret,
+    tenant_id       = local.spn.tenant_id,
+    object_id       = data.azuread_service_principal.sp.id 
   }
 }
 

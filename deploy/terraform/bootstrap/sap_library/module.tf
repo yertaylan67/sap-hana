@@ -10,7 +10,7 @@ module "sap_library" {
   naming                  = module.sap_namegenerator.naming
   software                = var.software
   deployer                = var.deployer
-  spn                     = local.spn
+  service_principal       = local.service_principal
   deployer_tfstate        = data.terraform_remote_state.deployer
 
 }

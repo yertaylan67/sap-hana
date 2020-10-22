@@ -25,8 +25,8 @@ variable naming {
   description = "Defines the names for the resources"
 }
 
-variable "spn" {
-  description = "Current SPN used to authenticate to Azure"
+variable "service_principal" {
+  description = "Current service principal used to authenticate to Azure"
 }
 
 variable "deployer-uai" {
@@ -163,8 +163,7 @@ locals {
      At phase 2, the logic will be updated and the key vault information will be obtained from tfstate file of sap landscape.  
   */
   kv_landscape_id     = try(local.var_infra.landscape.key_vault_arm_id, "")
-  secret_sid_pk_name  = try(local.var_infra.landscape.sid_public_key_secret_name, "")
-  enable_landscape_kv = local.kv_landscape_id == "" ? true : false
+  enable_landscape_kv = local.kv_landscape_id == ""
 
   // By default, Ansible ssh key for SID uses generated public key. Provide sshkey.path_to_public_key and path_to_private_key overides it
   sid_public_key  = local.enable_landscape_kv ? try(file(var.sshkey.path_to_public_key), tls_private_key.sid[0].public_key_openssh) : null
@@ -401,7 +400,7 @@ locals {
     downloader = local.downloader
   })
 
-  // SPN
-  spn = try(var.spn, {})
+  // Current service principal
+  service_principal = try(var.service_principal, {})
 
 }
