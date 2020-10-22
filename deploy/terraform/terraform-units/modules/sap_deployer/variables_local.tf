@@ -78,6 +78,8 @@ locals {
   // By default use generated public key. Provide sshkey.path_to_public_key and path_to_private_key overides it
   public_key  = (local.enable_deployers && local.enable_key) ? (local.key_exist ? data.azurerm_key_vault_secret.pk[0].value : try(file(var.sshkey.path_to_public_key), tls_private_key.deployer[0].public_key_openssh)) : null
   private_key = (local.enable_deployers && local.enable_key) ? (local.key_exist ? data.azurerm_key_vault_secret.ppk[0].value : try(file(var.sshkey.path_to_private_key), tls_private_key.deployer[0].private_key_pem)) : null
+  // Provide the ability to deploy without the VM
+  enable_vm        = try(local.deployer_input.deploy_vm, true)
 
   deployers = [
     for idx, deployer in local.deployer_input : {
@@ -105,14 +107,10 @@ locals {
         "terraform",
         "ansible"
       ],
-<<<<<<< HEAD
       "private_ip_address" = try(deployer.private_ip_address, cidrhost(local.sub_mgmt_deployed.address_prefixes[0], idx + 4)),
       "users" = {
         "object_id" = try(deployer.users.object_id, [])
       }
-=======
-      "private_ip_address" = try(deployer.private_ip_address, cidrhost(local.sub_mgmt_deployed.address_prefixes[idx], 0 + 4))
->>>>>>> enable_vm flag added
     }
   ]
 
