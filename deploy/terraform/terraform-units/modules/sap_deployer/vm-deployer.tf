@@ -33,11 +33,11 @@ resource "azurerm_network_interface" "deployer" {
   }
 }
 
-// User defined identity for all Deployer, assign contributor to the current subscription
+// User defined identity for all Deployers, assign contributor to the current subscription
 resource "azurerm_user_assigned_identity" "deployer" {
-  resource_group_name = azurerm_resource_group.deployer[0].name
+  name                = format("%s%s", local.prefix, local.resource_suffixes.msi)
   location            = azurerm_resource_group.deployer[0].location
-  name                = format("%s-msi", local.prefix)
+  resource_group_name = azurerm_resource_group.deployer[0].name
 }
 
 // Add role to be able to deploy resources

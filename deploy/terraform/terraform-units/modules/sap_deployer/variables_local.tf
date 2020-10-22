@@ -105,10 +105,14 @@ locals {
         "terraform",
         "ansible"
       ],
+<<<<<<< HEAD
       "private_ip_address" = try(deployer.private_ip_address, cidrhost(local.sub_mgmt_deployed.address_prefixes[0], idx + 4)),
       "users" = {
         "object_id" = try(deployer.users.object_id, [])
       }
+=======
+      "private_ip_address" = try(deployer.private_ip_address, cidrhost(local.sub_mgmt_deployed.address_prefixes[idx], 0 + 4))
+>>>>>>> enable_vm flag added
     }
   ]
 
