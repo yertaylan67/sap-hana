@@ -79,7 +79,7 @@ locals {
   public_key  = (local.enable_deployers && local.enable_key) ? (local.key_exist ? data.azurerm_key_vault_secret.pk[0].value : try(file(var.sshkey.path_to_public_key), tls_private_key.deployer[0].public_key_openssh)) : null
   private_key = (local.enable_deployers && local.enable_key) ? (local.key_exist ? data.azurerm_key_vault_secret.ppk[0].value : try(file(var.sshkey.path_to_private_key), tls_private_key.deployer[0].private_key_pem)) : null
   // Provide the ability to deploy without the VM
-  enable_vm        = try(local.deployer_input.deploy_vm, true)
+  enable_vm = try(local.deployer_input[0].deploy_vm, true)
 
   deployers = [
     for idx, deployer in local.deployer_input : {
