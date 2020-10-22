@@ -149,12 +149,12 @@ locals {
 */
   // kv for sap landscape
   kv_prefix       = var.naming.prefix.VNET
-  kv_private_name = local.landscape_keyvault_names.privileged_access
+  kv_private_name = local.landscape_keyvault_names.private_access
   kv_user_name    = local.landscape_keyvault_names.user_access
 
   // key vault naming for sap system
   sid_kv_prefix       = var.naming.prefix.SDU
-  sid_kv_private_name = local.keyvault_names.privileged_access
+  sid_kv_private_name = local.keyvault_names.private_access
   sid_kv_user_name    = local.keyvault_names.user_access
 
   /* 

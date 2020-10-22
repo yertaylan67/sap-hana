@@ -79,7 +79,7 @@ locals {
   // deployer_users_id = try(local.deployer.users.object_id, [])
 
   // key vault for saplibrary
-  kv_private_name = local.keyvault_names.privileged_access
+  kv_private_name = local.keyvault_names.private_access
   kv_user_name    = local.keyvault_names.user_access
 
   // Current service principal

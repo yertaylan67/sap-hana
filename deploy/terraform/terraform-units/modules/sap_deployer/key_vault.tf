@@ -3,7 +3,7 @@ data "azurerm_client_config" "deployer" {}
 
 resource "azurerm_key_vault" "kv_prvt" {
   count                      = local.enable_deployers ? 1 : 0
-  name                       = local.keyvault_names.privileged_access
+  name                       = local.keyvault_names.private_access
   location                   = azurerm_resource_group.deployer[0].location
   resource_group_name        = azurerm_resource_group.deployer[0].name
   tenant_id                  = data.azurerm_client_config.deployer.tenant_id
