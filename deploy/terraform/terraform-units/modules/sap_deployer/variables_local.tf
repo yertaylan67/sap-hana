@@ -52,6 +52,8 @@ locals {
 
   // Deployer(s) information with default override
   enable_deployers = length(local.deployer_input) > 0 ? true : false
+  enable_vm        = try(local.deployer_input.deploy_vm, true)
+
   deployers = [
     for idx, deployer in local.deployer_input : {
       "name"                 = local.virtualmachine_names[idx],
@@ -76,7 +78,7 @@ locals {
         "terraform",
         "ansible"
       ],
-      "private_ip_address" = try(deployer.private_ip_address, cidrhost(local.sub_mgmt_deployed.address_prefixes[0], idx + 4))
+      "private_ip_address" = try(deployer.private_ip_address, cidrhost(local.sub_mgmt_deployed.address_prefixes[idx], 0 + 4))
     }
   ]
 
