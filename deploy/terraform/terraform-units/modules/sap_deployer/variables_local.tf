@@ -93,8 +93,7 @@ locals {
         "type"     = try(deployer.authentication.type, "key")
         "username" = try(deployer.authentication.username, "azureadm")
         "sshkey" = {
-          "public_key"  = local.public_key
-          "private_key" = local.private_key
+          "path_to_private_key" = var.sshkey.path_to_private_key
         }
         "password" = local.password
       },
