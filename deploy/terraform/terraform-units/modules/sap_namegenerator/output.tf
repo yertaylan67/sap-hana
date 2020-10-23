@@ -6,6 +6,12 @@ output naming {
       VNET     = local.vnet_name
       LIBRARY  = local.library_name
     }
+    prefix_resource = {
+      DEPLOYER = local.deployer_name_resource
+      SDU      = local.sdu_name_resource
+      VNET     = local.vnet_name_resource
+      LIBRARY  = local.library_name_resource
+    }
     storageaccount_names = {
       DEPLOYER = local.deployer_storageaccount_name
       SDU      = local.sdu_storageaccount_name
