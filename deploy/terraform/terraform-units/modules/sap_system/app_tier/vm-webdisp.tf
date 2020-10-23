@@ -21,7 +21,7 @@ resource "azurerm_network_interface" "web" {
 # Create Application NICs
 resource "azurerm_network_interface" "web-admin" {
   count                         = local.enable_deployment && local.apptier_dual_nics ? local.webdispatcher_count : 0
-  name                          = format("%s_%s%s", local.prefix, local.web_virtualmachine_names[count.index], local.resource_suffixes.admin-nic)
+  name                          = format("%s%s%s%s", local.prefix, var.naming.separator, local.web_virtualmachine_names[count.index], local.resource_suffixes.admin-nic)
   location                      = var.resource-group[0].location
   resource_group_name           = var.resource-group[0].name
   enable_accelerated_networking = local.app_sizing.compute.accelerated_networking
