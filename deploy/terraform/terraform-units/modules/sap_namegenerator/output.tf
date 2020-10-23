@@ -52,5 +52,7 @@ output naming {
       OBSERVER_VMNAME       = local.observer_vm_names
     }
     resource_suffixes = var.resource_suffixes
+
+    separator = local.separator
   }
 }
