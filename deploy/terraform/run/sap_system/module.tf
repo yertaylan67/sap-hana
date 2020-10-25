@@ -105,57 +105,54 @@ module "hdb_node" {
   storage-bootdiag           = module.common_infrastructure.storage-bootdiag
   ppg                        = module.common_infrastructure.ppg
   naming                     = module.sap_namegenerator.naming
-  custom_disk_sizes_filename = var.db_disk_sizes_filename
   sid_kv_user                = module.common_infrastructure.sid_kv_user
   deployer-uai               = module.deployer.deployer-uai
-  // Comment out code with users.object_id for the time being.
-  // deployer_user    = module.deployer.deployer_user
-  admin_subnet = module.common_infrastructure.admin_subnet
+  admin_subnet               = module.common_infrastructure.admin_subnet
+  custom_disk_sizes_filename = var.db_disk_sizes_filename
 }
 
 // Create Application Tier nodes
 module "app_tier" {
-  source           = "../../terraform-units/modules/sap_system/app_tier"
-  application      = var.application
-  databases        = var.databases
-  infrastructure   = var.infrastructure
-  jumpboxes        = var.jumpboxes
-  options          = local.options
-  software         = var.software
-  ssh-timeout      = var.ssh-timeout
-  sshkey           = var.sshkey
-  resource-group   = module.common_infrastructure.resource-group
-  subnet-mgmt      = module.common_infrastructure.subnet-mgmt
-  vnet-sap         = module.common_infrastructure.vnet-sap
-  storage-bootdiag = module.common_infrastructure.storage-bootdiag
-  ppg              = module.common_infrastructure.ppg
-  naming           = module.sap_namegenerator.naming
-  sid_kv_user      = module.common_infrastructure.sid_kv_user
-  deployer-uai     = module.deployer.deployer-uai
-  // Comment out code with users.object_id for the time being.  
-  // deployer_user    = module.deployer.deployer_user
-  admin_subnet = module.common_infrastructure.admin_subnet
+  source                     = "../../terraform-units/modules/sap_system/app_tier"
+  application                = var.application
+  databases                  = var.databases
+  infrastructure             = var.infrastructure
+  jumpboxes                  = var.jumpboxes
+  options                    = local.options
+  software                   = var.software
+  ssh-timeout                = var.ssh-timeout
+  sshkey                     = var.sshkey
+  resource-group             = module.common_infrastructure.resource-group
+  subnet-mgmt                = module.common_infrastructure.subnet-mgmt
+  vnet-sap                   = module.common_infrastructure.vnet-sap
+  storage-bootdiag           = module.common_infrastructure.storage-bootdiag
+  ppg                        = module.common_infrastructure.ppg
+  naming                     = module.sap_namegenerator.naming
+  sid_kv_user                = module.common_infrastructure.sid_kv_user
+  deployer-uai               = module.deployer.deployer-uai
+  admin_subnet               = module.common_infrastructure.admin_subnet
+  custom_disk_sizes_filename = var.app_disk_sizes_filename
 }
 
 // Create anydb database nodes
 module "anydb_node" {
-  source           = "../../terraform-units/modules/sap_system/anydb_node"
-  application      = var.application
-  databases        = var.databases
-  infrastructure   = var.infrastructure
-  jumpboxes        = var.jumpboxes
-  options          = var.options
-  software         = var.software
-  ssh-timeout      = var.ssh-timeout
-  sshkey           = var.sshkey
-  resource-group   = module.common_infrastructure.resource-group
-  vnet-sap         = module.common_infrastructure.vnet-sap
-  storage-bootdiag = module.common_infrastructure.storage-bootdiag
-  ppg              = module.common_infrastructure.ppg
-  naming           = module.sap_namegenerator.naming
-  sid_kv_user      = module.common_infrastructure.sid_kv_user
-  // Comment out code with users.object_id for the time being.  
-  admin_subnet     = module.common_infrastructure.admin_subnet
+  source                     = "../../terraform-units/modules/sap_system/anydb_node"
+  application                = var.application
+  databases                  = var.databases
+  infrastructure             = var.infrastructure
+  jumpboxes                  = var.jumpboxes
+  options                    = var.options
+  software                   = var.software
+  ssh-timeout                = var.ssh-timeout
+  sshkey                     = var.sshkey
+  resource-group             = module.common_infrastructure.resource-group
+  vnet-sap                   = module.common_infrastructure.vnet-sap
+  storage-bootdiag           = module.common_infrastructure.storage-bootdiag
+  ppg                        = module.common_infrastructure.ppg
+  naming                     = module.sap_namegenerator.naming
+  sid_kv_user                = module.common_infrastructure.sid_kv_user
+  admin_subnet               = module.common_infrastructure.admin_subnet
+  custom_disk_sizes_filename = var.db_disk_sizes_filename
 }
 
 // Generate output files

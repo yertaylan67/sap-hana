@@ -53,7 +53,7 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
     local.zonal_deployment && local.db_server_count == local.db_zone_count ? null : azurerm_availability_set.anydb[count.index % local.db_zone_count].id
   )
 
-  zone = local.enable_ultradisk || local.db_server_count == local.db_zone_count ? local.zones[count.index % local.db_zone_count] : null
+  zone = local.enable_ultradisk || (local.db_server_count == local.db_zone_count) ? local.zones[count.index % local.db_zone_count] : null
 
   network_interface_ids = local.anydb_dual_nics ? (
     [azurerm_network_interface.anydb_admin[count.index].id, azurerm_network_interface.anydb_db[count.index].id]) : (
@@ -125,7 +125,7 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
     local.zonal_deployment && local.db_server_count == local.db_zone_count ? null : azurerm_availability_set.anydb[count.index % local.db_zone_count].id
   )
 
-  zone = local.enable_ultradisk || local.db_server_count == local.db_zone_count ? local.zones[count.index % local.db_zone_count] : null
+  zone = local.enable_ultradisk || (local.db_server_count == local.db_zone_count) ? local.zones[count.index % local.db_zone_count] : null
 
   network_interface_ids = local.anydb_dual_nics ? (
     [azurerm_network_interface.anydb_admin[count.index].id, azurerm_network_interface.anydb_db[count.index].id]) : (
@@ -182,7 +182,7 @@ resource "azurerm_managed_disk" "disks" {
   storage_account_type = local.anydb_disks[count.index].storage_account_type
   disk_size_gb         = local.anydb_disks[count.index].disk_size_gb
 
-  zones = local.enable_ultradisk || local.db_server_count == local.db_zone_count ? (
+  zones = local.enable_ultradisk || (local.db_server_count == local.db_zone_count) ? (
     upper(local.anydb_ostype) == "LINUX" ? (
       [azurerm_linux_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].zone]) : (
       [azurerm_windows_virtual_machine.dbserver[local.anydb_disks[count.index].vm_index].zone]
