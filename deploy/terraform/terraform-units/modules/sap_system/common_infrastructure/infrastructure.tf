@@ -35,7 +35,7 @@ data "azurerm_virtual_network" "vnet-sap" {
   resource_group_name = split("/", local.vnet_sap_arm_id)[4]
 }
 
-# Creates admin subnet of SAP VNET
+// Creates admin subnet of SAP VNET
 resource "azurerm_subnet" "admin" {
   count                = local.sub_admin_exists ? 0 : 1
   name                 = local.sub_admin_name
