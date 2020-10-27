@@ -10,10 +10,6 @@ output "nics-web" {
   value = azurerm_network_interface.web
 }
 
-output "nics-scs-admin" {
-  value = azurerm_network_interface.scs
-}
-
 output "nics-app-admin" {
   value = azurerm_network_interface.app-admin
 }

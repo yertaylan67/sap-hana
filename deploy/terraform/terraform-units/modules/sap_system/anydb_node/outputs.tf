@@ -3,7 +3,7 @@ output "nics-anydb" {
 }
 
 output "nics-anydb-admin" {
-  value = azurerm_network_interface.admin_anydb_db
+  value = azurerm_network_interface.anydb_admin
 }
 
 output "anydb_vm_names" {
