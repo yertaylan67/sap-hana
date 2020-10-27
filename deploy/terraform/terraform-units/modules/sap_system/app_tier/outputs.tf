@@ -19,8 +19,8 @@ output "app_vm_names" {
 
 output "app_computer_names" {
   value = upper(local.app_ostype) == "LINUX" ? (
-    azurerm_linux_virtual_machine.app.*.computername) : (
-    azurerm_windows_virtual_machine.app.*.computername
+    azurerm_linux_virtual_machine.app.*.computer_name) : (
+    azurerm_windows_virtual_machine.app.*.computer_name
   )
 }
 
@@ -33,8 +33,8 @@ output "scs_vm_names" {
 
 output "scs_computer_names" {
   value = upper(local.scs_ostype) == "LINUX" ? (
-    azurerm_linux_virtual_machine.scs.*.computername) : (
-    azurerm_windows_virtual_machine.scs.*.computername
+    azurerm_linux_virtual_machine.scs.*.computer_name) : (
+    azurerm_windows_virtual_machine.scs.*.computer_name
   )
 }
 
@@ -47,8 +47,8 @@ output "web_vm_names" {
 
 output "web_computer_names" {
   value = upper(local.web_ostype) == "LINUX" ? (
-    azurerm_linux_virtual_machine.web.*.computername) : (
-    azurerm_windows_virtual_machine.web.*.computername
+    azurerm_linux_virtual_machine.web.*.computer_name) : (
+    azurerm_windows_virtual_machine.web.*.computer_name
   )
 }
 

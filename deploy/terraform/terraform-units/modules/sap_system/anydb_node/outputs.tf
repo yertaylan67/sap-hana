@@ -11,8 +11,8 @@ output "anydb_vm_names" {
 
 output "anydb_computer_names" {
   value = upper(local.anydb_ostype) == "LINUX" ? (
-    azurerm_linux_virtual_machine.dbserver.*.computername) : (
-    azurerm_windows_virtual_machine.dbserver.*.computername
+    azurerm_linux_virtual_machine.dbserver.*.computer_name) : (
+    azurerm_windows_virtual_machine.dbserver.*.computer_name
   )
 }
 
