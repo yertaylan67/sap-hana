@@ -18,9 +18,11 @@ variable "max_timeout" {
   default     = 10
 }
 
+/*
 // Registers the current deployment state with Azure's Metadata Service (IMDS)
 resource "null_resource" "IMDS" {
   provisioner "local-exec" {
     command = "curl --silent --max-time ${var.max_timeout} -i -H \"Metadata: \"true\"\" -H \"user-agent: SAP AutoDeploy/${var.auto-deploy-version}; scenario=${var.scenario}; deploy-status=Terraform_${var.scenario}\" http://169.254.169.254/metadata/instance?api-version=${var.api-version} || true"
   }
 }
+*/

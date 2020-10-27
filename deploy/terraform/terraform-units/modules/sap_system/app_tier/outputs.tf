@@ -10,38 +10,70 @@ output "nics-web" {
   value = azurerm_network_interface.web
 }
 
+output "app_vm_names" {
+  value = local.app_virtualmachine_names
+}
+
+output "app_computer_names" {
+  value = local.app_computer_names
+}
+
+output "scs_vm_names" {
+  value = local.scs_virtualmachine_names
+}
+
+output "scs_computer_names" {
+  value = local.scs_computer_names
+}
+
+output "web_vm_names" {
+  value = local.web_virtualmachine_names
+}
+
+output "web_computer_names" {
+  value = local.web_computer_names
+}
+
+output "scs_lb_name" {
+  value = azurerm_lb.scs.*.name
+}
+
+output "web_lb_name" {
+  value = azurerm_lb.web.*.name
+}
+
 output "app_ip" {
-  value = azurerm_network_interface.app.*.ip_configuration.private_ip_address
+  value = azurerm_network_interface.app.*.private_ip_address
 }
 
 output "app_admin_ip" {
-  value = azurerm_network_interface.app-admin.*.ip_configuration.private_ip_address
+  value = azurerm_network_interface.app-admin.*.private_ip_address
 }
 
 output "scs_ip" {
-  value = azurerm_network_interface.scs.*.ip_configuration.private_ip_address
+  value = azurerm_network_interface.scs.*.private_ip_address
 }
 
 output "scs_admin_ip" {
-  value = azurerm_network_interface.scs-admin.*.ip_configuration.private_ip_address
+  value = azurerm_network_interface.scs-admin.*.private_ip_address
 }
 
 output "web_ip" {
-  value = azurerm_network_interface.web.*.ip_configuration.private_ip_address
+  value = azurerm_network_interface.web.*.private_ip_address
 }
 
 output "web_admin_ip" {
-  value = azurerm_network_interface.web-admin.*.ip_configuration.private_ip_address
+  value = azurerm_network_interface.web-admin.*.private_ip_address
 }
 
 output "web_lb_ip" {
-  value =  azurerm_lb.web.*.frontend_ip_configuration.private_ip_address
+  value = azurerm_lb.web.*.private_ip_address
 }
 
 output "scs_lb_ip" {
-  value =  azurerm_lb.scs.*.frontend_ip_configuration[0].private_ip_address
+  value = azurerm_lb.scs.*.private_ip_address
 }
 
 output "ers_lb_ip" {
-  value =  azurerm_lb.web.*.frontend_ip_configuration[1].private_ip_address
+  value = azurerm_lb.web.*.private_ip_address
 }

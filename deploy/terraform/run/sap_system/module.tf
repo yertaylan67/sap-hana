@@ -158,7 +158,7 @@ module "anydb_node" {
 // Generate output files
 module "output_files" {
   source                       = "../../terraform-units/modules/sap_system/output_files"
-  application                  = module.app_tier.application
+  application                  = var.application
   databases                    = var.databases
   infrastructure               = var.infrastructure
   jumpboxes                    = var.jumpboxes
