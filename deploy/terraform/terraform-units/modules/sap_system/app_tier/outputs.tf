@@ -10,6 +10,22 @@ output "nics-web" {
   value = azurerm_network_interface.web
 }
 
+output "nics-scs-admin" {
+  value = azurerm_network_interface.scs
+}
+
+output "nics-app-admin" {
+  value = azurerm_network_interface.app-admin
+}
+
+output "nics-scs-admin" {
+  value = azurerm_network_interface.scs-admin
+}
+
+output "nics-web-admin" {
+  value = azurerm_network_interface.web-admin
+}
+
 output "app_vm_names" {
   value = upper(local.app_ostype) == "LINUX" ? (
     azurerm_linux_virtual_machine.app.*.name) : (

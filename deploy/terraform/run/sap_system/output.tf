@@ -1,5 +1,5 @@
 // Output IP Addresses
-/*
+
 output "anydb_vm_names" {
   value = module.anydb_node.anydb_vm_names
 }
@@ -92,7 +92,39 @@ output "scs_lb_name" {
 output "web_lb_name" {
   value = module.app_tier.web_lb_name
 }
-*/
+
+output "app_nics_app" {
+  value = module.app_tier.nics-app
+}
+
+output "app_nics_scs" {
+  value = module.app_tier.nics-scs
+}
+
+output "app_nics_web" {
+  value = module.app_tier.nics-web
+}
+
+output "app_nics_app_admin" {
+  value = module.app_tier.nics-app-admin
+}
+
+output "app_nics_scs_admin" {
+  value = module.app_tier.nics-scs-admin
+}
+
+output "app_nics_web_admin" {
+  value = module.app_tier.nics-web-admin
+}
+
+output "anydb_nics_db" {
+  value = module.anydb_node.nics-anydb
+}
+
+output "anydb_nics_db_admin" {
+  value = module.anydb_node.nics-anydb-admin
+}
+
 
 output "dns_info" {
   value = concat(
