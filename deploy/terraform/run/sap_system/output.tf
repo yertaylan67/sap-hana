@@ -8,7 +8,7 @@ output "anydb_computer_names" {
   value = module.anydb_node.anydb_computer_names
 }
 
-output "db_lb_name" {
+output "anydb_lb_name" {
   value = module.anydb_node.db_lb_name
 }
 
