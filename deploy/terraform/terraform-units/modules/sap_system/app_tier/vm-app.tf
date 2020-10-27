@@ -10,7 +10,7 @@ resource "azurerm_network_interface" "app" {
     name      = "IPConfig1"
     subnet_id = local.sub_app_exists ? data.azurerm_subnet.subnet-sap-app[0].id : azurerm_subnet.subnet-sap-app[0].id
     private_ip_address = try(local.app_nic_ips[count.index],
-      cidrhost(local.sub_web_exists ?
+      cidrhost(local.sub_app_exists ?
         data.azurerm_subnet.subnet-sap-app[0].address_prefixes[0] :
         azurerm_subnet.subnet-sap-app[0].address_prefixes[0],
         tonumber(count.index) + local.ip_offsets.app_vm
