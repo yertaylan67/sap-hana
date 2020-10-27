@@ -132,7 +132,7 @@ module "app_tier" {
   deployer-uai               = module.deployer.deployer-uai
   admin_subnet               = module.common_infrastructure.admin_subnet
   custom_disk_sizes_filename = var.app_disk_sizes_filename
-  admin_subnet               = module.common_infrastructure.admin_subnet
+ 
 }
 
 // Create anydb database nodes
@@ -153,8 +153,8 @@ module "anydb_node" {
   naming                     = module.sap_namegenerator.naming
   sid_kv_user                = module.common_infrastructure.sid_kv_user
   admin_subnet               = module.common_infrastructure.admin_subnet
-  custom_disk_sizes_filename = var.db_disk_sizes_filename
-  admin_subnet               = module.common_infrastructure.admin_subnet
+   custom_disk_sizes_filename = var.db_disk_sizes_filename
+ 
 }
 
 // Generate output files
