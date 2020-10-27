@@ -54,7 +54,7 @@ data "azurerm_subnet" "admin" {
 
 # Creates SAP admin subnet nsg
 resource "azurerm_network_security_group" "admin" {
-  count               = (local.enable_deployment && ! local.sub_admin_nsg_exists) ? 1 : 0
+  count               = ! local.sub_admin_nsg_exists ? 1 : 0
   name                = local.sub_admin_nsg_name
   resource_group_name = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
   location            = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
@@ -62,7 +62,7 @@ resource "azurerm_network_security_group" "admin" {
 
 # Imports the SAP admin subnet nsg data
 data "azurerm_network_security_group" "admin" {
-  count               = (local.enable_deployment && local.sub_admin_nsg_exists) ? 1 : 0
+  count               = local.sub_admin_nsg_exists ? 1 : 0
   name                = split("/", local.sub_admin_nsg_arm_id)[8]
   resource_group_name = split("/", local.sub_admin_nsg_arm_id)[4]
 }
