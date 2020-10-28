@@ -32,10 +32,6 @@ variable "custom_disk_sizes_filename" {
   default     = ""
 }
 
-variable "deployer-uai" {
-  description = "Details of the UAI used by deployer(s)"
-}
-
 variable "deployer_user" {
   description = "Details of the users"
   default     = []

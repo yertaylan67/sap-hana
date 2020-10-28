@@ -45,6 +45,7 @@ module "common_infrastructure" {
   subnet-mgmt         = module.deployer.subnet-mgmt
   nsg-mgmt            = module.deployer.nsg-mgmt
   naming              = module.sap_namegenerator.naming
+  service_principal   = local.service_principal
 }
 
 module "sap_namegenerator" {
@@ -115,6 +116,8 @@ module "hdb_node" {
   naming                     = module.sap_namegenerator.naming
   custom_disk_sizes_filename = var.db_disk_sizes_filename
   admin_subnet               = module.common_infrastructure.admin_subnet
+  sid_kv_user                = module.common_infrastructure.sid_kv_user
+
 }
 
 // Create Application Tier nodes
@@ -136,6 +139,7 @@ module "app_tier" {
   naming                     = module.sap_namegenerator.naming
   admin_subnet               = module.common_infrastructure.admin_subnet
   custom_disk_sizes_filename = var.app_disk_sizes_filename
+  sid_kv_user                = module.common_infrastructure.sid_kv_user
 }
 
 // Create anydb database nodes
@@ -156,6 +160,7 @@ module "anydb_node" {
   naming                     = module.sap_namegenerator.naming
   custom_disk_sizes_filename = var.db_disk_sizes_filename
   admin_subnet               = module.common_infrastructure.admin_subnet
+  sid_kv_user                = module.common_infrastructure.sid_kv_user
 }
 
 // Generate output files
@@ -169,9 +174,6 @@ module "output_files" {
   software                     = var.software
   ssh-timeout                  = var.ssh-timeout
   sshkey                       = var.sshkey
-  storage-sapbits              = module.saplibrary.saplibrary
-  file_share_name              = module.saplibrary.file_share_name
-  storagecontainer-sapbits     = module.saplibrary.storagecontainer-sapbits
   nics-iscsi                   = module.common_infrastructure.nics-iscsi
   infrastructure_w_defaults    = module.common_infrastructure.infrastructure_w_defaults
   software_w_defaults          = module.common_infrastructure.software_w_defaults

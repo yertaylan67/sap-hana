@@ -29,10 +29,10 @@ variable "service_principal" {
   description = "Current service principal used to authenticate to Azure"
 }
 
-variable "deployer-uai" {
+/*variable "deployer-uai" {
   description = "Details of the UAI used by deployer(s)"
 }
-
+*/
 /* Comment out code with users.object_id for the time being
 variable "deployer_user" {
   description = "Details of the users"
