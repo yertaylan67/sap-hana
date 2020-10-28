@@ -104,7 +104,6 @@ locals {
   }
 
   anchor_ostype           = upper(try(local.anchor.os.os_type, local.db_ostype))
-  anchor_enable_ultradisk = try(local.anchor.support_ultra, [false, false, false])
 
   //Resource group
   var_rg    = try(local.var_infra.resource_group, {})
