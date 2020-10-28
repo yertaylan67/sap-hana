@@ -16,6 +16,20 @@ module "deployer" {
   naming         = module.sap_namegenerator.naming
 }
 
+module "saplibrary" {
+  source         = "../../terraform-units/modules/sap_system/saplibrary"
+  application    = var.application
+  databases      = var.databases
+  infrastructure = var.infrastructure
+  jumpboxes      = var.jumpboxes
+  options        = var.options
+  software       = var.software
+  ssh-timeout    = var.ssh-timeout
+  sshkey         = var.sshkey
+  naming         = module.sap_namegenerator.naming
+}
+
+
 module "common_infrastructure" {
   source              = "../../terraform-units/modules/sap_system/common_infrastructure"
   is_single_node_hana = "true"
@@ -31,11 +45,6 @@ module "common_infrastructure" {
   subnet-mgmt         = module.deployer.subnet-mgmt
   nsg-mgmt            = module.deployer.nsg-mgmt
   naming              = module.sap_namegenerator.naming
-  deployer-uai        = module.deployer.deployer-uai
-  service_principal   = local.service_principal
-  // Comment out code with users.object_id for the time being.
-  // deployer_user       = module.deployer.deployer_user
-
 }
 
 module "sap_namegenerator" {
@@ -48,7 +57,6 @@ module "sap_namegenerator" {
   sap_sid       = local.sap_sid
   db_sid        = local.db_sid
   app_ostype    = local.app_ostype
-  anchor_ostype = local.anchor_ostype
   db_ostype     = local.db_ostype
   /////////////////////////////////////////////////////////////////////////////////////
   // The naming module creates a list of servers names that is app_server_count
@@ -105,10 +113,8 @@ module "hdb_node" {
   storage-bootdiag           = module.common_infrastructure.storage-bootdiag
   ppg                        = module.common_infrastructure.ppg
   naming                     = module.sap_namegenerator.naming
-  sid_kv_user                = module.common_infrastructure.sid_kv_user
-  deployer-uai               = module.deployer.deployer-uai
-  admin_subnet               = module.common_infrastructure.admin_subnet
   custom_disk_sizes_filename = var.db_disk_sizes_filename
+  admin_subnet               = module.common_infrastructure.admin_subnet
 }
 
 // Create Application Tier nodes
@@ -128,11 +134,8 @@ module "app_tier" {
   storage-bootdiag           = module.common_infrastructure.storage-bootdiag
   ppg                        = module.common_infrastructure.ppg
   naming                     = module.sap_namegenerator.naming
-  sid_kv_user                = module.common_infrastructure.sid_kv_user
-  deployer-uai               = module.deployer.deployer-uai
-  admin_subnet               = module.common_infrastructure.admin_subnet
   custom_disk_sizes_filename = var.app_disk_sizes_filename
- 
+
 }
 
 // Create anydb database nodes
@@ -151,16 +154,14 @@ module "anydb_node" {
   storage-bootdiag           = module.common_infrastructure.storage-bootdiag
   ppg                        = module.common_infrastructure.ppg
   naming                     = module.sap_namegenerator.naming
-  sid_kv_user                = module.common_infrastructure.sid_kv_user
+  custom_disk_sizes_filename = var.db_disk_sizes_filename
   admin_subnet               = module.common_infrastructure.admin_subnet
-   custom_disk_sizes_filename = var.db_disk_sizes_filename
- 
 }
 
 // Generate output files
 module "output_files" {
   source                       = "../../terraform-units/modules/sap_system/output_files"
-  application                  = module.app_tier.application
+  application                  = var.application
   databases                    = var.databases
   infrastructure               = var.infrastructure
   jumpboxes                    = var.jumpboxes
@@ -168,6 +169,9 @@ module "output_files" {
   software                     = var.software
   ssh-timeout                  = var.ssh-timeout
   sshkey                       = var.sshkey
+  storage-sapbits              = module.saplibrary.saplibrary
+  file_share_name              = module.saplibrary.file_share_name
+  storagecontainer-sapbits     = module.saplibrary.storagecontainer-sapbits
   nics-iscsi                   = module.common_infrastructure.nics-iscsi
   infrastructure_w_defaults    = module.common_infrastructure.infrastructure_w_defaults
   software_w_defaults          = module.common_infrastructure.software_w_defaults
