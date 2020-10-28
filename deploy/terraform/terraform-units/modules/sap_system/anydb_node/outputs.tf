@@ -25,3 +25,21 @@ output "any-database-info" {
 output "anydb-loadbalancers" {
   value = azurerm_lb.anydb
 }
+
+output "db_lb_name" {
+  value = azurerm_lb.anydb.*.name
+}
+
+output "anydb_vm_names" {
+  value = upper(local.anydb_ostype) == "LINUX" ? (
+    azurerm_linux_virtual_machine.dbserver.*.name) : (
+    azurerm_windows_virtual_machine.dbserver.*.name
+  )
+}
+
+output "anydb_computer_names" {
+  value = upper(local.anydb_ostype) == "LINUX" ? (
+    azurerm_linux_virtual_machine.dbserver.*.computer_name) : (
+    azurerm_windows_virtual_machine.dbserver.*.computer_name
+  )
+}
