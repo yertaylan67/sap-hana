@@ -134,6 +134,7 @@ module "app_tier" {
   storage-bootdiag           = module.common_infrastructure.storage-bootdiag
   ppg                        = module.common_infrastructure.ppg
   naming                     = module.sap_namegenerator.naming
+  admin_subnet               = module.common_infrastructure.admin_subnet
   custom_disk_sizes_filename = var.app_disk_sizes_filename
 
 }
