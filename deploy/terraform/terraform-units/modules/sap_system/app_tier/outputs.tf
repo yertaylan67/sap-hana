@@ -10,16 +10,16 @@ output "nics_web" {
   value = azurerm_network_interface.web
 }
 
-output "nics-app-admin" {
-  value = azurerm_network_interface.app-admin
+output "nics_app_admin" {
+  value = azurerm_network_interface.app_admin
 }
 
-output "nics-scs-admin" {
-  value = azurerm_network_interface.scs-admin
+output "nics_scs_admin" {
+  value = azurerm_network_interface.scs_admin
 }
 
-output "nics-web-admin" {
-  value = azurerm_network_interface.web-admin
+output "nics_web_admin" {
+  value = azurerm_network_interface.web_admin
 }
 
 output "app_vm_names" {
