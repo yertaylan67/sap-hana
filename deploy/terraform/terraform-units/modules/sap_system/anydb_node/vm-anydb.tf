@@ -25,7 +25,7 @@ resource "azurerm_network_interface" "anydb_db" {
   }
 }
 
-# Creates the DB traffic NIC and private IP address for database nodes
+# Creates the Admin traffic NIC and private IP address for database nodes
 resource "azurerm_network_interface" "anydb_admin" {
   count                         = local.enable_deployment && local.anydb_dual_nics ? local.db_server_count : 0
   name                          = format("%s%s", local.anydb_vms[count.index].name, local.resource_suffixes.admin-nic)
@@ -60,7 +60,10 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
     local.zonal_deployment && local.db_server_count == local.db_zone_count ? null : azurerm_availability_set.anydb[count.index % local.db_zone_count].id
   )
 
-  zone = local.zonal_deployment && (local.db_server_count == local.db_zone_count) ? local.zones[count.index % local.db_zone_count] : null
+  zone = local.zonal_deployment ? (
+    local.db_server_count == local.db_zone_count ? local.zones[count.index % local.db_zone_count] : null) : (
+    null
+  )
 
   network_interface_ids = local.anydb_dual_nics ? (
     [azurerm_network_interface.anydb_admin[count.index].id, azurerm_network_interface.anydb_db[count.index].id]) : (
@@ -129,7 +132,10 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
     local.zonal_deployment && local.db_server_count == local.db_zone_count ? null : azurerm_availability_set.anydb[count.index % local.db_zone_count].id
   )
 
-  zone = local.zonal_deployment && (local.db_server_count == local.db_zone_count) ? local.zones[count.index % local.db_zone_count] : null
+  zone = local.zonal_deployment ? (
+    local.db_server_count == local.db_zone_count ? local.zones[count.index % local.db_zone_count] : null) : (
+    null
+  )
 
   network_interface_ids = local.anydb_dual_nics ? (
     [azurerm_network_interface.anydb_admin[count.index].id, azurerm_network_interface.anydb_db[count.index].id]) : (
