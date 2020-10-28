@@ -21,7 +21,7 @@ resource "azurerm_network_interface" "app" {
 }
 
 # Create Application NICs
-resource "azurerm_network_interface" "app-admin" {
+resource "azurerm_network_interface" "app_admin" {
   count                         = local.enable_deployment && local.apptier_dual_nics ? local.application_server_count : 0
   name                          = format("%s%s%s%s", local.prefix, var.naming.separator, local.app_virtualmachine_names[count.index], local.resource_suffixes.admin-nic)
   location                      = var.resource-group[0].location
@@ -63,7 +63,7 @@ resource "azurerm_linux_virtual_machine" "app" {
   null)
 
   network_interface_ids = local.apptier_dual_nics ? (
-    [azurerm_network_interface.app-admin[count.index].id, azurerm_network_interface.app[count.index].id]) : (
+    [azurerm_network_interface.app_admin[count.index].id, azurerm_network_interface.app[count.index].id]) : (
     [azurerm_network_interface.app[count.index].id]
   )
 
@@ -125,7 +125,7 @@ resource "azurerm_windows_virtual_machine" "app" {
   null)
 
   network_interface_ids = local.apptier_dual_nics ? (
-    [azurerm_network_interface.app-admin[count.index].id, azurerm_network_interface.app[count.index].id]) : (
+    [azurerm_network_interface.app_admin[count.index].id, azurerm_network_interface.app[count.index].id]) : (
     [azurerm_network_interface.app[count.index].id]
   )
 

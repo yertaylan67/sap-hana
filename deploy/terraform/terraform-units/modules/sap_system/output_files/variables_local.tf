@@ -50,22 +50,41 @@ variable "hana-database-info" {
   description = "Updated hana database json"
 }
 
-variable "nics-scs" {
+variable "nics_scs" {
   description = "List of NICs for the SCS Application VMs"
 }
 
-variable "nics-app" {
+variable "nics_app" {
   description = "List of NICs for the Application Instance VMs"
 }
 
-variable "nics-web" {
+variable "nics_web" {
   description = "List of NICs for the Web dispatcher VMs"
 }
 
 # Any DB
-variable "nics-anydb" {
+variable "nics_anydb" {
+  description = "List of NICs for the AnyDB VMs"
+}
+
+variable "nics_scs_admin" {
+  description = "List of NICs for the SCS Application VMs"
+}
+
+variable "nics_app_admin" {
+  description = "List of NICs for the Application Instance VMs"
+}
+
+variable "nics_web_admin" {
   description = "List of NICs for the Web dispatcher VMs"
 }
+
+# Any DB
+variable "nics_anydb_admin" {
+  description = "List of Admin NICs for the anyDB VMs"
+}
+
+
 
 variable "random_id" {
   description = "Random hex string"

@@ -25,7 +25,7 @@ resource "azurerm_network_interface" "anydb_db" {
   }
 }
 
-# Creates the DB traffic NIC and private IP address for database nodes
+# Creates the Admin traffic NIC and private IP address for database nodes
 resource "azurerm_network_interface" "anydb_admin" {
   count                         = local.enable_deployment && local.anydb_dual_nics ? local.db_server_count : 0
   name                          = format("%s%s", local.anydb_vms[count.index].name, local.resource_suffixes.admin-nic)
