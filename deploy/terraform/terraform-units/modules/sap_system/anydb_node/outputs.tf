@@ -2,7 +2,7 @@ output "nics_anydb" {
   value = azurerm_network_interface.anydb_db
 }
 
-output "nics_anydb" {
+output "nics_anydb_admin" {
   value = azurerm_network_interface.anydb_admin
 }
 
