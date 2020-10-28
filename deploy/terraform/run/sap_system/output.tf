@@ -94,35 +94,35 @@ output "web_lb_name" {
 }
 
 output "app_nics_app" {
-  value = module.app_tier.nics-app
+  value = module.app_tier.nics_app
 }
 
 output "app_nics_scs" {
-  value = module.app_tier.nics-scs
+  value = module.app_tier.nics_scs
 }
 
 output "app_nics_web" {
-  value = module.app_tier.nics-web
+  value = module.app_tier.nics_web
 }
 
 output "app_nics_app_admin" {
-  value = module.app_tier.nics-app-admin
+  value = module.app_tier.nics_app_admin
 }
 
 output "app_nics_scs_admin" {
-  value = module.app_tier.nics-scs-admin
+  value = module.app_tier.nics_scs_admin
 }
 
 output "app_nics_web_admin" {
-  value = module.app_tier.nics-web-admin
+  value = module.app_tier.nics_web_admin
 }
 
 output "anydb_nics_db" {
-  value = module.anydb_node.nics-anydb
+  value = module.anydb_node.nics_anydb
 }
 
 output "anydb_nics_db_admin" {
-  value = module.anydb_node.nics-anydb-admin
+  value = module.anydb_node.nics_anydb_admin
 }
 
 

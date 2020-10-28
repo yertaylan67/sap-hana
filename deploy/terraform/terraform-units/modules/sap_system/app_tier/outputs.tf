@@ -78,7 +78,7 @@ output "app_ip" {
 }
 
 output "app_admin_ip" {
-  value = azurerm_network_interface.app-admin.*.private_ip_address
+  value = azurerm_network_interface.app_admin.*.private_ip_address
 }
 
 output "scs_ip" {
@@ -86,7 +86,7 @@ output "scs_ip" {
 }
 
 output "scs_admin_ip" {
-  value = azurerm_network_interface.scs-admin.*.private_ip_address
+  value = azurerm_network_interface.scs_admin.*.private_ip_address
 }
 
 output "web_ip" {
@@ -94,7 +94,7 @@ output "web_ip" {
 }
 
 output "web_admin_ip" {
-  value = azurerm_network_interface.web-admin.*.private_ip_address
+  value = azurerm_network_interface.web_admin.*.private_ip_address
 }
 
 output "web_lb_ip" {
