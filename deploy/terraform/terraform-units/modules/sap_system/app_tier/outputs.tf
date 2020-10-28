@@ -98,7 +98,6 @@ output "web_admin_ip" {
 }
 
 output "web_lb_ip" {
-<<<<<<< HEAD
   value = azurerm_lb.web.*.private_ip_address
 }
 
@@ -108,15 +107,4 @@ output "scs_lb_ip" {
 
 output "ers_lb_ip" {
   value = azurerm_lb.web.*.private_ip_address
-=======
-  value = azurerm_lb.web.*.frontend_ip_configuration.private_ip_address
-}
-
-output "scs_lb_ip" {
-  value = azurerm_lb.scs.*.frontend_ip_configuration[0].private_ip_address
-}
-
-output "ers_lb_ip" {
-  value = azurerm_lb.web.*.frontend_ip_configuration[1].private_ip_address
->>>>>>> f3e38d4ed4d7fdfc2be8a72295c5da38c2af2030
 }
