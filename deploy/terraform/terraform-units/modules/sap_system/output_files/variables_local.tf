@@ -91,7 +91,7 @@ variable "nics_web_admin" {
   description = "List of NICs for the Web dispatcher VMs"
 }
 
-# Any DB
+// Any DB
 variable "nics_anydb_admin" {
   description = "List of Admin NICs for the anyDB VMs"
 }
