@@ -69,7 +69,7 @@ data "azurerm_network_security_group" "admin" {
 
 # Associates SAP admin nsg to SAP admin subnet
 resource "azurerm_subnet_network_security_group_association" "Associate-admin" {
-  count                     = local.enable_admin_subnet && (signum((local.sub_admin_exists ? 0 : 1) + (local.sub_admin_nsg_exists ? 0 : 1)))
+  count                     = local.enable_admin_subnet ? (signum((local.sub_admin_exists ? 0 : 1) + (local.sub_admin_nsg_exists ? 0 : 1))) : 0
   subnet_id                 = local.sub_admin_exists ? data.azurerm_subnet.admin[0].id : azurerm_subnet.admin[0].id
   network_security_group_id = local.sub_admin_nsg_exists ? data.azurerm_network_security_group.admin[0].id : azurerm_network_security_group.admin[0].id
 }
