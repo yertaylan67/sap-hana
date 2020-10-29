@@ -1,5 +1,5 @@
 data "azurerm_subnet" "anchor" {
-  count                = local.zonal_deployment && local.sub_admin_exists ? 1 : 0
+  count                = local.deploy_anchor && local.sub_admin_exists ? 1 : 0
   name                 = split("/", local.sub_admin_arm_id)[10]
   resource_group_name  = split("/", local.sub_admin_arm_id)[4]
   virtual_network_name = split("/", local.sub_admin_arm_id)[8]
@@ -7,7 +7,7 @@ data "azurerm_subnet" "anchor" {
 
 # Create Anchor VM
 resource "azurerm_network_interface" "anchor" {
-  count                         = local.zonal_deployment ? length(local.zones) : 0
+  count                         = local.deploy_anchor ? length(local.zones) : 0
   name                          = format("%s_%s%s", local.prefix, local.anchor_virtualmachine_names[count.index], local.resource_suffixes.nic)
   resource_group_name           = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
   location                      = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
@@ -23,7 +23,7 @@ resource "azurerm_network_interface" "anchor" {
 
 # Create the Linux Application VM(s)
 resource "azurerm_linux_virtual_machine" "anchor" {
-  count                        = local.zonal_deployment && (local.anchor_ostype == "LINUX") ? length(local.zones) : 0
+  count                        = local.deploy_anchor && (local.anchor_ostype == "LINUX") ? length(local.zones) : 0
   name                         = format("%s_%s%s", local.prefix, local.anchor_virtualmachine_names[count.index], local.resource_suffixes.vm)
   computer_name                = local.anchor_computer_names[count.index]
   resource_group_name          = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
@@ -72,7 +72,7 @@ resource "azurerm_linux_virtual_machine" "anchor" {
 
 # Create the Windows Application VM(s)
 resource "azurerm_windows_virtual_machine" "anchor" {
-  count                        = local.zonal_deployment && (local.anchor_ostype == "WINDOWS") ? length(local.zones) : 0
+  count                        = local.deploy_anchor && (local.anchor_ostype == "WINDOWS") ? length(local.zones) : 0
   name                         = format("%s_%s%s", local.prefix, local.anchor_virtualmachine_names[count.index], local.resource_suffixes.vm)
   computer_name                = local.anchor_computer_names[count.index]
   resource_group_name          = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
@@ -92,10 +92,6 @@ resource "azurerm_windows_virtual_machine" "anchor" {
     name                 = format("%s_%s%s", local.prefix, local.anchor_virtualmachine_names[count.index], local.resource_suffixes.osdisk)
     caching              = "ReadWrite"
     storage_account_type = "Standard_LRS"
-  }
-
-  additional_capabilities {
-    ultra_ssd_enabled = local.anchor_enable_ultradisk[count.index]
   }
 
   source_image_id = local.anchor_custom_image ? local.anchor_os.source_image_id : null

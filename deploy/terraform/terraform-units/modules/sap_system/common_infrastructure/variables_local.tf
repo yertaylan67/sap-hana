@@ -68,21 +68,24 @@ locals {
   anchor_computer_names       = var.naming.virtualmachine_names.ANCHOR_COMPUTERNAME
   resource_suffixes           = var.naming.resource_suffixes
 
-  //Filter the list of databases to only HANA platform entries
-  hana-databases = [
+
+  databases = [
     for database in var.databases : database
-    if try(database.platform, "NONE") == "HANA"
+    if try(database.platform, "NONE") != "NONE"
   ]
-  hdb    = try(local.hana-databases[0], {})
-  hdb_ha = try(local.hdb.high_availability, "false")
+
+  db    = try(local.databases[0], {})
+  db_ha = try(local.db.high_availability, "false")
+
   //If custom image is used, we do not overwrite os reference with default value
-  hdb_custom_image = try(local.hdb.os.source_image_id, "") != "" ? true : false
-  hdb_os = {
-    "source_image_id" = local.hdb_custom_image ? local.hdb.os.source_image_id : ""
-    "publisher"       = try(local.hdb.os.publisher, local.hdb_custom_image ? "" : "suse")
-    "offer"           = try(local.hdb.os.offer, local.hdb_custom_image ? "" : "sles-sap-12-sp5")
-    "sku"             = try(local.hdb.os.sku, local.hdb_custom_image ? "" : "gen1")
-    "version"         = try(local.hdb.os.version, local.hdb_custom_image ? "" : "latest")
+  db_custom_image = try(local.db.os.source_image_id, "") != "" ? true : false
+
+  db_os = {
+    "source_image_id" = local.db_custom_image ? local.db.os.source_image_id : ""
+    "publisher"       = try(local.db.os.publisher, local.db_custom_image ? "" : "suse")
+    "offer"           = try(local.db.os.offer, local.db_custom_image ? "" : "sles-sap-12-sp5")
+    "sku"             = try(local.db.os.sku, local.db_custom_image ? "" : "gen1")
+    "version"         = try(local.db.os.version, local.db_custom_image ? "" : "latest")
   }
 
   //Enable DB deployment 
@@ -107,26 +110,29 @@ locals {
 
   var_infra = try(var.infrastructure, {})
 
-  //Anchor VM
-  anchor      = try(local.var_infra.anchor_vms, {})
-  anchor_size = try(local.anchor.sku, "Standard_D8s_v3")
-  anchor_authentication = try(local.anchor.authentication,
+  db_auth = try(local.db.authentication,
     {
       "type"     = "key"
       "username" = "azureadm"
   })
 
+  //Anchor VM
+  anchor                = try(local.var_infra.anchor_vms, {})
+  deploy_anchor         = length(local.anchor) > 0 ? true : false
+  anchor_size           = try(local.anchor.sku, "Standard_D8s_v3")
+  anchor_authentication = try(local.anchor.authentication, local.db_auth)
+
   anchor_custom_image = try(local.anchor.os.source_image_id, "") != "" ? true : false
 
   anchor_os = {
     "source_image_id" = local.anchor_custom_image ? local.anchor.os.source_image_id : ""
-    "publisher"       = try(local.anchor.os.publisher, local.anchor_custom_image ? "" : "suse")
-    "offer"           = try(local.anchor.os.offer, local.anchor_custom_image ? "" : "sles-sap-12-sp5")
-    "sku"             = try(local.anchor.os.sku, local.anchor_custom_image ? "" : "gen1")
-    "version"         = try(local.anchor.os.version, local.anchor_custom_image ? "" : "latest")
+    "publisher"       = try(local.anchor.os.publisher, local.anchor_custom_image ? "" : local.db_os.publisher)
+    "offer"           = try(local.anchor.os.offer, local.anchor_custom_image ? "" : local.db_os.offer)
+    "sku"             = try(local.anchor.os.sku, local.anchor_custom_image ? "" : local.db_os.sku)
+    "version"         = try(local.anchor.os.version, local.anchor_custom_image ? "" : local.db_os.version)
   }
-  anchor_ostype           = upper(try(local.anchor.os.os_type, "LINUX"))
-  anchor_enable_ultradisk = try(local.anchor.support_ultra, [false, false, false])
+
+  anchor_ostype           = upper(try(local.anchor.os.os_type, local.db_ostype))
 
   //Resource group
   var_rg    = try(local.var_infra.resource_group, {})
@@ -179,7 +185,7 @@ locals {
   //- AND
   //  - HANA database has high_availability set to true
   //  - HANA database uses SUSE
-  iscsi_count = (local.hdb_ha && upper(local.hdb_os.publisher) == "SUSE") ? try(local.var_iscsi.iscsi_count, 0) : 0
+  iscsi_count = (local.db_ha && upper(local.db_os.publisher) == "SUSE") ? try(local.var_iscsi.iscsi_count, 0) : 0
   iscsi_size  = try(local.var_iscsi.size, "Standard_D2s_v3")
   iscsi_os = try(local.var_iscsi.os,
     {
