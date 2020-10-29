@@ -41,9 +41,9 @@ module "common_infrastructure" {
   software            = var.software
   ssh-timeout         = var.ssh-timeout
   sshkey              = var.sshkey
-  vnet-mgmt           = module.deployer.vnet-mgmt
-  subnet-mgmt         = module.deployer.subnet-mgmt
-  nsg-mgmt            = module.deployer.nsg-mgmt
+  vnet-mgmt           = local.enable_peering ? module.deployer.vnet-mgmt : null
+  subnet-mgmt         = local.enable_peering ? module.deployer.subnet-mgmt : null
+  nsg-mgmt            = local.enable_peering ? module.deployer.nsg-mgmt : null
   naming              = module.sap_namegenerator.naming
   service_principal   = local.service_principal
 }

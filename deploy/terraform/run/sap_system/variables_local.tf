@@ -111,6 +111,8 @@ locals {
   tfstate_container_name       = "tfstate"
   deployer_tfstate_key         = try(local.deployer_config.deployer_tfstate_key, "")
 
+  enable_peering = try(local.deployer_config.enable_peering, true)
+
   // Retrieve the arm_id of deployer's Key Vault from deployer's terraform.tfstate
   deployer_key_vault_arm_id = try(var.infrastructure.landscape.key_vault_arm_id,data.terraform_remote_state.deployer.outputs.deployer_kv_user_arm_id)
 

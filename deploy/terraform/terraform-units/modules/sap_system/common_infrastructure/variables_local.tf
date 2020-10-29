@@ -272,6 +272,8 @@ locals {
   sub_app_nsg_exists = length(local.sub_app_nsg_arm_id) > 0 ? true : false
   sub_app_nsg_name   = local.sub_app_nsg_exists ? try(split("/", local.sub_app_nsg_arm_id)[8], "") : try(local.var_sub_app_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.app-subnet-nsg))
 
+  enable_peering = try(var.infrastructure.vnets.management.enable_peering, true)
+  
   //---- Update infrastructure with defaults ----//
   infrastructure = {
     resource_group = {

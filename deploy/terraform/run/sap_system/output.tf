@@ -133,41 +133,41 @@ output "dns_info" {
         "${vm}" = module.anydb_node.anydb_db_ip[idx]
       }
     ]),
-    flatten([for idx, vm in module.anydb_node.anydb_vm_names :
+    length(module.anydb_node.anydb_admin_ip) > 0 ? flatten([for idx, vm in module.anydb_node.anydb_vm_names :
       {
         "${vm}" = module.anydb_node.anydb_admin_ip[idx]
       }
-    ]),
+    ]): [],
     flatten([for idx, vm in module.app_tier.app_vm_names :
       {
         "${vm}" = module.app_tier.app_ip[idx]
       }
     ]),
-    flatten([for idx, vm in module.app_tier.app_vm_names :
+    length(module.app_tier.app_admin_ip) > 0 ? flatten([for idx, vm in module.app_tier.app_vm_names :
       {
         "${vm}" = module.app_tier.app_admin_ip[idx]
       }
-    ]),
+    ]) :[],
     flatten([for idx, vm in module.app_tier.scs_vm_names :
       {
         "${vm}" = module.app_tier.scs_ip[idx]
       }
     ]),
-    flatten([for idx, vm in module.app_tier.scs_vm_names :
+    length(module.app_tier.scs_admin_ip) > 0 ? flatten([for idx, vm in module.app_tier.scs_vm_names :
       {
         "${vm}" = module.app_tier.scs_admin_ip[idx]
       }
-    ]),
+    ]) : [],
     flatten([for idx, vm in module.app_tier.web_vm_names :
       {
         "${vm}" = module.app_tier.web_ip[idx]
       }
     ]),
-    flatten([for idx, vm in module.app_tier.web_vm_names :
+    length(module.app_tier.web_admin_ip) > 0 ? flatten([for idx, vm in module.app_tier.web_vm_names :
       {
         "${vm}" = module.app_tier.web_admin_ip[idx]
       }
-    ]),
+    ]) : [],
     flatten([for idx, lb in module.anydb_node.db_lb_name :
       {
         "${lb}" = module.anydb_node.anydb_lb_ip[idx]

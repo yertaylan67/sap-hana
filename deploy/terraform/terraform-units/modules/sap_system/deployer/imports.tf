@@ -15,12 +15,14 @@ data "terraform_remote_state" "deployer" {
 
 // Import deployer management vnet
 data "azurerm_virtual_network" "vnet-mgmt" {
+  count               = local.enable_peering ? 1 : 0
   name                = data.terraform_remote_state.deployer.outputs.vnet_mgmt.name
   resource_group_name = data.terraform_remote_state.deployer.outputs.vnet_mgmt.resource_group_name
 }
 
 // Import deployer management subnet
 data "azurerm_subnet" "subnet-mgmt" {
+  count                = local.enable_peering ? 1 : 0
   name                 = data.terraform_remote_state.deployer.outputs.subnet_mgmt.name
   resource_group_name  = data.terraform_remote_state.deployer.outputs.subnet_mgmt.resource_group_name
   virtual_network_name = data.terraform_remote_state.deployer.outputs.subnet_mgmt.virtual_network_name
@@ -28,6 +30,7 @@ data "azurerm_subnet" "subnet-mgmt" {
 
 // Import deployer management nsg
 data "azurerm_network_security_group" "nsg-mgmt" {
+  count               = local.enable_peering ? 1 : 0
   name                = data.terraform_remote_state.deployer.outputs.nsg_mgmt.name
   resource_group_name = data.terraform_remote_state.deployer.outputs.nsg_mgmt.resource_group_name
 }
