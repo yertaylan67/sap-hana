@@ -95,9 +95,6 @@ variable "nics_web_admin" {
 variable "nics_anydb_admin" {
   description = "List of Admin NICs for the anyDB VMs"
 }
-
-
-
 variable "random_id" {
   description = "Random hex string"
 }
