@@ -44,10 +44,6 @@ resource "azurerm_linux_virtual_machine" "anchor" {
     storage_account_type = "Standard_LRS"
   }
 
-  additional_capabilities {
-    ultra_ssd_enabled = local.anchor_enable_ultradisk[count.index]
-  }
-
   source_image_id = local.anchor_custom_image ? local.anchor_os.source_image_id : null
 
   dynamic "source_image_reference" {
