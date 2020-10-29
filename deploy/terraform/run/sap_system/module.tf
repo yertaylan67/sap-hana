@@ -179,8 +179,8 @@ module "output_files" {
   software_w_defaults          = module.common_infrastructure.software_w_defaults
   nics-jumpboxes-windows       = module.jumpbox.nics-jumpboxes-windows
   nics-jumpboxes-linux         = module.jumpbox.nics-jumpboxes-linux
-  public-ips-jumpboxes-windows = module.jumpbox.public-ips-jumpboxes-windows
-  public-ips-jumpboxes-linux   = module.jumpbox.public-ips-jumpboxes-linux
+  public-ips_jumpboxes-windows = module.jumpbox.public-ips_jumpboxes-windows
+  public-ips_jumpboxes-linux   = module.jumpbox.public-ips_jumpboxes-linux
   jumpboxes-linux              = module.jumpbox.jumpboxes-linux
   nics-dbnodes-admin           = module.hdb_node.nics-dbnodes-admin
   nics-dbnodes-db              = module.hdb_node.nics-dbnodes-db

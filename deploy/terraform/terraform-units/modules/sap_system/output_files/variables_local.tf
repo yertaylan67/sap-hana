@@ -14,11 +14,11 @@ variable "nics-jumpboxes-windows" {
   description = "NICs of the Windows jumpboxes"
 }
 
-variable "public-ips-jumpboxes-linux" {
+variable "public-ips_jumpboxes-linux" {
   description = "Public IPs of the Linux jumpboxes"
 }
 
-variable "public-ips-jumpboxes-windows" {
+variable "public-ips_jumpboxes-windows" {
   description = "Public IPs of the Windows jumpboxes"
 }
 
@@ -142,7 +142,7 @@ locals {
   ips_app = [for key, value in local.ips_primary_app : value.private_ip_address]
   ips_web = [for key, value in local.ips_primary_web : value.private_ip_address]
 
-  ips_primary_anydb = length(var.var.nics_anydb_admin) > 0 ? var.nics_anydb_admin : var.nics_anydb
+  ips_primary_anydb = length(var.nics_anydb_admin) > 0 ? var.nics_anydb_admin : var.nics_anydb
   ips_anydbnodes = [for key, value in local.ips_primary_anydb : value.private_ip_address]
   
   anydatabases = [
