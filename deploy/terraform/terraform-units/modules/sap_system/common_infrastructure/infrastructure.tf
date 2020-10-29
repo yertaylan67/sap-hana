@@ -46,7 +46,7 @@ resource "azurerm_subnet" "admin" {
 
 # Imports data of existing SAP admin subnet
 data "azurerm_subnet" "admin" {
-  count                = local.sub_admin_exists ? 1 : 0
+  count                = local.sub_admin_exists  && local.create_admin_subnet ? 1 : 0
   name                 = split("/", local.sub_admin_arm_id)[10]
   resource_group_name  = split("/", local.sub_admin_arm_id)[4]
   virtual_network_name = split("/", local.sub_admin_arm_id)[8]
