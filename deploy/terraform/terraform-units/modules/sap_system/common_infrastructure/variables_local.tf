@@ -84,7 +84,7 @@ locals {
   //iSCSI
   var_iscsi = try(local.var_infra.iscsi, {})
 
-  create_admin_subnet = try(var.application.dual_nics, false) || try(var.databases[0].dual_nics, false) || length(local.hana-databases) > 0
+  enable_admin_subnet = try(var.application.dual_nics, false) || try(var.databases[0].dual_nics, false) || length(local.hana-databases) > 0
 
   //iSCSI target device(s) is only created when below conditions met:
   //- iscsi is defined in input JSON
