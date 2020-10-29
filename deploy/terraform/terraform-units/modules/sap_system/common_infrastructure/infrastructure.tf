@@ -37,7 +37,7 @@ data "azurerm_virtual_network" "vnet-sap" {
 
 // Creates admin subnet of SAP VNET
 resource "azurerm_subnet" "admin" {
-  count                = local.sub_admin_exists ? 0 : local.create_admin_subnet ? 1 : 0
+  count                = ! local.sub_admin_exists && local.enable_admin_subnet ? 1 : 0
   name                 = local.sub_admin_name
   resource_group_name  = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
   virtual_network_name = local.vnet_sap_exists ? data.azurerm_virtual_network.vnet-sap[0].name : azurerm_virtual_network.vnet-sap[0].name
@@ -46,7 +46,7 @@ resource "azurerm_subnet" "admin" {
 
 # Imports data of existing SAP admin subnet
 data "azurerm_subnet" "admin" {
-  count                = local.sub_admin_exists ? 1 : 0
+  count                = local.sub_admin_exists && local.enable_admin_subnet ? 1 : 0
   name                 = split("/", local.sub_admin_arm_id)[10]
   resource_group_name  = split("/", local.sub_admin_arm_id)[4]
   virtual_network_name = split("/", local.sub_admin_arm_id)[8]
@@ -54,7 +54,7 @@ data "azurerm_subnet" "admin" {
 
 # Creates SAP admin subnet nsg
 resource "azurerm_network_security_group" "admin" {
-  count               = ! local.sub_admin_nsg_exists ? 1 : 0
+  count               = local.sub_admin_nsg_exists && local.enable_admin_subnet ? 0 : 1
   name                = local.sub_admin_nsg_name
   resource_group_name = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
   location            = local.rg_exists ? data.azurerm_resource_group.resource-group[0].location : azurerm_resource_group.resource-group[0].location
@@ -62,14 +62,14 @@ resource "azurerm_network_security_group" "admin" {
 
 # Imports the SAP admin subnet nsg data
 data "azurerm_network_security_group" "admin" {
-  count               = local.sub_admin_nsg_exists ? 1 : 0
+  count               = local.sub_admin_nsg_exists && local.enable_admin_subnet ? 1 : 0
   name                = split("/", local.sub_admin_nsg_arm_id)[8]
   resource_group_name = split("/", local.sub_admin_nsg_arm_id)[4]
 }
 
 # Associates SAP admin nsg to SAP admin subnet
 resource "azurerm_subnet_network_security_group_association" "Associate-admin" {
-  count                     = (signum((local.sub_admin_exists ? 0 : 1) + (local.sub_admin_nsg_exists ? 0 : 1))) 
+  count                     = local.enable_admin_subnet && (signum((local.sub_admin_exists ? 0 : 1) + (local.sub_admin_nsg_exists ? 0 : 1)))
   subnet_id                 = local.sub_admin_exists ? data.azurerm_subnet.admin[0].id : azurerm_subnet.admin[0].id
   network_security_group_id = local.sub_admin_nsg_exists ? data.azurerm_network_security_group.admin[0].id : azurerm_network_security_group.admin[0].id
 }
