@@ -98,13 +98,13 @@ output "web_admin_ip" {
 }
 
 output "web_lb_ip" {
-  value = azurerm_lb.web.*.private_ip_address
+  value = azurerm_lb.web.*.private_ip_addresses
 }
 
 output "scs_lb_ip" {
-  value = azurerm_lb.scs.*.private_ip_address
+  value = azurerm_lb.scs.*.private_ip_addresses
 }
 
 output "ers_lb_ip" {
-  value = azurerm_lb.web.*.private_ip_address
+  value = azurerm_lb.ers.*.private_ip_addresses
 }
