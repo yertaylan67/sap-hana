@@ -145,7 +145,7 @@ resource "azurerm_availability_set" "app" {
 
 # Create the Web dispatcher Load Balancer
 resource "azurerm_lb" "web" {
-  count               = local.enable_deployment ? 1 : 0
+  count               = local.enable_deployment &&  local.webdispatcher_count > 0 ? 1 : 0
   name                = format("%s%s", local.prefix, local.resource_suffixes.web-alb)
   resource_group_name = var.resource-group[0].name
   location            = var.resource-group[0].location
