@@ -57,10 +57,6 @@ output "scs_lb_ip" {
   value = module.app_tier.scs_lb_ip
 }
 
-output "ers_lb_ip" {
-  value = module.app_tier.ers_lb_ip
-}
-
 output "app_vm_names" {
   value = module.app_tier.app_vm_names
 }
@@ -176,11 +172,6 @@ output "dns_info" {
     flatten([for idx, lb in module.app_tier.scs_lb_name :
       {
         "${lb}" = module.app_tier.scs_lb_ip[idx]
-      }
-    ]),
-    flatten([for idx, lb in module.app_tier.scs_lb_name :
-      {
-        "${lb}" = module.app_tier.ers_lb_ip[idx]
       }
     ]),
     flatten([for idx, lb in module.app_tier.web_lb_name :

@@ -64,47 +64,43 @@ output "web_computer_names" {
   )
 }
 
-
 output "scs_lb_name" {
-  value = azurerm_lb.scs.*.name
+  value = azurerm_lb.scs[*].name
 }
 
 output "web_lb_name" {
-  value = azurerm_lb.web.*.name
+  value = azurerm_lb.web[*].name
 }
 
 output "app_ip" {
-  value = azurerm_network_interface.app.*.private_ip_address
+  value = azurerm_network_interface.app[*].private_ip_address
 }
 
 output "app_admin_ip" {
-  value = azurerm_network_interface.app_admin.*.private_ip_address
+  value = azurerm_network_interface.app_admin[*].private_ip_address
 }
 
 output "scs_ip" {
-  value = azurerm_network_interface.scs.*.private_ip_address
+  value = azurerm_network_interface.scs[*].private_ip_address
 }
 
 output "scs_admin_ip" {
-  value = azurerm_network_interface.scs_admin.*.private_ip_address
+  value = azurerm_network_interface.scs_admin[*].private_ip_address
 }
 
 output "web_ip" {
-  value = azurerm_network_interface.web.*.private_ip_address
+  value = azurerm_network_interface.web[*].private_ip_address
 }
 
 output "web_admin_ip" {
-  value = azurerm_network_interface.web_admin.*.private_ip_address
+  value = azurerm_network_interface.web_admin[*].private_ip_address
 }
 
 output "web_lb_ip" {
-  value = azurerm_lb.web.*.private_ip_addresses
+  value = azurerm_lb.web[*].private_ip_addresses
 }
 
 output "scs_lb_ip" {
-  value = azurerm_lb.scs.*.private_ip_addresses
+  value = azurerm_lb.scs[*].private_ip_addresses
 }
 
-output "ers_lb_ip" {
-  value = azurerm_lb.ers.*.private_ip_addresses
-}
