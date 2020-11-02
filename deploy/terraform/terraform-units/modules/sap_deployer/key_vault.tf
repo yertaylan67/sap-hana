@@ -113,7 +113,7 @@ resource "tls_private_key" "deployer" {
 
 resource "azurerm_key_vault_secret" "ppk" {
   depends_on   = [azurerm_key_vault_access_policy.kv_user_pre_deployer[0]]
-  count        = (local.enable_deployers && local.enable_key) ? 1 : 0
+  count        = (local.enable_deployers && local.enable_key && local.enable_vm) ? 1 : 0
   name         = format("%s-sshkey", replace(local.prefix,"_",""))
   value        = trimspace(local.private_key)
   key_vault_id = azurerm_key_vault.kv_user[0].id
@@ -121,7 +121,7 @@ resource "azurerm_key_vault_secret" "ppk" {
 
 resource "azurerm_key_vault_secret" "pk" {
   depends_on   = [azurerm_key_vault_access_policy.kv_user_pre_deployer[0]]
-  count        = (local.enable_deployers && local.enable_key) ? 1 : 0
+  count        = (local.enable_deployers && local.enable_key && local.enable_vm) ? 1 : 0
   name         = format("%s-sshkey-pub", replace(local.prefix,"_",""))
   value        = trimspace(local.public_key)
   key_vault_id = azurerm_key_vault.kv_user[0].id
@@ -141,7 +141,7 @@ resource "random_password" "deployer" {
 
 resource "azurerm_key_vault_secret" "pwd" {
   depends_on   = [azurerm_key_vault_access_policy.kv_user_pre_deployer[0]]
-  count        = (local.enable_deployers && local.enable_password) ? 1 : 0
+  count        = (local.enable_deployers && local.enable_password  && local.enable_vm) ? 1 : 0
   name         = format("%s-password", replace(local.prefix,"_",""))
   value        = local.password
   key_vault_id = azurerm_key_vault.kv_user[0].id

@@ -6,6 +6,7 @@ Description:
 */
 
 resource "local_file" "scp" {
+  count =  local.enable_vm ? 1 : 0
   content = templatefile("${path.module}/deployer_scp.tmpl", {
     user_vault_name = module.sap_deployer.user_vault_name,
     ppk_name        = module.sap_deployer.ppk_name,

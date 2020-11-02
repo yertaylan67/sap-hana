@@ -11,17 +11,17 @@ output "deployer_rg_name" {
 
 // Details of management vnet that is deployed/imported
 output "vnet_mgmt" {
-  value = local.vnet_mgmt_exists ? data.azurerm_virtual_network.vnet_mgmt[0] : azurerm_virtual_network.vnet_mgmt[0]
+  value = local.enable_vm ? local.vnet_mgmt_exists ? data.azurerm_virtual_network.vnet_mgmt[0] : azurerm_virtual_network.vnet_mgmt[0] : ""
 }
 
 // Details of management subnet that is deployed/imported
 output "subnet_mgmt" {
-  value = local.sub_mgmt_exists ? data.azurerm_subnet.subnet_mgmt[0] : azurerm_subnet.subnet_mgmt[0]
+  value = local.enable_vm ? local.sub_mgmt_exists ? data.azurerm_subnet.subnet_mgmt[0] : azurerm_subnet.subnet_mgmt[0] : ""
 }
 
 // Details of the management vnet NSG that is deployed/imported
 output "nsg_mgmt" {
-  value = local.sub_mgmt_nsg_exists ? data.azurerm_network_security_group.nsg_mgmt[0] : azurerm_network_security_group.nsg_mgmt[0]
+  value = local.enable_vm ? local.sub_mgmt_nsg_exists ? data.azurerm_network_security_group.nsg_mgmt[0] : azurerm_network_security_group.nsg_mgmt[0] : ""
 }
 
 // Details of the user assigned identity for deployer(s)
@@ -31,7 +31,7 @@ output "deployer_uai" {
 
 // Details of deployer pip(s)
 output "deployer_pip" {
-  value = azurerm_public_ip.deployer
+  value = local.enable_vm ? azurerm_public_ip.deployer[0].ip_address : ""
 }
 
 // Details of deployer(s)
@@ -53,16 +53,16 @@ output "prvt_vault_name" {
 
 // output the secret name of public key
 output "ppk_name" {
-  value = local.enable_deployers && local.enable_key ? azurerm_key_vault_secret.ppk[0].name : ""
+  value = local.enable_deployers && local.enable_key && local.enable_vm ? azurerm_key_vault_secret.ppk[0].name : ""
 }
 
 // output the secret name of private key
 output "pk_name" {
-  value = local.enable_deployers && local.enable_key ? azurerm_key_vault_secret.pk[0].name : ""
+  value = local.enable_deployers && local.enable_key && local.enable_vm ? azurerm_key_vault_secret.pk[0].name : ""
 }
 
 output "pwd_name" {
-  value = local.enable_deployers && local.enable_password ? azurerm_key_vault_secret.pwd[0].name : ""
+  value = local.enable_deployers && local.enable_password && local.enable_vm ? azurerm_key_vault_secret.pwd[0].name : ""
 }
 
 // Comment out code with users.object_id for the time being.

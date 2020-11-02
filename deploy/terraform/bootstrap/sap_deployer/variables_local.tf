@@ -17,4 +17,7 @@ locals {
   vnet_mgmt_name_part = substr(upper(local.vnet_mgmt_name), -5, 5) == "-VNET" ? split("-", local.vnet_mgmt_name)[(local.vnet_mgmt_parts - 2)] : local.vnet_mgmt_name
 
   deployer_vm_count = length(var.deployers)
+
+    // Provide the ability to deploy without the VM
+  enable_vm        = try(var.deployers[0].deploy_vm, true)
 }
