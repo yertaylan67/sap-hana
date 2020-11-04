@@ -194,20 +194,9 @@ locals {
   kv_users = var.deployer_user
   */
   // kv for sap landscape
-<<<<<<< HEAD
   kv_prefix       = var.naming.prefix.VNET
   kv_private_name = local.landscape_keyvault_names.private_access
   kv_user_name    = local.landscape_keyvault_names.user_access
-=======
-  environment    = lower(try(local.var_infra.environment, ""))
-  location_short = lower(try(var.region_mapping[local.region], "unkn"))
-  vnet_nr_parts  = length(split("-", local.vnet_sap_name))
-  // Default naming of vnet has multiple parts. Taking the second-last part as the name 
-  vnet_sap_name_prefix = local.vnet_nr_parts >= 3 ? split("-", upper(local.vnet_sap_name))[local.vnet_nr_parts - 1] == "VNET" ? split("-", local.vnet_sap_name)[local.vnet_nr_parts - 2] : local.vnet_sap_name : local.vnet_sap_name
-  kv_prefix            = upper(format("%s%s%s", substr(local.environment, 0, 5), local.location_short, substr(local.vnet_sap_name_prefix, 0, 7)))
-  kv_private_name      = format("%sprvt%s", local.kv_prefix, upper(substr(local.postfix, 0, 3)))
-  kv_user_name         = format("%suser%s", local.kv_prefix, upper(substr(local.postfix, 0, 3)))
->>>>>>> 589c0be737604504f81efb9cd85d17bdb2f3aa81
 
   // key vault naming for sap system
   sid_kv_prefix       = var.naming.prefix.SDU
@@ -223,18 +212,10 @@ locals {
   secret_sid_pk_name  = try(local.var_infra.landscape.sid_public_key_secret_name, "")
   enable_landscape_kv = local.kv_landscape_id == ""
 
-  // By default, Ansible ssh key for SID uses generated public key. Provide sshkey.path_to_public_key and path_to_private_key overides it
-  sid_public_key  = local.enable_landscape_kv ? try(file(var.sshkey.path_to_public_key), tls_private_key.sid[0].public_key_openssh) : null
-  sid_private_key = local.enable_landscape_kv ? try(file(var.sshkey.path_to_private_key), tls_private_key.sid[0].private_key_pem) : null
-
   //iSCSI
   var_iscsi = try(local.var_infra.iscsi, {})
 
-<<<<<<< HEAD
-  enable_admin_subnet = try(var.application.dual_nics, false) || try(var.databases[0].dual_nics, false) || local.enable_hdb_deployment
-=======
   enable_admin_subnet = try(var.application.dual_nics, false) || try(var.databases[0].dual_nics, false) || (try(upper(local.db.platform), "NONE") == "HANA")
->>>>>>> 589c0be737604504f81efb9cd85d17bdb2f3aa81
 
   //iSCSI target device(s) is only created when below conditions met:
   //- iscsi is defined in input JSON
@@ -243,10 +224,6 @@ locals {
   //  - HANA database uses SUSE
   iscsi_count = (local.db_ha && upper(local.db_os.publisher) == "SUSE") ? try(local.var_iscsi.iscsi_count, 0) : 0
   iscsi_size  = try(local.var_iscsi.size, "Standard_D2s_v3")
-<<<<<<< HEAD
-=======
-
->>>>>>> 589c0be737604504f81efb9cd85d17bdb2f3aa81
   iscsi_os = try(local.var_iscsi.os,
     {
       "publisher" = try(local.var_iscsi.os.publisher, "SUSE")
@@ -284,13 +261,10 @@ locals {
   vnet_sap_exists = length(local.vnet_sap_arm_id) > 0 ? true : false
   vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, format("%s%s", local.vnet_prefix, local.resource_suffixes.vnet))
   vnet_sap_addr   = local.vnet_sap_exists ? "" : try(local.var_vnet_sap.address_space, "")
-<<<<<<< HEAD
-=======
 
   // By default, Ansible ssh key for SID uses generated public key. Provide sshkey.path_to_public_key and path_to_private_key overides it
   sid_public_key  = local.enable_landscape_kv ? try(file(var.sshkey.path_to_public_key), tls_private_key.sid[0].public_key_openssh) : null
   sid_private_key = local.enable_landscape_kv ? try(file(var.sshkey.path_to_private_key), tls_private_key.sid[0].private_key_pem) : null
->>>>>>> 589c0be737604504f81efb9cd85d17bdb2f3aa81
 
   //Admin subnet
   var_sub_admin    = try(local.var_vnet_sap.subnet_admin, {})

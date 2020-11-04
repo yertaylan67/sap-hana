@@ -74,11 +74,6 @@ resource "azurerm_linux_virtual_machine" "scs" {
     [azurerm_network_interface.scs_admin[count.index].id, azurerm_network_interface.scs[count.index].id]) : (
     [azurerm_network_interface.scs[count.index].id]
   )
-<<<<<<< HEAD
-  
-=======
-
->>>>>>> 589c0be737604504f81efb9cd85d17bdb2f3aa81
   size                            = local.scs_sizing.compute.vm_size
   admin_username                  = local.sid_auth_username
   disable_password_authentication = ! local.enable_auth_password
@@ -141,11 +136,6 @@ resource "azurerm_windows_virtual_machine" "scs" {
     [azurerm_network_interface.scs_admin[count.index].id, azurerm_network_interface.scs[count.index].id]) : (
     [azurerm_network_interface.scs[count.index].id]
   )
-<<<<<<< HEAD
-  
-=======
-
->>>>>>> 589c0be737604504f81efb9cd85d17bdb2f3aa81
   size           = local.scs_sizing.compute.vm_size
   admin_username = local.sid_auth_username
   admin_password = local.sid_auth_password
@@ -175,17 +165,10 @@ resource "azurerm_windows_virtual_machine" "scs" {
 
 # Creates managed data disk
 resource "azurerm_managed_disk" "scs" {
-<<<<<<< HEAD
-  count                = local.enable_deployment ? length(local.scs-data-disks) : 0
-  name                 = format("%s%s%s%s", local.prefix, var.naming.separator, local.scs_virtualmachine_names[count.index], local.scs-data-disks[count.index].suffix)
-  location             = var.resource-group[0].location
-  resource_group_name  = var.resource-group[0].name
-=======
   count                = local.enable_deployment ? length(local.scs_data_disks) : 0
   name                 = format("%s%s%s%s", local.prefix, var.naming.separator, local.scs_virtualmachine_names[count.index], local.scs_data_disks[count.index].suffix)
   location             = var.resource_group[0].location
   resource_group_name  = var.resource_group[0].name
->>>>>>> 589c0be737604504f81efb9cd85d17bdb2f3aa81
   create_option        = "Empty"
   storage_account_type = local.scs_data_disks[count.index].storage_account_type
   disk_size_gb         = local.scs_data_disks[count.index].disk_size_gb
