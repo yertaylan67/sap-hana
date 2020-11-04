@@ -170,8 +170,8 @@ resource "azurerm_lb_backend_address_pool" "web" {
 
 # Create the Web dispatcher Load Balancer Rules
 resource "azurerm_lb_rule" "web" {
-  count                          = local.enable_deployment &&  local.webdispatcher_count > 0 ? length(local.lb-ports.web) : 0
-  resource_group_name            = var.resource-group[0].name
+  count                          = local.enable_deployment &&  local.webdispatcher_count > 0 ? length(local.lb_ports.web) : 0
+  resource_group_name            = var.resource_group[0].name
   loadbalancer_id                = azurerm_lb.web[0].id
   name                           = format("%s%s%05d-%02d", local.prefix, local.resource_suffixes.web_alb_inrule, local.lb_ports.web[count.index], count.index)
   protocol                       = "Tcp"

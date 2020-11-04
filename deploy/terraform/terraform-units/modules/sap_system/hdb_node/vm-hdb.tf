@@ -98,7 +98,7 @@ resource "azurerm_lb_probe" "hdb" {
   interval_in_seconds = 5
   number_of_probes    = 2
 }
-
+/*
 # TODO:
 # Current behavior, it will try to add all VMs in the cluster into the backend pool, which would not work since we do not have availability sets created yet.
 # In a scale-out scenario, we need to rewrite this code according to the scale-out + HA reference architecture.
@@ -108,7 +108,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "hdb" {
   ip_configuration_name   = azurerm_network_interface.nics_dbnodes_db[count.index].ip_configuration[0].name
   backend_address_pool_id = azurerm_lb_backend_address_pool.hdb[0].id
 }
-
+*/
 resource "azurerm_lb_rule" "hdb" {
   count                          = local.enable_deployment ? length(local.loadbalancer_ports) : 0
   resource_group_name            = var.resource_group[0].name
@@ -133,11 +133,11 @@ resource "azurerm_linux_virtual_machine" "vm_dbnode" {
   location            = var.resource_group[0].location
   resource_group_name = var.resource_group[0].name
 
-  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % local.db_zone_count].id : var.ppg[0].id
+  proximity_placement_group_id = local.zonal_deployment ? var.ppg[count.index % max(local.db_zone_count,1)].id : var.ppg[0].id
   //If more than one servers are deployed into a single zone put them in an availability set and not a zone
   //Ultra disk requires zonal deployment
   availability_set_id = local.enable_ultradisk ? null : (
-    local.zonal_deployment && local.db_server_count == local.db_zone_count ? null : azurerm_availability_set.hdb[count.index % local.db_zone_count].id
+    local.zonal_deployment && local.db_server_count == local.db_zone_count ? null : azurerm_availability_set.hdb[count.index % max(local.db_zone_count,1)].id
   )
 
   zone = local.enable_ultradisk || local.db_server_count == local.db_zone_count ? local.zones[count.index % local.db_zone_count] : null

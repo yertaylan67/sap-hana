@@ -88,7 +88,7 @@ locals {
   vnet_prefix                 = var.naming.prefix.VNET
   storageaccount_name         = var.naming.storageaccount_names.SDU
   keyvault_names              = var.naming.keyvault_names.SDU
-  landscape_keyvault_names = var.naming.keyvault_names.VNET
+  landscape_keyvault_names    = var.naming.keyvault_names.VNET
   virtualmachine_names        = var.naming.virtualmachine_names.ISCSI_COMPUTERNAME
   anchor_virtualmachine_names = var.naming.virtualmachine_names.ANCHOR_VMNAME
   anchor_computer_names       = var.naming.virtualmachine_names.ANCHOR_COMPUTERNAME
@@ -159,8 +159,7 @@ locals {
   anchor_auth_type            = try(local.anchor.authentication.type, "key")
   enable_anchor_auth_password = local.deploy_anchor && local.anchor_auth_type == "password"
   enable_anchor_auth_key      = local.deploy_anchor && local.anchor_auth_type == "key"
-
-  anchor_nic_ips = local.sub_admin_exists ? try(local.anchor.nic_ips, []) : []
+  anchor_nic_ips              = try(local.anchor.nic_ips, [])
 
   anchor_custom_image = try(local.anchor.os.source_image_id, "") != "" ? true : false
 
@@ -320,7 +319,7 @@ locals {
   sub_app_nsg_name   = local.sub_app_nsg_exists ? try(split("/", local.sub_app_nsg_arm_id)[8], "") : try(local.var_sub_app_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.app_subnet_nsg))
 
   enable_peering = try(var.infrastructure.vnets.management.enable_peering, true)
-  
+
   //---- Update infrastructure with defaults ----//
   infrastructure = {
     resource_group = {

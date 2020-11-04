@@ -30,10 +30,6 @@ output "software_w_defaults" {
   value = local.software
 }
 
-output "random_id" {
-  value = random_id.random_id.hex
-}
-
 output "admin_subnet" {
   value = ! local.enable_admin_subnet ? null : (local.sub_admin_exists ? data.azurerm_subnet.admin[0] : azurerm_subnet.admin[0])
 }

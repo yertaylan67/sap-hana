@@ -270,14 +270,15 @@ locals {
   location_short = upper(try(var.region_mapping[var.location], "unkn"))
 
   env_verified      = upper(substr(var.environment, 0, var.sapautomation_name_limits.environment_variable_length))
-  vnet_verified     = upper(substr(var.sap_vnet_name, 0, var.sapautomation_name_limits.sap_vnet_length))
-  dep_vnet_verified = upper(substr(var.management_vnet_name, 0, var.sapautomation_name_limits.sap_vnet_length))
+  vnet_verified     = replace(upper(substr(var.sap_vnet_name, 0, var.sapautomation_name_limits.sap_vnet_length)),"-","")
+  dep_vnet_verified = replace(upper(substr(var.management_vnet_name, 0, var.sapautomation_name_limits.sap_vnet_length)),"-","")
 
   random_id_verified    = upper(substr(var.random_id, 0, var.sapautomation_name_limits.random_id_length))
   random_id_vm_verified = lower(substr(var.random_id, 0, var.sapautomation_name_limits.random_id_length))
 
   zones            = distinct(concat(var.db_zones, var.app_zones, var.scs_zones, var.web_zones))
   zonal_deployment = try(length(local.zones), 0) > 0 ? true : false
+  db_zonal_deployment = try(length(var.db_zones), 0) > 0 ? true : false
 
   //The separator to use between the prefix and resource name
   separator = "_"

@@ -57,7 +57,7 @@ resource "local_file" "output_json" {
             } if local.hdb_vms[index(local.ips_dbnodes_admin, ip_dbnode_admin)].platform == database.platform
           ],
           loadbalancer = {
-            frontend_ip = var.loadbalancers[0].private_ip_address
+            frontend_ip = try(length(var.loadbalancers) > 0 ? var.loadbalancers[0].private_ip_address : "","")
           }
         }
         if database != {}

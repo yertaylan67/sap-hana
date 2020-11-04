@@ -26,14 +26,14 @@ locals {
   ]
 
   anydb_vm_names = [for idx in range(var.db_server_count) :
-    local.zonal_deployment ? (
+    local.db_zonal_deployment ? (
       format("%sd%s%sz%s%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), local.separator, var.db_zones[idx % length(var.db_zones)], local.separator, idx, 0, local.random_id_vm_verified)) : (
       format("%sd%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), idx, 0, local.random_id_vm_verified)
     )
   ]
 
   anydb_vm_names_ha = [for idx in range(var.db_server_count) :
-    local.zonal_deployment ? (
+    local.db_zonal_deployment ? (
       format("%sd%s%sz%s%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), local.separator, var.db_zones[idx % length(var.db_zones)], local.separator, idx, 1, local.random_id_vm_verified)) : (
       format("%sd%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), idx, 1, local.random_id_vm_verified)
     )
@@ -63,14 +63,14 @@ locals {
   ]
 
   hana_server_vm_names = [for idx in range(var.db_server_count) :
-    local.zonal_deployment ? (
+    local.db_zonal_deployment ? (
       format("%sd%s%sz%s%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), local.separator, var.db_zones[idx % length(var.db_zones)], local.separator, idx, 0, local.random_id_vm_verified)) : (
       format("%sd%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), idx, 0, local.random_id_vm_verified)
     )
   ]
 
   hana_server_vm_names_ha = [for idx in range(var.db_server_count) :
-    local.zonal_deployment ? (
+    local.db_zonal_deployment ? (
       format("%sd%s%sz%s%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), local.separator, var.db_zones[idx % length(var.db_zones)], local.separator, idx, 1, local.random_id_vm_verified)) : (
       format("%sd%s%02dl%d%s", lower(var.sap_sid), lower(var.db_sid), idx, 1, local.random_id_vm_verified)
     )
