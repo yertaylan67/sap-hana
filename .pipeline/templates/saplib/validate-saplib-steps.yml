@@ -34,7 +34,7 @@ steps:
       
       if ! grep "No changes\|0 to change, 0 to destroy" plan_output.log; then exit 1; fi;
       '
-    displayName: "Validate sap_library new config"
+    displayName: "Validate library new config"
     env:
       ARM_CLIENT_ID: $(hana-pipeline-spn-id)
       ARM_CLIENT_SECRET: $(hana-pipeline-spn-pw)

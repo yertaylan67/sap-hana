@@ -1,15 +1,21 @@
-
 /*
   Description:
   Set up key vault for sap system
 */
+
+// retrieve public key from sap landscape's Key vault
+data "azurerm_key_vault_secret" "sid_pk" {
+  count        = local.enable_anchor_auth_key ? 1 : 0
+  name         = local.secret_sid_pk_name
+  key_vault_id = local.kv_landscape_id
+}
 
 // Create private KV with access policy
 resource "azurerm_key_vault" "sid_kv_prvt" {
   count                      = local.enable_sid_deployment ? 1 : 0
   name                       = local.sid_kv_private_name
   location                   = local.region
-  resource_group_name        = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
+  resource_group_name        = local.rg_exists ? data.azurerm_resource_group.resource_group[0].name : azurerm_resource_group.resource_group[0].name
   tenant_id                  = local.service_principal.tenant_id
   soft_delete_enabled        = true
   soft_delete_retention_days = 7
@@ -32,7 +38,7 @@ resource "azurerm_key_vault" "sid_kv_user" {
   count                      = local.enable_sid_deployment ? 1 : 0
   name                       = local.sid_kv_user_name
   location                   = local.region
-  resource_group_name        = local.rg_exists ? data.azurerm_resource_group.resource-group[0].name : azurerm_resource_group.resource-group[0].name
+  resource_group_name        = local.rg_exists ? data.azurerm_resource_group.resource_group[0].name : azurerm_resource_group.resource_group[0].name
   tenant_id                  = local.service_principal.tenant_id
   soft_delete_enabled        = true
   soft_delete_retention_days = 7

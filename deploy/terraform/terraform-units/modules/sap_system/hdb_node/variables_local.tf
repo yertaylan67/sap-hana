@@ -1,20 +1,12 @@
-variable "resource-group" {
+variable "resource_group" {
   description = "Details of the resource group"
 }
 
-variable "subnet-mgmt" {
-  description = "Details of the management subnet"
-}
-
-variable "nsg-mgmt" {
-  description = "Details of the NSG for management subnet"
-}
-
-variable "vnet-sap" {
+variable "vnet_sap" {
   description = "Details of the SAP VNet"
 }
 
-variable "storage-bootdiag" {
+variable "storage_bootdiag" {
   description = "Details of the boot diagnostics storage account"
 }
 
@@ -32,18 +24,14 @@ variable "custom_disk_sizes_filename" {
   default     = ""
 }
 
-variable "deployer_user" {
-  description = "Details of the users"
-  default     = []
+variable "admin_subnet" {
+  description = "Information about SAP admin subnet"
 }
 
 variable "sid_kv_user" {
   description = "Details of the user keyvault for sap_system"
 }
 
-variable "admin_subnet" {
-  description = "Information about SAP admin subnet"
-}
 
 locals {
   // Imports database sizing information
@@ -60,7 +48,18 @@ locals {
   sid    = upper(try(var.application.sid, ""))
   prefix  = try(var.infrastructure.resource_group.name, length(var.naming.prefix_resource.SDU) > 0 ? var.naming.prefix_resource.SDU : var.naming.prefix.SDU)
 
-  rg_name = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, local.resource_suffixes.sdu-rg))
+  rg_name = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, local.resource_suffixes.sdu_rg))
+
+  /* 
+     TODO: currently sap landscape and sap system haven't been decoupled. 
+     The key vault information of sap landscape will be obtained via input json.
+     At phase 2, the logic will be updated and the key vault information will be obtained from tfstate file of sap landscape.  
+  */
+  kv_landscape_id    = try(local.var_infra.landscape.key_vault_arm_id, "")
+  secret_sid_pk_name = try(local.var_infra.landscape.sid_public_key_secret_name, "")
+
+  // Define this variable to make it easier when implementing existing kv.
+  sid_kv_user = try(var.sid_kv_user[0], null)
 
   # SAP vnet
   var_infra       = try(var.infrastructure, {})
@@ -79,7 +78,7 @@ locals {
   var_sub_db    = try(var.infrastructure.vnets.sap.subnet_db, {})
   sub_db_arm_id = try(local.var_sub_db.arm_id, "")
   sub_db_exists = length(local.sub_db_arm_id) > 0 ? true : false
-  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s%s", local.prefix, local.resource_suffixes.db-subnet))
+  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s%s", local.prefix, local.resource_suffixes.db_subnet))
   sub_db_prefix = try(local.var_sub_db.prefix, "")
 
   // DB NSG
@@ -88,7 +87,7 @@ locals {
   sub_db_nsg_exists = length(local.sub_db_nsg_arm_id) > 0 ? true : false
   sub_db_nsg_name = local.sub_db_nsg_exists ? (
     try(split("/", local.sub_db_nsg_arm_id)[8], "")) : (
-    try(local.var_sub_db_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.db-subnet-nsg))
+    try(local.var_sub_db_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.db_subnet_nsg))
   )
 
   // Filter the list of databases to only HANA platform entries
@@ -101,16 +100,6 @@ locals {
   node_count      = try(length(var.databases[0].dbnodes), 1)
   db_server_count = local.hdb_ha ? local.node_count * 2 : local.node_count
 
-  /* 
-     TODO: currently sap landscape and sap system haven't been decoupled. 
-     The key vault information of sap landscape will be obtained via input json.
-     At phase 2, the logic will be updated and the key vault information will be obtained from tfstate file of sap landscape.  
-  */
-  kv_landscape_id    = try(local.var_infra.landscape.key_vault_arm_id, "")
-  secret_sid_pk_name = try(local.var_infra.landscape.sid_public_key_secret_name, "")
-  
-  // Define this variable to make it easier when implementing existing kv.
-  sid_kv_user = try(var.sid_kv_user[0], null)
 
   hdb = try(local.hdb_list[0], {})
 
@@ -152,10 +141,9 @@ locals {
     "password" = local.sid_auth_password
   }
 
-  hdb_ins = try(local.hdb.instance, {})
-  hdb_sid = try(local.hdb_ins.sid, local.sid) // HANA database sid from the Databases array for use as reference to LB/AS
-  hdb_nr  = try(local.hdb_ins.instance_number, "01")
-
+  hdb_ins    = try(local.hdb.instance, {})
+  hdb_sid    = try(local.hdb_ins.sid, local.sid) // HANA database sid from the Databases array for use as reference to LB/AS
+  hdb_nr     = try(local.hdb_ins.instance_number, "01")
   components = merge({ hana_database = [] }, try(local.hdb.components, {}))
   xsa        = try(local.hdb.xsa, { routing = "ports" })
   shine      = try(local.hdb.shine, { email = "shinedemo@microsoft.com" })
@@ -254,7 +242,7 @@ locals {
   ])
 
   // List of data disks to be created for HANA DB nodes
-  data-disk-per-dbnode = (length(local.hdb_vms) > 0) ? flatten(
+  data_disk_per_dbnode = (length(local.hdb_vms) > 0) ? flatten(
     [
       for storage_type in lookup(local.sizes, local.hdb_size).storage : [
         for disk_count in range(storage_type.count) : {
@@ -274,7 +262,7 @@ locals {
 
   data_disk_list = flatten([
     for vm_counter, hdb_vm in local.hdb_vms : [
-      for idx, datadisk in local.data-disk-per-dbnode : {
+      for idx, datadisk in local.data_disk_per_dbnode : {
         vm_index                  = vm_counter
         name                      = format("%s-%s", hdb_vm.name, datadisk.suffix)
         vm_index                  = vm_counter

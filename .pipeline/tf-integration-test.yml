@@ -13,6 +13,7 @@ schedules:
   branches:
     include:
     - feature/*
+    - beta/*
   always: true
 variables:
   - group: azure-config-variables
@@ -151,7 +152,7 @@ stages:
           az group delete -n ${sapsystem_rg} --no-wait -y
 
           saplandscape_rg="${environment}-EAUS-SAP0-INFRASTRUCTURE"
-          echo "=== Try to delete rg ${saplandscape_rg} ==="
+          echo "=== Mark and try to delete rg ${saplandscape_rg} ==="
           az group update --resource-group ${saplandscape_rg} --set tags.Delete=True
           az group delete -n ${saplandscape_rg} --no-wait -y
 
@@ -160,7 +161,7 @@ stages:
           az group update --resource-group ${saplib_rg} --set tags.Delete=True
           az group delete -n ${saplib_rg} --no-wait -y
 
-          deployer_rg="${environment}-EAUS-DEP00-INFRASTRUCTURE"
+          deployer_rg="${environment}-EAUS-MGMT-INFRASTRUCTURE"
           echo "=== Try to delete rg ${deployer_rg} ==="
           az group update --resource-group ${deployer_rg} --set tags.Delete=True
           az group delete -n ${deployer_rg} --no-wait -y

@@ -9,36 +9,62 @@ variable "is_single_node_hana" {
   default     = false
 }
 
-variable "vnet-mgmt" {
-  description = "Details about management vnet of deployer(s)"
-}
-
-variable "subnet-mgmt" {
-  description = "Details about management subnet of deployer(s)"
-}
-
-variable "nsg-mgmt" {
-  description = "Details about management nsg of deployer(s)"
-}
-
-variable naming {
-  description = "Defines the names for the resources"
+variable "deployer_tfstate" {
+  description = "Deployer remote tfstate file"
 }
 
 variable "service_principal" {
   description = "Current service principal used to authenticate to Azure"
 }
 
-/*variable "deployer-uai" {
-  description = "Details of the UAI used by deployer(s)"
-}
-*/
 /* Comment out code with users.object_id for the time being
 variable "deployer_user" {
   description = "Details of the users"
   default     = []
 }
 */
+
+variable naming {
+  description = "Defines the names for the resources"
+}
+
+variable "region_mapping" {
+  type        = map(string)
+  description = "Region Mapping: Full = Single CHAR, 4-CHAR"
+
+  //28 Regions 
+
+  default = {
+    westus             = "weus"
+    westus2            = "wus2"
+    centralus          = "ceus"
+    eastus             = "eaus"
+    eastus2            = "eus2"
+    northcentralus     = "ncus"
+    southcentralus     = "scus"
+    westcentralus      = "wcus"
+    northeurope        = "noeu"
+    westeurope         = "weeu"
+    eastasia           = "eaas"
+    southeastasia      = "seas"
+    brazilsouth        = "brso"
+    japaneast          = "jpea"
+    japanwest          = "jpwe"
+    centralindia       = "cein"
+    southindia         = "soin"
+    westindia          = "wein"
+    uksouth2           = "uks2"
+    uknorth            = "ukno"
+    canadacentral      = "cace"
+    canadaeast         = "caea"
+    australiaeast      = "auea"
+    australiasoutheast = "ause"
+    uksouth            = "ukso"
+    ukwest             = "ukwe"
+    koreacentral       = "koce"
+    koreasouth         = "koso"
+  }
+}
 
 //Set defaults
 locals {
@@ -68,7 +94,13 @@ locals {
   anchor_computer_names       = var.naming.virtualmachine_names.ANCHOR_COMPUTERNAME
   resource_suffixes           = var.naming.resource_suffixes
 
+  // Retrieve information about Deployer from tfstate file
+  deployer_tfstate = var.deployer_tfstate
+  vnet_mgmt        = local.deployer_tfstate.vnet_mgmt
+  subnet_mgmt      = local.deployer_tfstate.subnet_mgmt
+  nsg_mgmt         = local.deployer_tfstate.nsg_mgmt
 
+  //Filter the list of databases to only HANA platform entries
   databases = [
     for database in var.databases : database
     if try(database.platform, "NONE") != "NONE"
@@ -88,7 +120,13 @@ locals {
     "version"         = try(local.db.os.version, local.db_custom_image ? "" : "latest")
   }
 
-  db_ostype = try(local.db.os.os_type, "Linux")
+  db_ostype = upper(try(local.db.os.os_type, "LINUX"))
+
+  db_auth = try(local.db.authentication,
+    {
+      "type"     = "key"
+      "username" = "azureadm"
+  })
 
   //Enable DB deployment 
   hdb_list = [
@@ -112,17 +150,17 @@ locals {
 
   var_infra = try(var.infrastructure, {})
 
-  db_auth = try(local.db.authentication,
-    {
-      "type"     = "key"
-      "username" = "azureadm"
-  })
-
   //Anchor VM
-  anchor                = try(local.var_infra.anchor_vms, {})
-  deploy_anchor         = length(local.anchor) > 0 ? true : false
-  anchor_size           = try(local.anchor.sku, "Standard_D8s_v3")
-  anchor_authentication = try(local.anchor.authentication, local.db_auth)
+
+  anchor                      = try(local.var_infra.anchor_vms, {})
+  deploy_anchor               = length(local.anchor) > 0 ? true : false
+  anchor_size                 = try(local.anchor.sku, "Standard_D8s_v3")
+  anchor_authentication       = try(local.anchor.authentication, local.db_auth)
+  anchor_auth_type            = try(local.anchor.authentication.type, "key")
+  enable_anchor_auth_password = local.deploy_anchor && local.anchor_auth_type == "password"
+  enable_anchor_auth_key      = local.deploy_anchor && local.anchor_auth_type == "key"
+
+  anchor_nic_ips = local.sub_admin_exists ? try(local.anchor.nic_ips, []) : []
 
   anchor_custom_image = try(local.anchor.os.source_image_id, "") != "" ? true : false
 
@@ -134,13 +172,13 @@ locals {
     "version"         = try(local.anchor.os.version, local.anchor_custom_image ? "" : local.db_os.version)
   }
 
-  anchor_ostype           = upper(try(local.anchor.os.os_type, local.db_ostype))
+  anchor_ostype = upper(try(local.anchor.os.os_type, local.db_ostype))
 
   //Resource group
   var_rg    = try(local.var_infra.resource_group, {})
   rg_arm_id = try(local.var_rg.arm_id, "")
   rg_exists = length(local.rg_arm_id) > 0 ? true : false
-  rg_name   = local.rg_exists ? try(split("/", local.rg_arm_id)[4], "") : try(local.var_rg.name, format("%s%s", local.prefix, local.resource_suffixes.sdu-rg))
+  rg_name   = local.rg_exists ? try(split("/", local.rg_arm_id)[4], "") : try(local.var_rg.name, format("%s%s", local.prefix, local.resource_suffixes.sdu_rg))
 
   //PPG
   var_ppg    = try(local.var_infra.ppg, {})
@@ -154,11 +192,22 @@ locals {
   /* Comment out code with users.object_id for the time being
   // Additional users add to user KV
   kv_users = var.deployer_user
-*/
+  */
   // kv for sap landscape
+<<<<<<< HEAD
   kv_prefix       = var.naming.prefix.VNET
   kv_private_name = local.landscape_keyvault_names.private_access
   kv_user_name    = local.landscape_keyvault_names.user_access
+=======
+  environment    = lower(try(local.var_infra.environment, ""))
+  location_short = lower(try(var.region_mapping[local.region], "unkn"))
+  vnet_nr_parts  = length(split("-", local.vnet_sap_name))
+  // Default naming of vnet has multiple parts. Taking the second-last part as the name 
+  vnet_sap_name_prefix = local.vnet_nr_parts >= 3 ? split("-", upper(local.vnet_sap_name))[local.vnet_nr_parts - 1] == "VNET" ? split("-", local.vnet_sap_name)[local.vnet_nr_parts - 2] : local.vnet_sap_name : local.vnet_sap_name
+  kv_prefix            = upper(format("%s%s%s", substr(local.environment, 0, 5), local.location_short, substr(local.vnet_sap_name_prefix, 0, 7)))
+  kv_private_name      = format("%sprvt%s", local.kv_prefix, upper(substr(local.postfix, 0, 3)))
+  kv_user_name         = format("%suser%s", local.kv_prefix, upper(substr(local.postfix, 0, 3)))
+>>>>>>> 589c0be737604504f81efb9cd85d17bdb2f3aa81
 
   // key vault naming for sap system
   sid_kv_prefix       = var.naming.prefix.SDU
@@ -171,6 +220,7 @@ locals {
      At phase 2, the logic will be updated and the key vault information will be obtained from tfstate file of sap landscape.  
   */
   kv_landscape_id     = try(local.var_infra.landscape.key_vault_arm_id, "")
+  secret_sid_pk_name  = try(local.var_infra.landscape.sid_public_key_secret_name, "")
   enable_landscape_kv = local.kv_landscape_id == ""
 
   // By default, Ansible ssh key for SID uses generated public key. Provide sshkey.path_to_public_key and path_to_private_key overides it
@@ -180,7 +230,11 @@ locals {
   //iSCSI
   var_iscsi = try(local.var_infra.iscsi, {})
 
+<<<<<<< HEAD
   enable_admin_subnet = try(var.application.dual_nics, false) || try(var.databases[0].dual_nics, false) || local.enable_hdb_deployment
+=======
+  enable_admin_subnet = try(var.application.dual_nics, false) || try(var.databases[0].dual_nics, false) || (try(upper(local.db.platform), "NONE") == "HANA")
+>>>>>>> 589c0be737604504f81efb9cd85d17bdb2f3aa81
 
   //iSCSI target device(s) is only created when below conditions met:
   //- iscsi is defined in input JSON
@@ -189,6 +243,10 @@ locals {
   //  - HANA database uses SUSE
   iscsi_count = (local.db_ha && upper(local.db_os.publisher) == "SUSE") ? try(local.var_iscsi.iscsi_count, 0) : 0
   iscsi_size  = try(local.var_iscsi.size, "Standard_D2s_v3")
+<<<<<<< HEAD
+=======
+
+>>>>>>> 589c0be737604504f81efb9cd85d17bdb2f3aa81
   iscsi_os = try(local.var_iscsi.os,
     {
       "publisher" = try(local.var_iscsi.os.publisher, "SUSE")
@@ -226,59 +284,66 @@ locals {
   vnet_sap_exists = length(local.vnet_sap_arm_id) > 0 ? true : false
   vnet_sap_name   = local.vnet_sap_exists ? try(split("/", local.vnet_sap_arm_id)[8], "") : try(local.var_vnet_sap.name, format("%s%s", local.vnet_prefix, local.resource_suffixes.vnet))
   vnet_sap_addr   = local.vnet_sap_exists ? "" : try(local.var_vnet_sap.address_space, "")
+<<<<<<< HEAD
+=======
+
+  // By default, Ansible ssh key for SID uses generated public key. Provide sshkey.path_to_public_key and path_to_private_key overides it
+  sid_public_key  = local.enable_landscape_kv ? try(file(var.sshkey.path_to_public_key), tls_private_key.sid[0].public_key_openssh) : null
+  sid_private_key = local.enable_landscape_kv ? try(file(var.sshkey.path_to_private_key), tls_private_key.sid[0].private_key_pem) : null
+>>>>>>> 589c0be737604504f81efb9cd85d17bdb2f3aa81
 
   //Admin subnet
   var_sub_admin    = try(local.var_vnet_sap.subnet_admin, {})
   sub_admin_arm_id = try(local.var_sub_admin.arm_id, "")
   sub_admin_exists = length(local.sub_admin_arm_id) > 0 ? true : false
 
-  sub_admin_name   = local.sub_admin_exists ? try(split("/", local.sub_admin_arm_id)[10], "") : try(local.var_sub_admin.name, format("%s%s", local.prefix, local.resource_suffixes.admin-subnet))
+  sub_admin_name   = local.sub_admin_exists ? try(split("/", local.sub_admin_arm_id)[10], "") : try(local.var_sub_admin.name, format("%s%s", local.prefix, local.resource_suffixes.admin_subnet))
   sub_admin_prefix = local.sub_admin_exists ? "" : try(local.var_sub_admin.prefix, "")
 
   //Admin NSG
   var_sub_admin_nsg    = try(local.var_sub_admin.nsg, {})
   sub_admin_nsg_arm_id = try(local.var_sub_admin_nsg.arm_id, "")
   sub_admin_nsg_exists = length(local.sub_admin_nsg_arm_id) > 0 ? true : false
-  sub_admin_nsg_name   = local.sub_admin_nsg_exists ? try(split("/", local.sub_admin_nsg_arm_id)[8], "") : try(local.var_sub_admin_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.admin-subnet-nsg))
+  sub_admin_nsg_name   = local.sub_admin_nsg_exists ? try(split("/", local.sub_admin_nsg_arm_id)[8], "") : try(local.var_sub_admin_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.admin_subnet_nsg))
 
   //DB subnet
   var_sub_db    = try(local.var_vnet_sap.subnet_db, {})
   sub_db_arm_id = try(local.var_sub_db.arm_id, "")
   sub_db_exists = length(local.sub_db_arm_id) > 0 ? true : false
-  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s%s", local.prefix, local.resource_suffixes.db-subnet))
+  sub_db_name   = local.sub_db_exists ? try(split("/", local.sub_db_arm_id)[10], "") : try(local.var_sub_db.name, format("%s%s", local.prefix, local.resource_suffixes.db_subnet))
   sub_db_prefix = local.sub_db_exists ? "" : try(local.var_sub_db.prefix, "")
 
   //DB NSG
   var_sub_db_nsg    = try(local.var_sub_db.nsg, {})
   sub_db_nsg_arm_id = try(local.var_sub_db_nsg.arm_id, "")
   sub_db_nsg_exists = length(local.sub_db_nsg_arm_id) > 0 ? true : false
-  sub_db_nsg_name   = local.sub_db_nsg_exists ? try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.db-subnet-nsg))
+  sub_db_nsg_name   = local.sub_db_nsg_exists ? try(split("/", local.sub_db_nsg_arm_id)[8], "") : try(local.var_sub_db_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.db_subnet_nsg))
 
   //iSCSI subnet
   var_sub_iscsi    = try(local.var_vnet_sap.subnet_iscsi, {})
   sub_iscsi_arm_id = try(local.var_sub_iscsi.arm_id, "")
   sub_iscsi_exists = length(local.sub_iscsi_arm_id) > 0 ? true : false
-  sub_iscsi_name   = local.sub_iscsi_exists ? try(split("/", local.sub_iscsi_arm_id)[10], "") : try(local.var_sub_iscsi.name, format("%s%s", local.prefix, local.resource_suffixes.iscsi-subnet))
+  sub_iscsi_name   = local.sub_iscsi_exists ? try(split("/", local.sub_iscsi_arm_id)[10], "") : try(local.var_sub_iscsi.name, format("%s%s", local.prefix, local.resource_suffixes.iscsi_subnet))
   sub_iscsi_prefix = local.sub_iscsi_exists ? "" : try(local.var_sub_iscsi.prefix, "")
 
   //iSCSI NSG
   var_sub_iscsi_nsg    = try(local.var_sub_iscsi.nsg, {})
   sub_iscsi_nsg_arm_id = try(local.var_sub_iscsi_nsg.arm_id, "")
   sub_iscsi_nsg_exists = length(local.sub_iscsi_nsg_arm_id) > 0 ? true : false
-  sub_iscsi_nsg_name   = local.sub_iscsi_nsg_exists ? try(split("/", local.sub_iscsi_nsg_arm_id)[8], "") : try(local.var_sub_iscsi_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.iscsi-subnet-nsg))
+  sub_iscsi_nsg_name   = local.sub_iscsi_nsg_exists ? try(split("/", local.sub_iscsi_nsg_arm_id)[8], "") : try(local.var_sub_iscsi_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.iscsi_subnet_nsg))
 
   //APP subnet
   var_sub_app    = try(local.var_vnet_sap.subnet_app, {})
   sub_app_arm_id = try(local.var_sub_app.arm_id, "")
   sub_app_exists = length(local.sub_app_arm_id) > 0 ? true : false
-  sub_app_name   = local.sub_app_exists ? "" : try(local.var_sub_app.name, format("%s%s", local.prefix, local.resource_suffixes.app-subnet))
+  sub_app_name   = local.sub_app_exists ? "" : try(local.var_sub_app.name, format("%s%s", local.prefix, local.resource_suffixes.app_subnet))
   sub_app_prefix = local.sub_app_exists ? "" : try(local.var_sub_app.prefix, "")
 
   //APP NSG
   var_sub_app_nsg    = try(local.var_sub_app.nsg, {})
   sub_app_nsg_arm_id = try(local.var_sub_app_nsg.arm_id, "")
   sub_app_nsg_exists = length(local.sub_app_nsg_arm_id) > 0 ? true : false
-  sub_app_nsg_name   = local.sub_app_nsg_exists ? try(split("/", local.sub_app_nsg_arm_id)[8], "") : try(local.var_sub_app_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.app-subnet-nsg))
+  sub_app_nsg_name   = local.sub_app_nsg_exists ? try(split("/", local.sub_app_nsg_arm_id)[8], "") : try(local.var_sub_app_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.app_subnet_nsg))
 
   enable_peering = try(var.infrastructure.vnets.management.enable_peering, true)
   

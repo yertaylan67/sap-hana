@@ -17,6 +17,44 @@ variable "service_principal" {
   description = "Current service principal used to authenticate to Azure"
 }
 
+variable "region_mapping" {
+  type        = map(string)
+  description = "Region Mapping: Full = Single CHAR, 4-CHAR"
+
+  # 28 Regions 
+
+  default = {
+    westus             = "weus"
+    westus2            = "wus2"
+    centralus          = "ceus"
+    eastus             = "eaus"
+    eastus2            = "eus2"
+    northcentralus     = "ncus"
+    southcentralus     = "scus"
+    westcentralus      = "wcus"
+    northeurope        = "noeu"
+    westeurope         = "weeu"
+    eastasia           = "eaas"
+    southeastasia      = "seas"
+    brazilsouth        = "brso"
+    japaneast          = "jpea"
+    japanwest          = "jpwe"
+    centralindia       = "cein"
+    southindia         = "soin"
+    westindia          = "wein"
+    uksouth2           = "uks2"
+    uknorth            = "ukno"
+    canadacentral      = "cace"
+    canadaeast         = "caea"
+    australiaeast      = "auea"
+    australiasoutheast = "ause"
+    uksouth            = "ukso"
+    ukwest             = "ukwe"
+    koreacentral       = "koce"
+    koreasouth         = "koso"
+  }
+}
+
 locals {
 
   storageaccount_names = var.naming.storageaccount_names.LIBRARY
@@ -34,12 +72,14 @@ locals {
   var_rg    = try(local.var_infra.resource_group, {})
   rg_exists = try(local.var_rg.is_existing, false)
   rg_arm_id = local.rg_exists ? try(local.var_rg.arm_id, "") : ""
-  rg_name   = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, local.resource_suffixes.library-rg))
+
+  rg_name = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, local.resource_suffixes.library_rg))
 
   // Storage account for sapbits
-  sa_sapbits_arm_id                   = try(var.storage_account_sapbits.arm_id, "")
-  sa_sapbits_exists                   = length(local.sa_sapbits_arm_id) > 0 ? true : false
-  sa_sapbits_name                     = local.sa_sapbits_exists ? split("/", local.sa_sapbits_arm_id)[8] : local.storageaccount_names.library_storageaccount_name
+  sa_sapbits_arm_id = try(var.storage_account_sapbits.arm_id, "")
+  sa_sapbits_exists = length(local.sa_sapbits_arm_id) > 0 ? true : false
+  sa_sapbits_name   = local.sa_sapbits_exists ? split("/", local.sa_sapbits_arm_id)[8] : local.storageaccount_names.library_storageaccount_name
+
   sa_sapbits_account_tier             = local.sa_sapbits_exists ? "" : try(var.storage_account_sapbits.account_tier, "Standard")
   sa_sapbits_account_replication_type = local.sa_sapbits_exists ? "" : try(var.storage_account_sapbits.account_replication_type, "LRS")
   sa_sapbits_account_kind             = local.sa_sapbits_exists ? "" : try(var.storage_account_sapbits.account_kind, "StorageV2")
@@ -56,17 +96,17 @@ locals {
   sa_sapbits_blob_container_name   = try(var.storage_account_sapbits.sapbits_blob_container.name, "sapbits")
   sa_sapbits_container_access_type = "private"
 
-  // Storage account for terraform state files
+  // Storage account for tfstate
   sa_tfstate_arm_id                   = try(var.storage_account_tfstate.arm_id, "")
   sa_tfstate_exists                   = length(local.sa_tfstate_arm_id) > 0 ? true : false
-  sa_tfstate_account_tier             = local.sa_sapbits_exists ? "" : try(var.storage_account_tfstate.account_tier, "Standard")
-  sa_tfstate_account_replication_type = local.sa_sapbits_exists ? "" : try(var.storage_account_tfstate.account_replication_type, "LRS")
-  sa_tfstate_account_kind             = local.sa_sapbits_exists ? "" : try(var.storage_account_tfstate.account_kind, "StorageV2")
+  sa_tfstate_account_tier             = local.sa_tfstate_exists ? "" : try(var.storage_account_tfstate.account_tier, "Standard")
+  sa_tfstate_account_replication_type = local.sa_tfstate_exists ? "" : try(var.storage_account_tfstate.account_replication_type, "LRS")
+  sa_tfstate_account_kind             = local.sa_tfstate_exists ? "" : try(var.storage_account_tfstate.account_kind, "StorageV2")
   sa_tfstate_container_access_type    = "private"
   sa_tfstate_name                     = local.sa_tfstate_exists ? split("/", local.sa_tfstate_arm_id)[8] : local.storageaccount_names.terraformstate_storageaccount_name
+  sa_tfstate_enable_secure_transfer   = true
+  sa_tfstate_delete_retention_policy  = 7
 
-  sa_tfstate_enable_secure_transfer  = true
-  sa_tfstate_delete_retention_policy = 7
   sa_tfstate_container_exists        = try(var.storage_account_tfstate.tfstate_blob_container.is_existing, false)
   sa_tfstate_container_name          = "tfstate"
 

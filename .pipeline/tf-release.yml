@@ -65,11 +65,17 @@ stages:
         parameters:
           deployer_env: "UNIT"
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
       - template: templates/util/add-agent-to-deployer-nsg.yml
         parameters:
           deployer_env: "UNIT"
 >>>>>>> d06fbf063bfb86d9df3e7d45be2cc5c535bcba02
+=======
+      - template: templates/util/add-agent-to-deployer-nsg.yml
+        parameters:
+          deployer_env: "UNIT"
+>>>>>>> 589c0be737604504f81efb9cd85d17bdb2f3aa81
       - template: templates/deployer/post-deployer-steps.yml
         parameters:
           deployer_env: "UNIT"
