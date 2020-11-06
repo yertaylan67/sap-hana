@@ -174,18 +174,6 @@ locals {
   // Additional users add to user KV
   kv_users = var.deployer_user
   */
-<<<<<<< HEAD
-  // kv for sap landscape
-  kv_prefix       = var.naming.prefix.VNET
-  kv_private_name = local.landscape_keyvault_names.private_access
-  kv_user_name    = local.landscape_keyvault_names.user_access
-
-  // key vault naming for sap system
-  sid_kv_prefix       = var.naming.prefix.SDU
-  sid_kv_private_name = local.keyvault_names.private_access
-  sid_kv_user_name    = local.keyvault_names.user_access
-=======
->>>>>>> 2b18f580f506bbf16b15f7ba53467cd7ddf85a43
 
   /* 
      TODO: currently sap landscape and sap system haven't been decoupled. 
