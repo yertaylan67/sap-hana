@@ -23,7 +23,7 @@ resource "azurerm_network_interface" "scs" {
 // Create Admin NICs
 resource "azurerm_network_interface" "scs_admin" {
   count                         = local.enable_deployment && local.apptier_dual_nics ? local.scs_server_count : 0
-  name                          = format("%s_%s%s", local.prefix, local.scs_virtualmachine_names[count.index], local.resource_suffixes.admin_nic)
+  name                          = format("%s%s%s%s", local.prefix, var.naming.separator, local.scs_virtualmachine_names[count.index], local.resource_suffixes.admin_nic)
   location                      = var.resource_group[0].location
   resource_group_name           = var.resource_group[0].name
   enable_accelerated_networking = local.app_sizing.compute.accelerated_networking
@@ -33,7 +33,7 @@ resource "azurerm_network_interface" "scs_admin" {
     subnet_id = var.admin_subnet.id
     private_ip_address = try(local.scs_admin_nic_ips[count.index],
       cidrhost(var.admin_subnet.id.address_prefixes[0],
-        tonumber(count.index) + 20
+        tonumber(count.index) + local.admin_ip_offsets.scs_vm
       )
     )
     private_ip_address_allocation = "static"
@@ -50,7 +50,7 @@ resource "azurerm_network_interface_backend_address_pool_association" "scs" {
 
 # Create the SCS Linux VM(s)
 resource "azurerm_linux_virtual_machine" "scs" {
-  count               = local.enable_deployment && (upper(local.app_ostype) == "LINUX") ? local.scs_server_count : 0
+  count               = local.enable_deployment && (upper(local.scs_ostype) == "LINUX") ? local.scs_server_count : 0
   name                = format("%s%s%s%s", local.prefix, var.naming.separator, local.scs_virtualmachine_names[count.index], local.resource_suffixes.vm)
   computer_name       = local.scs_computer_names[count.index]
   location            = var.resource_group[0].location
@@ -112,7 +112,7 @@ resource "azurerm_linux_virtual_machine" "scs" {
 
 # Create the SCS Windows VM(s)
 resource "azurerm_windows_virtual_machine" "scs" {
-  count               = local.enable_deployment && (upper(local.app_ostype) == "WINDOWS") ? local.scs_server_count : 0
+  count               = local.enable_deployment && (upper(local.scs_ostype) == "WINDOWS") ? local.scs_server_count : 0
   name                = format("%s%s%s%s", local.prefix, var.naming.separator, local.scs_virtualmachine_names[count.index], local.resource_suffixes.vm)
   computer_name       = local.scs_computer_names[count.index]
   location            = var.resource_group[0].location
@@ -173,7 +173,7 @@ resource "azurerm_managed_disk" "scs" {
   storage_account_type = local.scs_data_disks[count.index].storage_account_type
   disk_size_gb         = local.scs_data_disks[count.index].disk_size_gb
   zones = local.scs_zonal_deployment && (local.scs_server_count == local.scs_zone_count) ? (
-    upper(local.app_ostype) == "LINUX" ? (
+    upper(local.scs_ostype) == "LINUX" ? (
       [azurerm_linux_virtual_machine.scs[local.scs_data_disks[count.index].vm_index].zone]) : (
       [azurerm_windows_virtual_machine.scs[local.scs_data_disks[count.index].vm_index].zone]
     )) : (
@@ -184,7 +184,7 @@ resource "azurerm_managed_disk" "scs" {
 resource "azurerm_virtual_machine_data_disk_attachment" "scs" {
   count           = local.enable_deployment ? length(azurerm_managed_disk.scs) : 0
   managed_disk_id = azurerm_managed_disk.scs[count.index].id
-  virtual_machine_id = upper(local.app_ostype) == "LINUX" ? (
+  virtual_machine_id = upper(local.scs_ostype) == "LINUX" ? (
     azurerm_linux_virtual_machine.scs[local.scs_data_disks[count.index].vm_index].id) : (
     azurerm_windows_virtual_machine.scs[local.scs_data_disks[count.index].vm_index].id
   )

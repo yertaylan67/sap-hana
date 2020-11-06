@@ -36,6 +36,9 @@ stages:
       - template: templates/util/collect-deployer-info.yml
         parameters:
           deployer_env: "$(Build.BuildId)"
+      - template: templates/util/add-agent-to-deployer-nsg.yml
+        parameters:
+          deployer_env: "$(Build.BuildId)"
       - template: templates/deployer/post-deployer-steps.yml
         parameters:
           deployer_env: "$(Build.BuildId)"
@@ -161,7 +164,7 @@ stages:
           az group update --resource-group ${saplib_rg} --set tags.Delete=True
           az group delete -n ${saplib_rg} --no-wait -y
 
-          deployer_rg="${environment}-EAUS-MGMT-INFRASTRUCTURE"
+          deployer_rg="${environment}-EAUS-DEP00-INFRASTRUCTURE"
           echo "=== Try to delete rg ${deployer_rg} ==="
           az group update --resource-group ${deployer_rg} --set tags.Delete=True
           az group delete -n ${deployer_rg} --no-wait -y

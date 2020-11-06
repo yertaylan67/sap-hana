@@ -23,7 +23,7 @@ resource "azurerm_network_interface" "app" {
 # Create Application NICs
 resource "azurerm_network_interface" "app_admin" {
   count                         = local.enable_deployment && local.apptier_dual_nics ? local.application_server_count : 0
-  name                          = format("%s_%s%s", local.prefix, local.app_virtualmachine_names[count.index], local.resource_suffixes.admin_nic)
+  name                          = format("%s%s%s%s", local.prefix, var.naming.separator, local.app_virtualmachine_names[count.index], local.resource_suffixes.admin_nic)
   location                      = var.resource_group[0].location
   resource_group_name           = var.resource_group[0].name
   enable_accelerated_networking = local.app_sizing.compute.accelerated_networking
@@ -33,7 +33,7 @@ resource "azurerm_network_interface" "app_admin" {
     subnet_id = var.admin_subnet.id
     private_ip_address = try(local.app_admin_nic_ips[count.index],
       cidrhost(var.admin_subnet.address_prefixes[0],
-        tonumber(count.index) + 15
+        tonumber(count.index) + local.admin_ip_offsets.app_vm
       )
     )
     private_ip_address_allocation = "static"

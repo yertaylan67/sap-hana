@@ -28,42 +28,10 @@ variable naming {
   description = "Defines the names for the resources"
 }
 
-variable "region_mapping" {
-  type        = map(string)
-  description = "Region Mapping: Full = Single CHAR, 4-CHAR"
-
-  //28 Regions 
-
-  default = {
-    westus             = "weus"
-    westus2            = "wus2"
-    centralus          = "ceus"
-    eastus             = "eaus"
-    eastus2            = "eus2"
-    northcentralus     = "ncus"
-    southcentralus     = "scus"
-    westcentralus      = "wcus"
-    northeurope        = "noeu"
-    westeurope         = "weeu"
-    eastasia           = "eaas"
-    southeastasia      = "seas"
-    brazilsouth        = "brso"
-    japaneast          = "jpea"
-    japanwest          = "jpwe"
-    centralindia       = "cein"
-    southindia         = "soin"
-    westindia          = "wein"
-    uksouth2           = "uks2"
-    uknorth            = "ukno"
-    canadacentral      = "cace"
-    canadaeast         = "caea"
-    australiaeast      = "auea"
-    australiasoutheast = "ause"
-    uksouth            = "ukso"
-    ukwest             = "ukwe"
-    koreacentral       = "koce"
-    koreasouth         = "koso"
-  }
+variable "custom_disk_sizes_filename" {
+  type        = string
+  description = "Disk size json file"
+  default     = ""
 }
 
 //Set defaults
@@ -87,8 +55,8 @@ locals {
 
   vnet_prefix                 = var.naming.prefix.VNET
   storageaccount_name         = var.naming.storageaccount_names.SDU
-  keyvault_names              = var.naming.keyvault_names.SDU
   landscape_keyvault_names    = var.naming.keyvault_names.VNET
+  sid_keyvault_names          = var.naming.keyvault_names.SDU
   virtualmachine_names        = var.naming.virtualmachine_names.ISCSI_COMPUTERNAME
   anchor_virtualmachine_names = var.naming.virtualmachine_names.ANCHOR_VMNAME
   anchor_computer_names       = var.naming.virtualmachine_names.ANCHOR_COMPUTERNAME
@@ -133,7 +101,16 @@ locals {
     for db in var.databases : db
     if contains(["HANA"], upper(try(db.platform, "NONE")))
   ]
+
   enable_hdb_deployment = (length(local.hdb_list) > 0) ? true : false
+
+  default_filepath = local.enable_hdb_deployment ? "${path.module}/../../../../../configs/hdb_sizes.json" : "${path.module}/../../../../../configs/anydb_sizes.json"
+  sizes            = jsondecode(file(length(var.custom_disk_sizes_filename) > 0 ? var.custom_disk_sizes_filename : local.default_filepath))
+  storage_list     = lookup(local.sizes, var.databases[0].size).storage
+  enable_ultradisk = try(compact([
+    for storage in local.storage_list :
+    storage.disk_type == "UltraSSD_LRS" ? true : ""
+  ])[0], false)
 
   //Enable xDB deployment 
   xdb_list = [
@@ -159,7 +136,15 @@ locals {
   anchor_auth_type            = try(local.anchor.authentication.type, "key")
   enable_anchor_auth_password = local.deploy_anchor && local.anchor_auth_type == "password"
   enable_anchor_auth_key      = local.deploy_anchor && local.anchor_auth_type == "key"
-  anchor_nic_ips              = try(local.anchor.nic_ips, [])
+
+  //If the db uses ultra disks ensure that the anchore sets the ultradisk flag but only for the zones that will contain db servers
+  enable_anchor_ultra =  [
+    for zone in local.zones :
+    contains(local.db_zones, zone) ? local.enable_ultradisk : false
+  ]
+  
+  enable_accelerated_networking = try(local.anchor.accelerated_networking, false)
+  anchor_nic_ips                = local.sub_admin_exists ? try(local.anchor.nic_ips, []) : []
 
   anchor_custom_image = try(local.anchor.os.source_image_id, "") != "" ? true : false
 
@@ -185,13 +170,11 @@ locals {
   ppg_exists = length(local.ppg_arm_id) > 0 ? true : false
   ppg_name   = local.ppg_exists ? try(split("/", local.ppg_arm_id)[8], "") : try(local.var_ppg.name, format("%s%s", local.prefix, local.resource_suffixes.ppg))
 
-  // Post fix for all deployed resources
-  postfix = random_id.saplandscape.hex
-
   /* Comment out code with users.object_id for the time being
   // Additional users add to user KV
   kv_users = var.deployer_user
   */
+<<<<<<< HEAD
   // kv for sap landscape
   kv_prefix       = var.naming.prefix.VNET
   kv_private_name = local.landscape_keyvault_names.private_access
@@ -201,6 +184,8 @@ locals {
   sid_kv_prefix       = var.naming.prefix.SDU
   sid_kv_private_name = local.keyvault_names.private_access
   sid_kv_user_name    = local.keyvault_names.user_access
+=======
+>>>>>>> 2b18f580f506bbf16b15f7ba53467cd7ddf85a43
 
   /* 
      TODO: currently sap landscape and sap system haven't been decoupled. 
