@@ -174,9 +174,11 @@ locals {
   //PPG
   var_ppg    = try(local.var_infra.ppg, {})
   ppg_arm_id = try(local.var_ppg.arm_id, "")
-  ppg_exists = length(local.ppg_arm_id) > 0 ? true : false
-  ppg_name   = local.ppg_exists ? try(split("/", local.ppg_arm_id)[8], "") : try(local.var_ppg.name, format("%s%s", local.prefix, local.resource_suffixes.ppg))
+  ppg_arm_ids = try(local.var_ppg.arm_ids, [])
 
+  ppg_exists = length(local.ppg_arm_id) > 0 || length(local.ppg_arm_ids) > 0 ? true : false
+  ppg_name   = local.ppg_exists ? try(split("/", local.ppg_arm_ids[0])[8], "") : try(local.var_ppg.name, format("%s%s", local.prefix, local.resource_suffixes.ppg))
+  
   /* Comment out code with users.object_id for the time being
   // Additional users add to user KV
   kv_users = var.deployer_user
@@ -244,7 +246,7 @@ locals {
     ppg = {
       is_existing = local.ppg_exists,
       name        = local.ppg_name,
-      arm_id      = local.ppg_arm_id
+      arm_id      = local.ppg_arm_ids
     },
     iscsi = local.landscape_infrastructure.iscsi
     vnets = {

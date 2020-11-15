@@ -70,7 +70,7 @@ resource "azurerm_proximity_placement_group" "ppg" {
 }
 
 data "azurerm_proximity_placement_group" "ppg" {
-  count               = local.ppg_exists ? 1 : 0
-  name                = split("/", local.ppg_arm_id)[8]
-  resource_group_name = split("/", local.ppg_arm_id)[4]
+  count               = local.ppg_exists ? max(length(local.zones), 1) : 0
+  name                = split("/", local.ppg_arm_ids[count.index])[8]
+  resource_group_name = split("/", local.ppg_arm_ids[count.index])[4]
 }
