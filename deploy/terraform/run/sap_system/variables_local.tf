@@ -35,6 +35,11 @@ variable "landscape_tfstate_key" {
   description = "The key of sap landscape's remote tfstate file"
 }
 
+variable "custom_prefix" {
+  description = "The Custom prefix to append to resource names"
+}
+
+
 locals {
 
   // The environment of sap landscape and sap system
