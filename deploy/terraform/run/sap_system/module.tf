@@ -20,7 +20,7 @@ module "common_infrastructure" {
 }
 
 module "sap_namegenerator" {
-  source           = "../../terraform-units/modules/sap_namegenerator"
+  source           = "../../../../../HM/sap_namegenerator"
   environment      = var.infrastructure.environment
   location         = var.infrastructure.region
   codename         = lower(try(var.infrastructure.codename, ""))
@@ -39,6 +39,7 @@ module "sap_namegenerator" {
   scs_zones        = local.scs_zones
   web_zones        = local.web_zones
   db_zones         = local.db_zones
+  custom_prefix    = var.custom_prefix
 }
 
 // Create HANA database nodes
