@@ -58,11 +58,7 @@ locals {
   sap_sid   = upper(try(var.application.sid, ""))
   anydb_sid = (length(local.anydb_databases) > 0) ? try(local.anydb.instance.sid, lower(substr(local.anydb_platform, 0, 3))) : lower(substr(local.anydb_platform, 0, 3))
   sid       = upper(try(var.application.sid, local.anydb_sid))
-<<<<<<< HEAD
   prefix    = try(var.infrastructure.resource_group.name, trimspace(var.naming.prefix.SDU))
-=======
-  prefix    = try(var.infrastructure.resource_group.name, trim(var.naming.prefix.SDU))
->>>>>>> Trim whitespace from custom_prefix
   rg_name   = try(var.infrastructure.resource_group.name, format("%s%s", local.prefix, local.resource_suffixes.sdu_rg))
 
   // Zones
