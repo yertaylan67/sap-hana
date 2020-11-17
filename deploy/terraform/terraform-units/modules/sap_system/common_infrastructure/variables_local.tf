@@ -176,7 +176,7 @@ locals {
   ppg_arm_ids = try(local.var_ppg.arm_ids, [])
 
   ppg_exists = length(local.ppg_arm_ids) > 0 ? true : false
-  ppg_names  = try(local.var_ppg.name, [])
+  ppg_names  = try(local.var_ppg.names, [])
   
   /* Comment out code with users.object_id for the time being
   // Additional users add to user KV
@@ -244,7 +244,7 @@ locals {
     },
     ppg = {
       is_existing = local.ppg_exists,
-      name        = local.ppg_name,
+      name        = local.ppg_names,
       arm_id      = local.ppg_arm_ids
     },
     iscsi = local.landscape_infrastructure.iscsi
