@@ -172,12 +172,11 @@ locals {
   rg_name   = local.rg_exists ? try(split("/", local.rg_arm_id)[4], "") : try(local.var_rg.name, format("%s%s", local.prefix, local.resource_suffixes.sdu_rg))
 
   //PPG
-  var_ppg    = try(local.var_infra.ppg, {})
+  var_ppg     = try(local.var_infra.ppg, {})
   ppg_arm_ids = try(local.var_ppg.arm_ids, [])
+  ppg_exists  = length(local.ppg_arm_ids) > 0 ? true : false
+  ppg_names   = try(local.var_ppg.names, [format("%s%s", local.prefix, local.resource_suffixes.ppg)])
 
-  ppg_exists = length(local.ppg_arm_ids) > 0 ? true : false
-  ppg_names  = try(local.var_ppg.names, [])
-  
   /* Comment out code with users.object_id for the time being
   // Additional users add to user KV
   kv_users = var.deployer_user
