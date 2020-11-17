@@ -40,13 +40,8 @@ data "azurerm_subnet" "subnet_sap_web" {
 
 # Create the SCS Load Balancer
 resource "azurerm_lb" "scs" {
-<<<<<<< HEAD
   count               = local.enable_deployment && local.scs_server_count > 0 ? 1 : 0
-  name                = format("%s%s", local.prefix, local.resource_suffixes.scs_alb)
-=======
-  count               = local.enable_deployment ? 1 : 0
   name                = format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.scs_alb)
->>>>>>> separator character between resource/extension
   resource_group_name = var.resource_group[0].name
   location            = var.resource_group[0].location
   sku                 = local.scs_zonal_deployment ? "Standard" : "Basic"
