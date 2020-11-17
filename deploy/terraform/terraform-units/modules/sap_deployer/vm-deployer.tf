@@ -11,7 +11,7 @@ data azurerm_client_config "current" {}
 
 // Public IP addresse and nic for Deployer
 resource "azurerm_public_ip" "deployer" {
-  count               = length(local.deployers)
+  count               = local.enable_deployer_public_ip ? length(local.deployers) : 0
   name                = format("%s%s%s%s", local.prefix, var.naming.separator, local.deployers[count.index].name, local.resource_suffixes.pip)
   location            = azurerm_resource_group.deployer[0].location
   resource_group_name = azurerm_resource_group.deployer[0].name
@@ -29,7 +29,7 @@ resource "azurerm_network_interface" "deployer" {
     subnet_id                     = local.sub_mgmt_deployed.id
     private_ip_address            = local.deployers[count.index].private_ip_address
     private_ip_address_allocation = "static"
-    public_ip_address_id          = azurerm_public_ip.deployer[count.index].id
+    public_ip_address_id          = local.enable_deployer_public_ip ? azurerm_public_ip.deployer[count.index].id : ""
   }
 }
 
