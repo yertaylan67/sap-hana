@@ -115,7 +115,7 @@ locals {
   // Deployer(s) information with updated pip
   deployers_updated = [
     for idx, deployer in local.deployers : merge({
-      "public_ip_address" = azurerm_public_ip.deployer[idx].ip_address
+      "public_ip_address" = local.enable_deployer_public_ip ? azurerm_public_ip.deployer[idx].ip_address : ""
     }, deployer)
   ]
 
