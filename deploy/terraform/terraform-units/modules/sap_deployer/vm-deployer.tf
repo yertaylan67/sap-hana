@@ -142,9 +142,6 @@ resource "null_resource" "prepare-deployer" {
       "sudo ln -s /opt/terraform/terraform_0.13.5/terraform /opt/terraform/bin/terraform",
       "sudo sh -c \"echo export PATH=$PATH:/opt/terraform/bin > /etc/profile.d/deploy_server.sh\"",
       // Set env for MSI
-      "sudo sh -c \"echo export ARM_USE_MSI=true >> /etc/profile.d/deploy_server.sh\"",
-      "sudo sh -c \"echo export ARM_SUBSCRIPTION_ID=${data.azurerm_subscription.primary.subscription_id} >> /etc/profile.d/deploy_server.sh\"",
-      "sudo sh -c \"echo export ARM_TENANT_ID=${data.azurerm_subscription.primary.tenant_id} >> /etc/profile.d/deploy_server.sh\"",
       "sudo sh -c \"echo az login --identity --output none >> /etc/profile.d/deploy_server.sh\"",
       // Install az cli
       "curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash",
