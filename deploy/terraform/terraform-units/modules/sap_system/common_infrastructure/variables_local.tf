@@ -176,7 +176,7 @@ locals {
   ppg_arm_ids = try(local.var_ppg.arm_ids, [])
   ppg_exists  = length(local.ppg_arm_ids) > 0 ? true : false
   ppg_names   = try(local.var_ppg.names, [format("%s%s", local.prefix, local.resource_suffixes.ppg)])
-
+  
   /* Comment out code with users.object_id for the time being
   // Additional users add to user KV
   kv_users = var.deployer_user
@@ -288,5 +288,4 @@ locals {
 
   // Current service principal
   service_principal = try(var.service_principal, {})
-
 }
