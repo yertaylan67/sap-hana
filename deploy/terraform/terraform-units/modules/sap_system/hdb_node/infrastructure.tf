@@ -13,3 +13,20 @@ resource "azurerm_availability_set" "hdb" {
   managed                      = true
 }
 
+// Scaleout on ANF
+
+resource "azurerm_subnet" "scaleout" {
+  count                = local.enable_deployment &&  local.scaleout_subnet_needed ? (local.sub_scaleout_exists ? 0 : 1) : 0
+  name                 = local.sub_scaleout_name
+  resource_group_name  = local.vnet_sap_resource_group_name
+  virtual_network_name = local.vnet_sap_name
+  address_prefixes     = [local.sub_scaleout_prefix]
+}
+
+// Imports data of existing db subnet
+data "azurerm_subnet" "scaleout" {
+  count                = local.enable_deployment && local.scaleout_subnet_needed  ? (local.sub_scaleout_exists ? 1 : 0) : 0
+  name                 = split("/", local.sub_scaleout_arm_id)[10]
+  resource_group_name  = split("/", local.sub_scaleout_arm_id)[4]
+  virtual_network_name = split("/", local.sub_scaleout_arm_id)[8]
+}
