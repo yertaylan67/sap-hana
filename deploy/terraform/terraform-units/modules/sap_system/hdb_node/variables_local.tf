@@ -65,6 +65,29 @@ locals {
   kv_landscape_id    = try(local.landscape_tfstate.landscape_key_vault_user_arm_id, "")
   secret_sid_pk_name = try(local.landscape_tfstate.sid_public_key_secret_name, "")
 
+  // SAP Landscape infrastructure
+  landscape_infrastructure = try(local.landscape_tfstate.landscape_infrastructure, {})
+
+  //SAP vnet
+  vnet_sap_arm_id              = try(local.landscape_tfstate.vnet_sap_arm_id, "")
+  vnet_sap_name                = split("/", local.vnet_sap_arm_id)[8]
+  vnet_sap_resource_group_name = split("/", local.vnet_sap_arm_id)[4]
+  var_vnet_sap                 = try(var.infrastructure.vnets.sap, {})
+
+  //Scaleout subnet
+  sub_scaleout_defined = try(var.infrastructure.vnets.sap.subnet_scaleout, null) == null ? false : true
+  sub_scaleout         = try(var.infrastructure.vnets.sap.subnet_scaleout, {})
+  sub_scaleout_arm_id  = try(local.sub_scaleout.arm_id, "")
+  sub_scaleout_exists  = length(local.sub_scaleout_arm_id) > 0 ? true : false
+  sub_scaleout_name    = local.sub_scaleout_exists ? try(split("/", local.sub_scaleout_arm_id)[10], "") : try(local.sub_scaleout.name, format("%s%s", local.prefix, local.resource_suffixes.scaleout_subnet))
+  sub_scaleout_prefix  = local.sub_scaleout_exists ? "" : try(local.sub_scaleout.prefix, "")
+
+  //Scaleout NSG
+  sub_scaleout_nsg        = try(local.sub_scaleout.nsg, {})
+  sub_scaleout_nsg_arm_id = try(local.sub_scaleout_nsg.arm_id, "")
+  sub_scaleout_nsg_exists = length(local.sub_scaleout_nsg_arm_id) > 0 ? true : false
+  sub_scaleout_nsg_name   = local.sub_scaleout_nsg_exists ? try(split("/", local.sub_scaleout_nsg_arm_id)[8], "") : try(local.sub_scaleout_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.scaleout_subnet_nsg))
+
   // Define this variable to make it easier when implementing existing kv.
   sid_kv_user = try(var.sid_kv_user[0], null)
 
@@ -77,6 +100,11 @@ locals {
 
   // Filter the list of databases to only HANA platform entries
   hdb = try(local.hdb_list[0], {})
+
+  //ANF support
+  use_ANF = try(local.hdb.use_ANF, false)
+  //Scalout subnet is needed if ANF is used and there are more than one hana node (or more than two if highly available)
+  scaleout_subnet_needed = local.use_ANF && ((length(local.hdb_vms) > 1 && ! local.hdb_ha) || (length(local.hdb_vms) > 2 && local.hdb_ha))
 
   // Zones
   zones            = try(local.hdb.zones, [])
@@ -127,19 +155,22 @@ locals {
   shine      = try(local.hdb.shine, { email = "shinedemo@microsoft.com" })
 
   dbnodes = flatten([[for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
-    name         = try("${dbnode.name}-0", format("%s%s%s%s", local.prefix, var.naming.separator, local.virtualmachine_names[idx], local.resource_suffixes.vm))
-    computername = try("${dbnode.name}-0", local.computer_names[idx], local.resource_suffixes.vm)
-    role         = try(dbnode.role, "worker")
-    admin_nic_ip = lookup(dbnode, "admin_nic_ips", [false, false])[0]
-    db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[0]
+    name            = try("${dbnode.name}-0", format("%s%s%s%s", local.prefix, var.naming.separator, local.virtualmachine_names[idx], local.resource_suffixes.vm))
+    computername    = try("${dbnode.name}-0", local.computer_names[idx], local.resource_suffixes.vm)
+    role            = try(dbnode.role, "worker")
+    admin_nic_ip    = lookup(dbnode, "admin_nic_ips", [false, false])[0]
+    db_nic_ip       = lookup(dbnode, "db_nic_ips", [false, false])[0]
+    scaleout_nic_ip = lookup(dbnode, "scaleout_nic_ips", [false, false])[0]
+
     }
     ],
     [for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
-      name         = try("${dbnode.name}-1", format("%s%s%s%s", local.prefix, var.naming.separator, local.virtualmachine_names[idx + local.node_count], local.resource_suffixes.vm))
-      computername = try("${dbnode.name}-1", local.computer_names[idx + local.node_count])
-      role         = try(dbnode.role, "worker")
-      admin_nic_ip = lookup(dbnode, "admin_nic_ips", [false, false])[1]
-      db_nic_ip    = lookup(dbnode, "db_nic_ips", [false, false])[1]
+      name            = try("${dbnode.name}-1", format("%s%s%s%s", local.prefix, var.naming.separator, local.virtualmachine_names[idx + local.node_count], local.resource_suffixes.vm))
+      computername    = try("${dbnode.name}-1", local.computer_names[idx + local.node_count])
+      role            = try(dbnode.role, "worker")
+      admin_nic_ip    = lookup(dbnode, "admin_nic_ips", [false, false])[1]
+      db_nic_ip       = lookup(dbnode, "db_nic_ips", [false, false])[1]
+      scaleout_nic_ip = lookup(dbnode, "scaleout_nic_ips", [false, false])[1]
       } if local.hdb_ha
     ]
     ]
@@ -183,24 +214,26 @@ locals {
   // Numerically indexed Hash of HANA DB nodes to be created
   hdb_vms = [
     for idx, dbnode in local.dbnodes : {
-      platform       = local.hdb_platform,
-      name           = dbnode.name
-      computername   = dbnode.computername
-      admin_nic_ip   = dbnode.admin_nic_ip,
-      db_nic_ip      = dbnode.db_nic_ip,
-      size           = local.hdb_size,
-      os             = local.hdb_os,
-      authentication = local.hdb_auth
-      sid            = local.hdb_sid
+      platform        = local.hdb_platform,
+      name            = dbnode.name
+      computername    = dbnode.computername
+      admin_nic_ip    = dbnode.admin_nic_ip,
+      db_nic_ip       = dbnode.db_nic_ip,
+      scaleout_nic_ip = dbnode.scaleout_nic_ip,
+      size            = local.hdb_size,
+      os              = local.hdb_os,
+      authentication  = local.hdb_auth
+      sid             = local.hdb_sid
     }
   ]
 
   // Subnet IP Offsets
   // Note: First 4 IP addresses in a subnet are reserved by Azure
   hdb_ip_offsets = {
-    hdb_lb       = 4
-    hdb_admin_vm = 10
-    hdb_db_vm    = 10
+    hdb_lb          = 4
+    hdb_admin_vm    = 10
+    hdb_db_vm       = 10
+    hdb_scaleout_vm = 10
   }
 
   // Ports used for specific HANA Versions
