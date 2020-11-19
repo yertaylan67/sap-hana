@@ -151,17 +151,10 @@ locals {
   pwd_name = format("%s-password", local.prefix)
 
   // Extract information from the specified key vault arm ids
-<<<<<<< HEAD
   user_kv_name    = local.user_kv_exist ? split("/", local.user_key_vault_id)[8] : local.keyvault_names.user_access
   user_kv_rg_name = local.user_kv_exist ? split("/", local.user_key_vault_id)[4] : ""
 
   prvt_kv_name    = local.prvt_kv_exist ? split("/", local.prvt_key_vault_id)[8] : local.keyvault_names.private_access
-=======
-  user_kv_name    = local.user_kv_exist ? split("/", local.user_key_vault_id)[8] : ""
-  user_kv_rg_name = local.user_kv_exist ? split("/", local.user_key_vault_id)[4] : ""
-
-  prvt_kv_name    = local.prvt_kv_exist ? split("/", local.prvt_key_vault_id)[8] : ""
->>>>>>> import existing key vaults to sap deployer
   prvt_kv_rg_name = local.prvt_kv_exist ? split("/", local.prvt_key_vault_id)[4] : ""
 
 }
