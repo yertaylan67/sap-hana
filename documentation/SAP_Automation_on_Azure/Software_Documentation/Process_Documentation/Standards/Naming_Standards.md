@@ -18,28 +18,30 @@ Revision History
 | 02/14/2020 | 0.3     | Add examples, descriptions, and Glossary | Morgan Deegan 🦄 |
 | 07/09/2020 | 0.4     | Changes from Naming Convention Meeting   | Morgan Deegan 🦄 |
 | 09/01/2020 | 1.0     | Finalized Draft                          | Morgan Deegan 🦄 |
-   
+
+
+<br/><br/>
    
    
    
  
 Table of Contents
-1 Naming Standards 5
-1.1 Terraform 5
-1.2 Concepts 5
-1.2.1 ENVIRONMENT 5
-1.2.2 SAP_VNET 5
-1.2.3 CODENAME 5
-1.3 Conventions 5
-1.3.1 Key 5
-1.3.2 DEPLOYER 6
-1.3.3 SAP_LIBRARY 6
-1.3.4 SAP_VNET 8
-1.3.5 SDU 8
-1.3.6 Region Mapping 11
-2 TAGS 13
-3 Appendix 14
-3.1 Definitions, acronyms, and abbreviations 14
+- [1 Naming Standards](#1-naming-standards)
+  - [1.1 Terraform](#11-terraform)
+  - [1.2 Concepts](#12-concepts)
+    - [1.2.1 ENVIRONMENT](#121-environment)
+    - [1.2.2 SAP_VNET](#122-sap_vnet)
+    - [1.2.3 CODENAME](#123-codename)
+  - [1.3 Conventions](#13-conventions)
+    - [1.3.1 Key](#131-key)
+  - [1.3.2 DEPLOYER](#132-deployer)
+  - [1.3.3 SAP_LIBRARY](#133-sap_library)
+  - [1.3.4 SAP_VNET](#134-sap_vnet)
+  - [1.3.5 SDU](#135-sdu)
+  - [2 TAGS](#2-tags)
+  - [3 Appendix](#3-appendix)
+    - [3.1 Definitions, acronyms, and abbreviations](#31-definitions-acronyms-and-abbreviations)
+
 
  
 # 1 Naming Standards
@@ -136,33 +138,19 @@ Logical partitioning of development cycles or projects.
 | Resource Group   | 80           | `{ENVIRONMENT}-{REGION_MAP}-{SAP_VNET}_{CODENAME}-{SID}`<br/>Ex: PROTO-WUS2_S4DEV-Z00
 | PPG              |              | `{ENVIRONMENT}-{REGION_MAP}-{SAP_VNET}_{CODENAME}-{SID}_ppg`
 | Subnet           | 80           | `{ENVIRONMENT}-{REGION_MAP}-{SAP_VNET}_{CODENAME}-{SID}_app-subnet`
-| NSG 80 NIC Level:
-{ENVIRONMENT}-{REGION_MAP}-{SAP_VNET}_{CODENAME}-{SID}_app-nsg
-
-Subnet Level:
-{ENVIRONMENT}-{REGION_MAP}-{SAP_VNET}_{CODENAME}-{SID}_appSubnet-nsg
-| AVSET  {ENVIRONMENT}-{REGION_MAP}-{SAP_VNET}_{CODENAME}-{SID}_app-avset
-| NIC 80 {ENVIRONMENT}-{REGION_MAP}-{SAP_VNET}_{CODENAME}-{SID}_{vm.name}-{sub}-nic
-
-Ex: _{vm.name}-app-nic
-Ex: _{vm.name}-web-nic
-Ex: _{vm.name}-admin-nic
-Ex: _{vm.name}-db-nic
-| Disk  {vm.name}-sap00
-{vm.name}-data00
-{vm.name}-log00
-{vm.name}-backup00
-
-Code: ${element(azurerm_virtual_machine.app.*.name, count.index)}-sap00
-| VM 80 {ENVIRONMENT}-{REGION_MAP}-{SAP_VNET}_{CODENAME}-{SID}_{computername}
-| OS Disk  {ENVIRONMENT}-{REGION_MAP}-{SAP_VNET}_{CODENAME}-{SID}_{computername}-osDisk
-| Computer Name
-Two naming standards:
-• DB
-• Non-DB 14 {sapsid}app##[l|w]{RND(3CHAR)}
+| NSG (NIC)        | 80           | `{ENVIRONMENT}-{REGION_MAP}-{SAP_VNET}_{CODENAME}-{SID}_app-nsg` |
+| NIC (Subnet)     | 80           | `{ENVIRONMENT}-{REGION_MAP}-{SAP_VNET}_{CODENAME}-{SID}_appSubnet-nsg` |
+| AVSET            |              | `{ENVIRONMENT}-{REGION_MAP}-{SAP_VNET}_{CODENAME}-{SID}_app-avset` |
+| NIC              | 80           | `{ENVIRONMENT}-{REGION_MAP}-{SAP_VNET}_{CODENAME}-{SID}_{vm.name}-{sub}-nic`<br/>Ex: `_{vm.name}-app-nic`<br/>Ex: `_{vm.name}-web-nic`<br/>Ex: `_{vm.name}-admin-nic`<br/>Ex: `_{vm.name}-db-nic` |
+| Disk             |              | `{vm.name}-sap00`<br/>`{vm.name}-data00`<br/>`{vm.name}-log00`<br/>`{vm.name}-backup00`<br/><br/>Code: `${element(azurerm_virtual_machine.app.*.name, count.index)}-sap00` |
+| VM               | 80           | `{ENVIRONMENT}-{REGION_MAP}-{SAP_VNET}_{CODENAME}-{SID}_{computername}` |
+| OS Disk          |              | `{ENVIRONMENT}-{REGION_MAP}-{SAP_VNET}_{CODENAME}-{SID}_{computername}-osDisk` |
+| Computer Name (DB) | 14           | Two naming standards:<br/>Non-DB<br/>`{sapsid}app##[l|w]{RND(3CHAR)}`<br/><br/>DB<br/>{sapsid}d{dbsid}##[l|w]{nodeNumber(1CHAR)}{RND(3CHAR)}
+| Computer Name ()   | 14           | `{sapsid}app##[l|w]{RND(3CHAR)}`<br/><br/>DB<br/>{sapsid}d{dbsid}##[l|w]{nodeNumber(1CHAR)}{RND(3CHAR)}
+• Non-DB 14 
 Code:  ${lower(var._sap_sid)}app${format("%02d", count.index)}
 
-{sapsid}d{dbsid}##[l|w]{nodeNumber(1CHAR)}{RND(3CHAR)}
+
 
 
 Ex: z00app00labc
