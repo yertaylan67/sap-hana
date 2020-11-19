@@ -4,8 +4,6 @@
 <br/><br/>
 # Naming Conventions for SAP Automation Framework <!-- omit in toc -->
 
-<<<<<<< HEAD
-=======
 Naming Conventions for
 SAP Automation
 
@@ -26,10 +24,6 @@ Revision History
 
 <br/><br/>
    
-   
-   
- 
->>>>>>> 9e8e727c... Update Naming Standards
 Table of Contents
 - [1 Naming Standards](#1-naming-standards)
   - [1.1 Terraform](#11-terraform)
