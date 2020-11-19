@@ -3,7 +3,7 @@
 
 Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azure-SAP-HANA/_apis/build/status/Azure.sap-hana?branchName=master&api-version=5.1-preview.1)](https://dev.azure.com/azuresaphana/Azure-SAP-HANA/_build/latest?definitionId=6&branchName=master)
 
-<br>
+<br/>
 
 ## Table of contents <!-- omit in toc -->
 - [Overview](#overview)
@@ -32,8 +32,8 @@ The Deployment Platform consists of:
 
 | Resource         | Description                                                                                               |
 | ---------------- | --------------------------------------------------------------------------------------------------------- |
-| Management VNET  | This is an administrative VNET. <br> Typically an address space with a /26 CIDR will be sufficient.       |
-| Deploy Subnet    | This is a small subnet to provide an isolation for the Deploy Server. <br> A /28 CIDR will be sufficient. |
+| Management VNET  | This is an administrative VNET. <br/> Typically an address space with a /26 CIDR will be sufficient.       |
+| Deploy Subnet    | This is a small subnet to provide an isolation for the Deploy Server. <br/> A /28 CIDR will be sufficient. |
 | Deploy NSG       | Network Security Group assigned to the Deploy Subnet.                                                     |
 | Deploy VM        | Deploy Server.                                                                                            |
 | Deploy OS Disk   | OS Disk.                                                                                                  |
@@ -41,7 +41,7 @@ The Deployment Platform consists of:
 | Deploy NIC       | Network Interface.                                                                                        |
 | Deploy PIP       | Provides external access to the Deployment Server.                                                        |
 | Storage Account  | Storage Account for Boot Diagnostics for the Deployment Environment VNET.                                 |
-| SAP VNET         | This the VNET to which the SAP Infrastructure will be deployed. <br> This is a larger address space. Default operations function with a /16 CIDR. Smaller address spaces require more administration overhead. |
+| SAP VNET         | This the VNET to which the SAP Infrastructure will be deployed. <br/> This is a larger address space. Default operations function with a /16 CIDR. Smaller address spaces require more administration overhead. |
 
 <br/><br/>
 

@@ -3,7 +3,7 @@
 
 Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azure-SAP-HANA/_apis/build/status/Azure.sap-hana?branchName=master&api-version=5.1-preview.1)](https://dev.azure.com/azuresaphana/Azure-SAP-HANA/_build/latest?definitionId=6&branchName=master)
 
-<br>
+<br/>
 
 ## Table of contents <!-- omit in toc -->
 - [Running the Terraform deployment](#running-the-terraform-deployment)
@@ -13,7 +13,7 @@ Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azur
   - [Apply](#apply)
 - [Outputs](#outputs)
 
-<br>
+<br/>
 
 ## Running the Terraform deployment
 
@@ -24,13 +24,13 @@ Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azur
 
 3. Apply - Execute deployment.
 
-<br><br><br>
+<br/><br/><br/>
 
 ## Terraform Operations
 
 - From the Workspace directory that you created.
 
-<br>
+<br/>
 
 ### Initialize
 
@@ -46,7 +46,7 @@ Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azur
   terraform init --upgrade=true <automation_root>/sap-hana/deploy/terraform
   ```
 
-<br>
+<br/>
 
 ### Plan
 
@@ -57,7 +57,7 @@ Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azur
   terraform plan -var-file=<JSON configuration file> <automation_root>/sap-hana/deploy/terraform
   ```
 
-<br>
+<br/>
 
 ### Apply
 
@@ -74,7 +74,7 @@ Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azur
   terraform apply --auto-approve -var-file=<JSON configuration file> <automation_root>/sap-hana/deploy/terraform
   ```
 
-<br>
+<br/>
 
 ## Outputs
 

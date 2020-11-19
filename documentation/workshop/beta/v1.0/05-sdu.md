@@ -3,7 +3,7 @@
 
 Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azure-SAP-HANA/_apis/build/status/Azure.sap-hana?branchName=master&api-version=5.1-preview.1)](https://dev.azure.com/azuresaphana/Azure-SAP-HANA/_build/latest?definitionId=6&branchName=master)
 
-<br>
+<br/>
 
 ## Table of contents <!-- omit in toc -->
 
@@ -12,7 +12,7 @@ Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azur
   - [SDU - SAP Deployment Unit](#sdu---sap-deployment-unit)
 
 
-<br>
+<br/>
 
 ## Overview
 
@@ -37,14 +37,14 @@ Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azur
     mkdir -p ~/Azure_SAP_Automated_Deployment/WORKSPACES/SAP_SYSTEM/NP-EUS2-SAP0-X00; cd $_
     ```
 
-<br>
+<br/>
 
 2. Reuse SSH Keys.
     ```bash
     cp ../../LOCAL/NP-EUS2-DEP00-INFRASTRUCTURE/sshkey* .
     ```
 
-<br>
+<br/>
 
 3. Extract Storage Account name
    ```bash
@@ -53,7 +53,7 @@ Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azur
      sed -e 's/^[ \t]*//' | grep -m 1 -i tfstate
    ```
 
-<br>
+<br/>
 
 4. Create *backend* parameter file.
    <br/>Update with Storage Account name for TFSTATE, identified in previous step.
@@ -66,14 +66,14 @@ Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azur
     EOF
     ```
 
-<br>
+<br/>
 
 1. Create input parameter [JSON](templates/NP-EUS2-SAP0-X00.json)
     ```bash
     vi NP-EUS2-SAP0-X00.json
     ```
 
-<br>
+<br/>
 
 6. Terraform
     1. Initialization

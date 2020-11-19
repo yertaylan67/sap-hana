@@ -3,12 +3,12 @@
 
 Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azure-SAP-HANA/_apis/build/status/Azure.sap-hana?branchName=master&api-version=5.1-preview.1)](https://dev.azure.com/azuresaphana/Azure-SAP-HANA/_build/latest?definitionId=6&branchName=master)
 
-<br>
+<br/>
 
 ## Table of contents <!-- omit in toc -->
 - [Adjusting the templates](#adjusting-the-templates)
 
-<br>
+<br/>
 
 ## Adjusting the templates
 
@@ -26,7 +26,7 @@ Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azur
 
    -  `sap-hana/deploy/template_samples` also contains some examples, but those are not actively tested.
 
-<br>
+<br/>
 
 2. Use a text editor to edit the JSON configuration file.  Full version of supported JSON configuration see below:
 
@@ -49,7 +49,7 @@ Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azur
     - software.downloader.credentials.sap_user
     - software.downloader.credentials.sap_password
 
-<br>
+<br/>
 
 | Section                                                         | Key                                           | Type              | Explain                                                                                                                                                                                                                                                                                                                                                                                                                |
 |-----------------------------------------------------------------|-----------------------------------------------|-------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|

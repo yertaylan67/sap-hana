@@ -3,7 +3,7 @@
 
 Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azure-SAP-HANA/_apis/build/status/Azure.sap-hana?branchName=master&api-version=5.1-preview.1)](https://dev.azure.com/azuresaphana/Azure-SAP-HANA/_build/latest?definitionId=6&branchName=master)
 
-<br>
+<br/>
 
 ## Table of contents <!-- omit in toc -->
 
@@ -17,7 +17,7 @@ Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azur
     - [Application Tier Resources](application-tier-resources)
     - [Jumpbox Resources](jumpbox-resources)
 
-<br>
+<br/>
 
 ## Supported Scenarios
 
@@ -26,7 +26,7 @@ Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azur
 - [HANA Scale-Up Stand Alone](/deploy/template_samples/single_node_hana.json)
 - [HANA with High Availability](/deploy/template_samples/clustered_hana.json)
 
-<br>
+<br/>
 
 ## Usage
 
@@ -40,7 +40,7 @@ A typical deployment lifecycle will require the following steps:
 
    *(**Note**: There are some script under [sap-hana/util](https://github.com/Azure/sap-hana/tree/master/util) would help if you are using Linux based workstation)*
 
-<br>
+<br/>
 
 ---
 

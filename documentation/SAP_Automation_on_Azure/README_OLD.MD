@@ -1,8 +1,18 @@
-### <img src="assets/images/UnicornSAPBlack256x256.png" width="64px"> SAP Deployment Automation Framework <!-- omit in toc -->
-# SAP on Azure Deployment Automation Framework <!-- omit in toc -->
+### <img src="documentation/assets/UnicornSAPBlack256x256.png" width="64px"> SAP Deployment Automation Framework<!-- omit in toc -->
+# Welcome <!-- omit in toc -->
+
+Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azure-SAP-HANA/_apis/build/status/Azure.sap-hana?branchName=master&api-version=5.1-preview.1)](https://dev.azure.com/azuresaphana/Azure-SAP-HANA/_build/latest?definitionId=6&branchName=master)
+
+# Abstract
+
+This repository contains code that can be used as a framework to drive a workflow to automatically deploy SAP landscapes in the Azure Cloud.
+
+Welcome to the **SAP on Azure Deployment Automation Framework** repository.
+This repository contains code that will support the automated deployments of SAP platforms in the Azure Cloud.
 
 
-<!-- TODO -->
+[SAP Deployment Automation Framework Documentation](documentation/SAP_Automation_on_Azure/overview.md)
+
 
 
 The templates are split into:
@@ -11,7 +21,7 @@ which deploy the infrastructure components (such as VMs, network, storage) in Az
 - **Ansible playbooks**
 which run different roles to configure and VMs and install SAP HANA and required applications on the already deployed infrastructure.
 
-<br/>
+<br>
 
 ## Table of contents <!-- omit in toc -->
 
@@ -21,7 +31,7 @@ which run different roles to configure and VMs and install SAP HANA and required
 - [License & Copyright](#license--copyright)
 - [Contact](#contact)
 
-<br/>
+<br>
 
 ## Usage
 
@@ -46,7 +56,7 @@ Step 2) [**Select Terraform Deployment Unit**](#terraform-deployment-units)
 
    *(**Note**: There are some script under [sap-hana/util](https://github.com/Azure/sap-hana/tree/master/util) would help if you are using Linux based workstation)*
 
-<br/>
+<br>
 
 ## Terraform Deployment Units
 
@@ -57,7 +67,7 @@ Step 2) [**Select Terraform Deployment Unit**](#terraform-deployment-units)
 - SDU - SAP Deployment Unit (Coming Soon)
 
 
-<br/><br/><br/><br/>  
+<br><br><br><br>  
 
 ---
 
@@ -67,7 +77,7 @@ If you want to contribute to our project, be sure to review the [contributing gu
 
 We use [GitHub issues](https://github.com/Azure/sap-hana/issues/) for feature requests and bugs.
 
-<br/>
+<br>
 
 ## License & Copyright
 
@@ -75,7 +85,7 @@ Copyright © 2018-2020 Microsoft Azure.
 
 Licensed under the [MIT License](LICENSE).
 
-<br/>
+<br>
 
 ## Contact
 

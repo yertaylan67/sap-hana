@@ -1,4 +1,4 @@
-### <img src="../../../assets/images/UnicornSAPBlack256x256.png" width="64px"> SAP Automation <!-- omit in toc -->
+### <img src="../../../assets/images/UnicornSAPBlack256x256.png" width="64px"> SAP Deployment Automation Framework <!-- omit in toc -->
 ## SAP on Azure Deployment Automation Framework <!-- omit in toc -->
 
 <br/><br/>
@@ -98,7 +98,7 @@ Logical partitioning of development cycles or projects.
 | ---------------  | -----------: | ----------------------------- |
 | Resource Group   | 80           | `{ENVIRONMENT}-{REGION_MAP}-SAP_LIBRARY`<br/>Ex: `PROTO-WUS2-SAP_LIBRARY`
 | Storage Account  | 24           | `{environment(5char)}{region_map(4CHAR)}saplib(12CHAR){RND(3CHAR)}`<br/>Ex: `protowus2saplibxxx`
-| Key Vault        | 24           | `{ENVIRONMENT(5char)}{REGION_MAP(4CHAR)}SAPLIBprvt(12CHAR){RND(3CHAR)}`<br>`{ENVIRONMENT(5char)}{REGION_MAP(4CHAR)}SAPLIBuser(12CHAR){RND(3CHAR)}`
+| Key Vault        | 24           | `{ENVIRONMENT(5char)}{REGION_MAP(4CHAR)}SAPLIBprvt(12CHAR){RND(3CHAR)}`<br/>`{ENVIRONMENT(5char)}{REGION_MAP(4CHAR)}SAPLIBuser(12CHAR){RND(3CHAR)}`
 |                  |              |                                                                    |
 <br/><br/><br/>
 
