@@ -1,63 +1,34 @@
-### <img src="documentation/assets/UnicornSAPBlack256x256.png" width="64px"> SAP Automation <!-- omit in toc -->
-# Automated SAP Deployments in Azure Cloud <!-- omit in toc -->
+### <img src="documentation/assets/UnicornSAPBlack256x256.png" width="64px"> SAP Deployment Automation Framework <!-- omit in toc -->
+# Welcome <!-- omit in toc -->
 
 Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azure-SAP-HANA/_apis/build/status/Azure.sap-hana?branchName=master&api-version=5.1-preview.1)](https://dev.azure.com/azuresaphana/Azure-SAP-HANA/_build/latest?definitionId=6&branchName=master)
 
-This repository contains code that can be used to automatically deploy SAP landscapes in the Azure Cloud.
+<br/><br/>
 
-The templates are split into:
-- **Terraform modules**
-which deploy the infrastructure components (such as VMs, network, storage) in Azure.
-- **Ansible playbooks**
-which run different roles to configure and VMs and install SAP HANA and required applications on the already deployed infrastructure.
+## Abstract <!-- omit in toc -->
 
-<br>
+---
+<br/>
 
-## Table of contents <!-- omit in toc -->
+Welcome to the **SAP on Azure Deployment Automation Framework** repository.
+This repository contains code that will support the automated deployments of SAP platforms in the Azure Cloud.
+<br/>
 
-- [Usage](#usage)
-- [Terraform Deployment Units](#terraform-deployment-units)
+Please follow the linke below to the documentation:
+<br/><br/>
+
+## [SAP Deployment Automation Framework Documentation](documentation/SAP_Automation_on_Azure/overview.md) <!-- omit in toc -->
+
+<br/><br/><br/>
+
+
+# Table of contents <!-- omit in toc -->
+
 - [Contributions](#contributions)
 - [License & Copyright](#license--copyright)
 - [Contact](#contact)
 
-<br>
-
-## Usage
-
-A typical deployment lifecycle will require the following steps:
-
-Step 1) [**Bootstrap the Deployment Platform**](/documentation/deployment-platform-bootstrap.md) (this has to be done only once)
-
-Step 2) [Deploy SAP Library]()
-
-Step 3) [Deploy SAP Workload VNET]()
-
-Step 4) [Deploy SDU]()
-
-Step 1) [**Preparing your environment**](/documentation/getting-started.md#preparing-your-environment) (this has to be done only once)
-
-Step 2) [**Select Terraform Deployment Unit**](#terraform-deployment-units)
-
-
-Step 1) [**Preparing your environment**](/documentation/getting-started.md#preparing-your-environment) (this has to be done only once)
-
-Step 2) [**Select Terraform Deployment Unit**](#terraform-deployment-units)
-
-   *(**Note**: There are some script under [sap-hana/util](https://github.com/Azure/sap-hana/tree/master/util) would help if you are using Linux based workstation)*
-
-<br>
-
-## Terraform Deployment Units
-
-- [SAP Landscape](/deploy/terraform/SAPLandscape.md) (Primary Entry Point)
-- [SAP Library](/deploy/terraform-units/workspace/SAP_Library/Readme.md)
-- Deployment Portal (Coming Soon)
-- Logical SAP Network Foundation (Coming Soon)
-- SDU - SAP Deployment Unit (Coming Soon)
-
-
-<br><br><br><br>  
+<br/><br/>
 
 ---
 
@@ -81,4 +52,4 @@ Licensed under the [MIT License](LICENSE).
 
 We look forward to your feedback and welcome any contributions!
 
-Please feel free to reach out to our team at ![image](/documentation/assets/contact.png).
+Please feel free to reach out to our team at ![image](documentation/SAP_Automation_on_Azure/assets/images/contact.png).
