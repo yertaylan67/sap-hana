@@ -13,7 +13,7 @@ locals {
   deployer                = try(var.deployer, {})
   deployer_environment    = try(local.deployer.environment, "")
   deployer_vnet           = try(local.deployer.vnet, "")
-  deployer_prefix         = module.naming.prefix.DELOYER
+  deployer_prefix         = module.sap_namegenerator.naming.prefix.DELOYER
   // If custom names are used for deployer, providing resource_group_name and msi_name will override the naming convention
   deployer_rg_name = try(local.deployer.resource_group_name, format("%s%s", local.deployer_prefix,module.resource_suffixes.naming.deployer_rg))
 
