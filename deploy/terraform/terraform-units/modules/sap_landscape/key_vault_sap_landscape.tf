@@ -5,7 +5,7 @@
 
 // Create private KV with access policy
 resource "azurerm_key_vault" "kv_prvt" {
-  count                      = local.enable_landscape_kv ? 0 : 0
+  count                      = local.enable_landscape_kv ? 1 : 0
   name                       = local.landscape_keyvault_names.private_access
   location                   = local.region
   resource_group_name        = local.rg_exists ? data.azurerm_resource_group.resource_group[0].name : azurerm_resource_group.resource_group[0].name
@@ -28,7 +28,7 @@ resource "azurerm_key_vault" "kv_prvt" {
 
 // Create user KV with access policy
 resource "azurerm_key_vault" "kv_user" {
-  count                      = local.enable_landscape_kv ? 0 : 0
+  count                      = local.enable_landscape_kv ? 1 : 0
   name                       = local.landscape_keyvault_names.user_access
   location                   = local.region
   resource_group_name        = local.rg_exists ? data.azurerm_resource_group.resource_group[0].name : azurerm_resource_group.resource_group[0].name
@@ -62,28 +62,28 @@ resource "tls_private_key" "iscsi" {
 }
 
 resource "azurerm_key_vault_secret" "iscsi_ppk" {
-  count        = (local.enable_landscape_kv && local.enable_iscsi_auth_key) ? 0 : 0
+  count        = (local.enable_landscape_kv && local.enable_iscsi_auth_key) ? 1 : 0
   name         = format("%s-iscsi-sshkey", local.prefix)
   value        = local.iscsi_private_key
   key_vault_id = azurerm_key_vault.kv_user[0].id
 }
 
 resource "azurerm_key_vault_secret" "iscsi_pk" {
-  count        = (local.enable_landscape_kv && local.enable_iscsi_auth_key) ? 0 : 0
+  count        = (local.enable_landscape_kv && local.enable_iscsi_auth_key) ? 1 : 0
   name         = format("%s-iscsi-sshkey-pub", local.prefix)
   value        = local.iscsi_public_key
   key_vault_id = azurerm_key_vault.kv_user[0].id
 }
 
 resource "azurerm_key_vault_secret" "iscsi_username" {
-  count        = (local.enable_landscape_kv && local.enable_iscsi_auth_password) ? 0 : 0
+  count        = (local.enable_landscape_kv && local.enable_iscsi_auth_password) ? 1 : 0
   name         = format("%s-iscsi-username", local.prefix)
   value        = local.iscsi_auth_username
   key_vault_id = azurerm_key_vault.kv_user[0].id
 }
 
 resource "azurerm_key_vault_secret" "iscsi_password" {
-  count        = (local.enable_landscape_kv && local.enable_iscsi_auth_password) ? 0 : 0
+  count        = (local.enable_landscape_kv && local.enable_iscsi_auth_password) ? 1 : 0
   name         = format("%s-iscsi-password", local.prefix)
   value        = local.iscsi_auth_password
   key_vault_id = azurerm_key_vault.kv_user[0].id
@@ -101,20 +101,20 @@ resource "random_password" "iscsi_password" {
 
 // Using TF tls to generate SSH key pair for SID and store in user KV
 resource "tls_private_key" "sid" {
-  count     = (local.enable_landscape_kv && try(file(var.sshkey.path_to_public_key), null) == null) ? 01 : 0
+  count     = (local.enable_landscape_kv && try(file(var.sshkey.path_to_public_key), null) == null) ? 1 : 0
   algorithm = "RSA"
   rsa_bits  = 2048
 }
 
 resource "azurerm_key_vault_secret" "sid_ppk" {
-  count        = local.enable_landscape_kv ? 0 : 0
+  count        = local.enable_landscape_kv ? 1 : 0
   name         = format("%s-sid-sshkey", local.prefix)
   value        = local.sid_private_key
   key_vault_id = azurerm_key_vault.kv_user[0].id
 }
 
 resource "azurerm_key_vault_secret" "sid_pk" {
-  count        = local.enable_landscape_kv ? 0 : 0
+  count        = local.enable_landscape_kv ? 1 : 0
   name         = format("%s-sid-sshkey-pub", local.prefix)
   value        = local.sid_public_key
   key_vault_id = azurerm_key_vault.kv_user[0].id
