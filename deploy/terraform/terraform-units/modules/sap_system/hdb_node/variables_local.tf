@@ -74,19 +74,19 @@ locals {
   vnet_sap_resource_group_name = split("/", local.vnet_sap_arm_id)[4]
   var_vnet_sap                 = try(var.infrastructure.vnets.sap, {})
 
-  //Scaleout subnet
-  sub_scaleout_defined = try(var.infrastructure.vnets.sap.subnet_scaleout, null) == null ? false : true
-  sub_scaleout         = try(var.infrastructure.vnets.sap.subnet_scaleout, {})
-  sub_scaleout_arm_id  = try(local.sub_scaleout.arm_id, "")
-  sub_scaleout_exists  = length(local.sub_scaleout_arm_id) > 0 ? true : false
-  sub_scaleout_name    = local.sub_scaleout_exists ? try(split("/", local.sub_scaleout_arm_id)[10], "") : try(local.sub_scaleout.name, format("%s%s", local.prefix, local.resource_suffixes.scaleout_subnet))
-  sub_scaleout_prefix  = local.sub_scaleout_exists ? "" : try(local.sub_scaleout.prefix, "")
+  //Storage subnet
+  sub_storage_defined  = try(var.infrastructure.vnets.sap.subnet_storage, null) == null ? false : true
+  sub_storage          = try(var.infrastructure.vnets.sap.subnet_storage, {})
+  sub_storage_arm_id   = try(local.sub_storage.arm_id, "")
+  sub_storage_exists   = length(local.sub_storage_arm_id) > 0 ? true : false
+  sub_storage_name     = local.sub_storage_exists ? try(split("/", local.sub_storage_arm_id)[10], "") : try(local.sub_storage.name, format("%s%s", local.prefix, local.resource_suffixes.storage_subnet))
+  sub_storage_prefix   = local.sub_storage_exists ? "" : try(local.sub_storage.prefix, "")
 
-  //Scaleout NSG
-  sub_scaleout_nsg        = try(local.sub_scaleout.nsg, {})
-  sub_scaleout_nsg_arm_id = try(local.sub_scaleout_nsg.arm_id, "")
-  sub_scaleout_nsg_exists = length(local.sub_scaleout_nsg_arm_id) > 0 ? true : false
-  sub_scaleout_nsg_name   = local.sub_scaleout_nsg_exists ? try(split("/", local.sub_scaleout_nsg_arm_id)[8], "") : try(local.sub_scaleout_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.scaleout_subnet_nsg))
+  //Storage NSG
+  sub_storage_nsg        = try(local.sub_storage.nsg, {})
+  sub_storage_nsg_arm_id = try(local.sub_storage_nsg.arm_id, "")
+  sub_storage_nsg_exists = length(local.sub_storage_nsg_arm_id) > 0 ? true : false
+  sub_storage_nsg_name   = local.sub_storage_nsg_exists ? try(split("/", local.sub_storage_nsg_arm_id)[8], "") : try(local.sub_storage_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.storage_subnet_nsg))
 
   // Define this variable to make it easier when implementing existing kv.
   sid_kv_user = try(var.sid_kv_user[0], null)
@@ -104,7 +104,7 @@ locals {
   //ANF support
   use_ANF = try(local.hdb.use_ANF, false)
   //Scalout subnet is needed if ANF is used and there are more than one hana node (or more than two if highly available)
-  scaleout_subnet_needed = local.use_ANF && ((length(local.hdb_vms) > 1 && ! local.hdb_ha) || (length(local.hdb_vms) > 2 && local.hdb_ha))
+  storage_subnet_needed = local.use_ANF && ((length(local.hdb_vms) > 1 && ! local.hdb_ha) || (length(local.hdb_vms) > 2 && local.hdb_ha))
 
   // Zones
   zones            = try(local.hdb.zones, [])
@@ -160,7 +160,7 @@ locals {
     role            = try(dbnode.role, "worker")
     admin_nic_ip    = lookup(dbnode, "admin_nic_ips", [false, false])[0]
     db_nic_ip       = lookup(dbnode, "db_nic_ips", [false, false])[0]
-    scaleout_nic_ip = lookup(dbnode, "scaleout_nic_ips", [false, false])[0]
+    storage_nic_ip = lookup(dbnode, "storage_nic_ips", [false, false])[0]
 
     }
     ],
@@ -170,7 +170,7 @@ locals {
       role            = try(dbnode.role, "worker")
       admin_nic_ip    = lookup(dbnode, "admin_nic_ips", [false, false])[1]
       db_nic_ip       = lookup(dbnode, "db_nic_ips", [false, false])[1]
-      scaleout_nic_ip = lookup(dbnode, "scaleout_nic_ips", [false, false])[1]
+      storage_nic_ip = lookup(dbnode, "storage_nic_ips", [false, false])[1]
       } if local.hdb_ha
     ]
     ]
@@ -219,7 +219,7 @@ locals {
       computername    = dbnode.computername
       admin_nic_ip    = dbnode.admin_nic_ip,
       db_nic_ip       = dbnode.db_nic_ip,
-      scaleout_nic_ip = dbnode.scaleout_nic_ip,
+      storage_nic_ip  = dbnode.storage_nic_ip,
       size            = local.hdb_size,
       os              = local.hdb_os,
       authentication  = local.hdb_auth
@@ -233,7 +233,7 @@ locals {
     hdb_lb          = 4
     hdb_admin_vm    = 10
     hdb_db_vm       = 10
-    hdb_scaleout_vm = 10
+    hdb_storage_vm = 10
   }
 
   // Ports used for specific HANA Versions
