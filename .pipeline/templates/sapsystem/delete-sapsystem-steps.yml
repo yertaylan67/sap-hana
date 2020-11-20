@@ -57,8 +57,13 @@ steps:
       
       echo "=== Delete SAP system from deployer with terraform ==="
       echo "=== This may take quite a while, please be patient ==="
+<<<<<<< HEAD:.pipeline/templates/sapsystem/delete-sapsystem-steps.yml
       terraform destroy -auto-approve -var-file=${input} ${repo_dir}/deploy/terraform/run/sap_system/
 
+=======
+      terraform destroy -auto-approve -var-file=${input} ${repo_dir}/deploy/terraform/run/sap_landscape/
+      
+>>>>>>> fix config path for sap_landscape pipeline (#939):.pipeline/templates/saplandscape/delete-saplandscape-steps.yml
       echo "=== Delete git clone for the build from deployer ==="
       rm -rf ~/${sapsystem_rg}
 
