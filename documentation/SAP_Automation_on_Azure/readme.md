@@ -1,4 +1,6 @@
 ### <img src="assets/images/UnicornSAPBlack256x256.png" width="64px"> SAP Deployment Automation Framework <!-- omit in toc -->
+<br/>
+
 # SAP on Azure Deployment Automation Framework <!-- omit in toc -->
 
 This repository contains code that can be used to automatically deploy SAP landscapes in the Azure Cloud.
