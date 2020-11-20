@@ -1,27 +1,14 @@
-### <img src="../../documentation/SAP_Automation_on_Azure/assets/images/UnicornSAPBlack256x256.png" width="64px"> SAP Automation > V1.x.x <!-- omit in toc -->
+### <img src="../../../../../assets/images/UnicornSAPBlack256x256.png" width="64px"> SAP Automation > V1.x.x <!-- omit in toc -->
+<br/><br/>
+
 # Workshops <!-- omit in toc -->
 
 <br/>
 
-## Table of contents <!-- omit in toc -->
-
-
-<br/><br/>
-
----
-
-
+## Table of Contents
 <br/>
-
-
-## Workshops
 
 1. [Standard](standard/overview.md)
     This is the Standard workshop    
 
-
 <br/><br/>
-
----
-
-
