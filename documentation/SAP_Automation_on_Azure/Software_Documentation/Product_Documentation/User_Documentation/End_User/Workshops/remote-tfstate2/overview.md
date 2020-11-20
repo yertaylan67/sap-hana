@@ -1,5 +1,7 @@
-### <img src="../../../../documentation/SAP_Automation_on_Azure/assets/images/UnicornSAPBlack256x256.png" width="64px"> SAP Automation > V1.x.x <!-- omit in toc -->
-# SDU - SAP Deployment Unit <!-- omit in toc -->
+### <img src="../../../../../../assets/images/UnicornSAPBlack256x256.png" width="64px"> SAP Deployment Automation Framework <!-- omit in toc -->
+<br/><br/>
+
+# Deployment Workshop <!-- omit in toc -->
 
 <br/>
 

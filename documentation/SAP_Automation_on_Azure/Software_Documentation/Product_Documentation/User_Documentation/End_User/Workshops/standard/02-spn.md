@@ -1,7 +1,7 @@
-### <img src="../../../../documentation/SAP_Automation_on_Azure/assets/images/UnicornSAPBlack256x256.png" width="64px"> SAP Automation > V1.x.x <!-- omit in toc -->
-# Bootstrapping the Deployer <!-- omit in toc -->
+### <img src="../../../../../../assets/images/UnicornSAPBlack256x256.png" width="64px"> SAP Deployment Automation Framework <!-- omit in toc -->
+<br/><br/>
 
-Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azure-SAP-HANA/_apis/build/status/Azure.sap-hana?branchName=master&api-version=5.1-preview.1)](https://dev.azure.com/azuresaphana/Azure-SAP-HANA/_build/latest?definitionId=6&branchName=master)
+# SPN Credentials <!-- omit in toc -->
 
 <br/>
 
@@ -22,9 +22,9 @@ This allows for mapping of an environment to a subscription, along with credenti
 
 |                  |              |
 | ---------------- | ------------ |
-| Duration of Task | `? minutes`  |
-| Steps            | `?`          |
-| Runtime          | `? minutes`  |
+| Duration of Task | `5 minutes`  |
+| Steps            | `4`          |
+| Runtime          | `1 minutes`  |
 
 <br/>
 
