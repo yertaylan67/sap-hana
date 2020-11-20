@@ -9,6 +9,6 @@
 ## Table of Contents
 <br/>
 
-- [Workshops](Software_Documentation/Product_Documentation/User_Documentation/End_User/Workshops/readme.md)
+- [Workshops](Software_Documentation/Product_Documentation/User_Documentation/End_User/Workshops/workshops.md)
 
 <br/><br/>
