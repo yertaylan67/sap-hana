@@ -62,6 +62,8 @@ locals {
   // Retrieve the arm_id of deployer's Key Vault from deployer's terraform.tfstate
   deployer_key_vault_arm_id = try(data.terraform_remote_state.deployer.outputs.deployer_kv_user_arm_id, "")
 
+  deployer_vnet = try(data.terraform_remote_state.deployer.outputs.vnet_mgmt.value.name, "")
+
   spn = {
     subscription_id = data.azurerm_key_vault_secret.subscription_id.value,
     client_id       = data.azurerm_key_vault_secret.client_id.value,

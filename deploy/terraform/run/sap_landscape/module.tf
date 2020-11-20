@@ -23,4 +23,5 @@ module "sap_namegenerator" {
   codename           = lower(try(var.infrastructure.codename, ""))
   random_id          = module.sap_landscape.random_id
   sap_vnet_name      = local.vnet_sap_name_part
+  management_vnet_name = local.deployer_vnet
 }
