@@ -1,35 +1,8 @@
-### <img src="documentation/assets/UnicornSAPBlack256x256.png" width="64px"> SAP Deployment Automation Framework<!-- omit in toc -->
-# Welcome <!-- omit in toc -->
-
-Master Branch's status: [![Build Status](https://dev.azure.com/azuresaphana/Azure-SAP-HANA/_apis/build/status/Azure.sap-hana?branchName=master&api-version=5.1-preview.1)](https://dev.azure.com/azuresaphana/Azure-SAP-HANA/_build/latest?definitionId=6&branchName=master)
-
-# Abstract
-
-This repository contains code that can be used as a framework to drive a workflow to automatically deploy SAP landscapes in the Azure Cloud.
-
-Welcome to the **SAP on Azure Deployment Automation Framework** repository.
-This repository contains code that will support the automated deployments of SAP platforms in the Azure Cloud.
-
-
-[SAP Deployment Automation Framework Documentation](documentation/SAP_Automation_on_Azure/overview.md)
-
-
-
 The templates are split into:
 - **Terraform modules**
 which deploy the infrastructure components (such as VMs, network, storage) in Azure.
 - **Ansible playbooks**
 which run different roles to configure and VMs and install SAP HANA and required applications on the already deployed infrastructure.
-
-<br>
-
-## Table of contents <!-- omit in toc -->
-
-- [Usage](#usage)
-- [Terraform Deployment Units](#terraform-deployment-units)
-- [Contributions](#contributions)
-- [License & Copyright](#license--copyright)
-- [Contact](#contact)
 
 <br>
 
@@ -66,29 +39,3 @@ Step 2) [**Select Terraform Deployment Unit**](#terraform-deployment-units)
 - Logical SAP Network Foundation (Coming Soon)
 - SDU - SAP Deployment Unit (Coming Soon)
 
-
-<br><br><br><br>  
-
----
-
-## Contributions
-
-If you want to contribute to our project, be sure to review the [contributing guidelines](/CONTRIBUTING.md).
-
-We use [GitHub issues](https://github.com/Azure/sap-hana/issues/) for feature requests and bugs.
-
-<br>
-
-## License & Copyright
-
-Copyright © 2018-2020 Microsoft Azure.
-
-Licensed under the [MIT License](LICENSE).
-
-<br>
-
-## Contact
-
-We look forward to your feedback and welcome any contributions!
-
-Please feel free to reach out to our team at ![image](/documentation/assets/contact.png).

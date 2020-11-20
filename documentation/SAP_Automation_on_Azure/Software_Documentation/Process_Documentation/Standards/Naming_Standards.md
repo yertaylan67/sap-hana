@@ -1,7 +1,7 @@
 ### <img src="../../../assets/images/UnicornSAPBlack256x256.png" width="64px"> SAP Deployment Automation Framework <!-- omit in toc -->
-## SAP on Azure Deployment Automation Framework <!-- omit in toc -->
 
 <br/><br/>
+
 # Naming Conventions for SAP Automation Framework <!-- omit in toc -->
 
 Table of Contents
@@ -25,6 +25,7 @@ Table of Contents
   - [3.1 Definitions, acronyms, and abbreviations](#31-definitions-acronyms-and-abbreviations)
 
 <br/><br/>
+
 # 1 Naming Standards
 <br/>
 
@@ -157,8 +158,10 @@ Logical partitioning of development cycles or projects.
 - Numbers formatted for two characters (ex. 00)
 <br/><br/><br/>
 
+
 ### 1.3.6 Region Mapping
 <br/>
+
 
 #### 1.3.6.1 Example: Variable Definition
 <br/>
@@ -203,6 +206,7 @@ variable "_region_mapping" {
 ```
 <br/><br/><br/>
 
+
 #### 1.3.6.2 Example Usage:
 <br/>
 
@@ -213,15 +217,18 @@ variable "_region_mapping" {
                                upper(var.__sap_vnet)}-INFRASTRUCTURE"
 ```
 <br/><br/><br/>
- 
+
+
 # 2 TAGS
 <br/>
 Notes:
 Track
 <br/><br/><br/>
 
+
 # 3 Appendix
 <br/>
+
 
 ## 3.1 Definitions, acronyms, and abbreviations
 <br/>
