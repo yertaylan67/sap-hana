@@ -20,7 +20,8 @@ module "common_infrastructure" {
 }
 
 module "sap_namegenerator" {
-  source           = "../../terraform-units/modules/sap_namegenerator"
+  source           = "../../../../../../code/HM/terraform/sap_namegenerator"
+  //source           = "../../terraform-units/modules/sap_namegenerator"
   environment      = var.infrastructure.environment
   location         = var.infrastructure.region
   codename         = lower(try(var.infrastructure.codename, ""))

@@ -15,7 +15,8 @@ module "sap_landscape" {
 }
 
 module "sap_namegenerator" {
-  source             = "../../terraform-units/modules/sap_namegenerator"
+  source           = "../../../../../../code/HM/terraform/sap_namegenerator"
+  //source             = "../../terraform-units/modules/sap_namegenerator"
   environment        = var.infrastructure.environment
   location           = var.infrastructure.region
   iscsi_server_count = local.iscsi_count
