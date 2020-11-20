@@ -15,7 +15,7 @@ locals {
   deployer_vnet           = try(local.deployer.vnet, "")
   deployer_prefix         = module.sap_namegenerator.naming.prefix.DELOYER
   // If custom names are used for deployer, providing resource_group_name and msi_name will override the naming convention
-  deployer_rg_name = try(local.deployer.resource_group_name, format("%s%s", local.deployer_prefix,module.resource_suffixes.naming.deployer_rg))
+  deployer_rg_name = try(local.deployer.resource_group_name, format("%s%s", local.deployer_prefix,module.sap_namegenerator.resource_suffixes.naming.deployer_rg))
 
   // Retrieve the arm_id of deployer's Key Vault from deployer's terraform.tfstate
   deployer_key_vault_arm_id = try(data.terraform_remote_state.deployer.outputs.deployer_kv_user_arm_id, "")
