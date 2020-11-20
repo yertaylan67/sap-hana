@@ -20,24 +20,14 @@ Please follow the linke below to the documentation:
 <br/><br/>
 
 
-
-<div id="container">
+<center>
 
 [<img src="documentation/SAP_Automation_on_Azure/assets/images/documentation-clipart.png" width="256px">](documentation/SAP_Automation_on_Azure/overview.md)
 
 ## [SAP Deployment Automation Framework Documentation](documentation/SAP_Automation_on_Azure/overview.md) <!-- omit in toc -->
 
-</div>
+</center>
 
-#container {
-  height: 384px;
-  line-height: 100px;
-}
-
-#container img {
-  verticle-align: middle;
-  max-height: 100%;
-}
 
 <br/><br/><br/>
 
