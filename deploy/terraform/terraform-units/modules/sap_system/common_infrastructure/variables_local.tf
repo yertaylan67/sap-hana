@@ -254,6 +254,21 @@ locals {
   dynamic_ipaddresses = try(local.var_infra.dynamic_addressing, false)
 
 
+  //Storage subnet
+  sub_storage_defined  = try(var.infrastructure.vnets.sap.subnet_storage, null) == null ? false : true
+  sub_storage          = try(var.infrastructure.vnets.sap.subnet_storage, {})
+  sub_storage_arm_id   = try(local.sub_storage.arm_id, "")
+  sub_storage_exists   = length(local.sub_storage_arm_id) > 0 ? true : false
+  sub_storage_name     = local.sub_storage_exists ? try(split("/", local.sub_storage_arm_id)[10], "") : try(local.sub_storage.name, format("%s%s", local.prefix, local.resource_suffixes.storage_subnet))
+  sub_storage_prefix   = local.sub_storage_exists ? "" : try(local.sub_storage.prefix, "")
+
+  //Storage NSG
+  sub_storage_nsg        = try(local.sub_storage.nsg, {})
+  sub_storage_nsg_arm_id = try(local.sub_storage_nsg.arm_id, "")
+  sub_storage_nsg_exists = length(local.sub_storage_nsg_arm_id) > 0 ? true : false
+  sub_storage_nsg_name   = local.sub_storage_nsg_exists ? try(split("/", local.sub_storage_nsg_arm_id)[8], "") : try(local.sub_storage_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.storage_subnet_nsg))
+
+
   //---- Update infrastructure with defaults ----//
   infrastructure = {
     resource_group = {

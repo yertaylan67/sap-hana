@@ -81,32 +81,6 @@ resource "azurerm_network_interface" "nics_dbnodes_storage" {
   }
 }
 
-# Creates the NIC for Hana scaleout
-resource "azurerm_network_interface" "nics_dbnodes_scaleout" {
-  count = local.enable_deployment && local.scaleout_subnet_needed ? length(local.hdb_vms) : 0
-  name  = format("%s%s", local.hdb_vms[count.index].name, local.resource_suffixes.scaleout_nic)
-
-  location                      = var.resource_group[0].location
-  resource_group_name           = var.resource_group[0].name
-  enable_accelerated_networking = true
-
-  ip_configuration {
-    primary   = true
-    name      = "ipconfig1"
-    subnet_id = local.sub_scaleout_exists ? data.azurerm_subnet.scaleout[0].id : azurerm_subnet.scaleout[0].id
-
-    private_ip_address = try(local.hdb_vms[count.index].scaleout_nic_ip, false) != false ? (
-      local.hdb_vms[count.index].scaleout_nic_ip) : (
-      cidrhost(local.sub_scaleout_exists ? (
-        data.azurerm_subnet.scaleout[0].address_prefixes[0]) : (
-        azurerm_subnet.scaleout[0].address_prefixes[0]
-      ), tonumber(count.index) + local.hdb_ip_offsets.hdb_scaleout_vm)
-
-    )
-    private_ip_address_allocation = "static"
-  }
-}
-
 
 # LOAD BALANCER ===================================================================================================
 
