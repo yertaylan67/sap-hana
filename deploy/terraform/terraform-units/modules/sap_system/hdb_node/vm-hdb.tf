@@ -65,15 +65,11 @@ resource "azurerm_network_interface" "nics_dbnodes_storage" {
   ip_configuration {
     primary   = true
     name      = "ipconfig1"
-    subnet_id = local.sub_storage_exists ? data.azurerm_subnet.storage[0].id : azurerm_subnet.storage[0].id
+    subnet_id = var.storage_subnet.id
 
     private_ip_address = try(local.hdb_vms[count.index].storage_nic_ip, false) != false ? (
       local.hdb_vms[count.index].storage_nic_ip) : (
-      cidrhost(local.sub_storage_exists ? (
-        data.azurerm_subnet.storage[0].address_prefixes[0]) : (
-        azurerm_subnet.storage[0].address_prefixes[0]
-      ), tonumber(count.index) + local.hdb_ip_offsets.hdb_storage_vm)
-
+      cidrhost(var.storage_subnet.address_prefixes[0], tonumber(count.index) + local.hdb_ip_offsets.hdb_storage_vm)
     )
     private_ip_address_allocation = "static"
   }
