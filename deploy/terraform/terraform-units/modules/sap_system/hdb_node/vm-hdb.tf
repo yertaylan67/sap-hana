@@ -53,6 +53,29 @@ resource "azurerm_network_interface" "nics_dbnodes_db" {
   }
 }
 
+# Creates the NIC for Hana storage
+resource "azurerm_network_interface" "nics_dbnodes_storage" {
+  count = local.enable_deployment && local.storage_subnet_needed ? length(local.hdb_vms) : 0
+  name  = format("%s%s", local.hdb_vms[count.index].name, local.resource_suffixes.storage_nic)
+
+  location                      = var.resource_group[0].location
+  resource_group_name           = var.resource_group[0].name
+  enable_accelerated_networking = true
+
+  ip_configuration {
+    primary   = true
+    name      = "ipconfig1"
+    subnet_id = var.storage_subnet.id
+
+    private_ip_address = try(local.hdb_vms[count.index].storage_nic_ip, false) != false ? (
+      local.hdb_vms[count.index].storage_nic_ip) : (
+      cidrhost(var.storage_subnet.address_prefixes[0], tonumber(count.index) + local.hdb_ip_offsets.hdb_storage_vm)
+    )
+    private_ip_address_allocation = "static"
+  }
+}
+
+
 # LOAD BALANCER ===================================================================================================
 
 /*-----------------------------------------------------------------------------8
@@ -143,10 +166,13 @@ resource "azurerm_linux_virtual_machine" "vm_dbnode" {
 
   zone = local.enable_ultradisk || local.db_server_count == local.db_zone_count ? local.zones[count.index % max(local.db_zone_count, 1)] : null
 
-  network_interface_ids = [
+  network_interface_ids = local.storage_subnet_needed ? ([
     azurerm_network_interface.nics_dbnodes_admin[count.index].id,
-    azurerm_network_interface.nics_dbnodes_db[count.index].id
-  ]
+    azurerm_network_interface.nics_dbnodes_db[count.index].id,
+    azurerm_network_interface.nics_dbnodes_storage[count.index].id]) : ([
+    azurerm_network_interface.nics_dbnodes_admin[count.index].id,
+    azurerm_network_interface.nics_dbnodes_db[count.index].id]
+  )
   size                            = lookup(local.sizes, local.hdb_vms[count.index].size).compute.vm_size
   admin_username                  = local.sid_auth_username
   admin_password                  = local.sid_auth_password
