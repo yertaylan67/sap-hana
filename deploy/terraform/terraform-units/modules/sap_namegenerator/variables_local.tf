@@ -3,6 +3,16 @@ variable environment {
   description = "Environment type (Prod, Test, Sand, QA)"
 }
 
+variable deployer_environment {
+  description = "Deployer environment type (Prod, Test, Sand, QA)"
+  default = ""
+}
+
+variable landscape_environment {
+  description = "Landscape environment type (Prod, Test, Sand, QA)"
+  default = ""
+}
+
 variable location {
   description = "Azure region"
 }
@@ -274,7 +284,10 @@ locals {
 
   location_short = upper(try(var.region_mapping[var.location], "unkn"))
 
-  env_verified      = upper(substr(var.environment, 0, var.sapautomation_name_limits.environment_variable_length))
+  env_verified            = upper(substr(var.environment, 0, var.sapautomation_name_limits.environment_variable_length))
+  deployer_env_verified   = upper(substr(length(var.deployer_environment) > 0 ? var.deployer_environment : var.environment, 0, var.sapautomation_name_limits.environment_variable_length))
+  landscape_env_verified  = upper(substr(length(var.landscape_environment) > 0 ? var.deployer_environment : var.environment, 0, var.sapautomation_name_limits.environment_variable_length))
+
   vnet_verified     = upper(trim(substr(var.sap_vnet_name, 0, var.sapautomation_name_limits.sap_vnet_length), "-_"))
   dep_vnet_verified = upper(trim(substr(var.management_vnet_name, 0, var.sapautomation_name_limits.sap_vnet_length), "-_"))
 
