@@ -32,6 +32,10 @@ variable "db_subnet" {
   description = "Information about SAP db subnet"
 }
 
+variable "storage_subnet" {
+  description = "Information about storage subnet"
+}
+
 variable "sid_kv_user" {
   description = "Details of the user keyvault for sap_system"
 }
@@ -74,21 +78,7 @@ locals {
   vnet_sap_resource_group_name = split("/", local.vnet_sap_arm_id)[4]
   var_vnet_sap                 = try(var.infrastructure.vnets.sap, {})
 
-  //Storage subnet
-  sub_storage_defined  = try(var.infrastructure.vnets.sap.subnet_storage, null) == null ? false : true
-  sub_storage          = try(var.infrastructure.vnets.sap.subnet_storage, {})
-  sub_storage_arm_id   = try(local.sub_storage.arm_id, "")
-  sub_storage_exists   = length(local.sub_storage_arm_id) > 0 ? true : false
-  sub_storage_name     = local.sub_storage_exists ? try(split("/", local.sub_storage_arm_id)[10], "") : try(local.sub_storage.name, format("%s%s", local.prefix, local.resource_suffixes.storage_subnet))
-  sub_storage_prefix   = local.sub_storage_exists ? "" : try(local.sub_storage.prefix, "")
-
-  //Storage NSG
-  sub_storage_nsg        = try(local.sub_storage.nsg, {})
-  sub_storage_nsg_arm_id = try(local.sub_storage_nsg.arm_id, "")
-  sub_storage_nsg_exists = length(local.sub_storage_nsg_arm_id) > 0 ? true : false
-  sub_storage_nsg_name   = local.sub_storage_nsg_exists ? try(split("/", local.sub_storage_nsg_arm_id)[8], "") : try(local.sub_storage_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.storage_subnet_nsg))
-
-  // Define this variable to make it easier when implementing existing kv.
+    // Define this variable to make it easier when implementing existing kv.
   sid_kv_user = try(var.sid_kv_user[0], null)
 
   hdb_list = [
@@ -103,8 +93,9 @@ locals {
 
   //ANF support
   use_ANF = try(local.hdb.use_ANF, false)
-  //Scalout subnet is needed if ANF is used and there are more than one hana node (or more than two if highly available)
-  storage_subnet_needed = local.use_ANF && ((length(local.hdb_vms) > 1 && ! local.hdb_ha) || (length(local.hdb_vms) > 2 && local.hdb_ha))
+  //Scalout subnet is needed if ANF is used and there are more than one hana node 
+  dbnode_per_site = length(try(local.hdb.dbnodes, [{}]))
+ storage_subnet_needed = local.use_ANF && local.dbnode_per_site > 1
 
   // Zones
   zones            = try(local.hdb.zones, [])
