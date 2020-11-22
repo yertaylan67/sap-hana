@@ -36,17 +36,9 @@ output "dns_info_vms" {
 }
 
 output "dns_info_loadbalancers" {
-<<<<<<< HEAD
-  value = local.enable_deployment ? (
-    [{ format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.db_alb) = azurerm_lb.hdb[0].private_ip_addresses[0] }
-    ]) : (
-    null
-  )
-=======
   value = [
     { format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.db_alb) = azurerm_lb.hdb[0].private_ip_addresses[0] }
   ]
->>>>>>> 5ccf7d6c... add dynamic IP to Hana node
 }
 
 
