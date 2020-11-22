@@ -151,24 +151,13 @@ resource "azurerm_availability_set" "app" {
 
 # Create the Web dispatcher Load Balancer
 resource "azurerm_lb" "web" {
-<<<<<<< HEAD
-  count               = local.enable_deployment  && local.webdispatcher_count > 0 ? 1 : 0
-  name                = format("%s%s", local.prefix, local.resource_suffixes.web_alb)
-=======
   count               = local.enable_deployment && local.webdispatcher_count > 0 ? 1 : 0
   name                = format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.web_alb)
->>>>>>> ec53462cc559cff6d37923981a46549c0543ac6a
   resource_group_name = var.resource_group[0].name
   location            = var.resource_group[0].location
   sku                 = local.web_zonal_deployment ? "Standard" : "Basic"
 
   frontend_ip_configuration {
-<<<<<<< HEAD
-    name                          = format("%s%s", local.prefix, local.resource_suffixes.web_alb_feip)
-    subnet_id                     = local.sub_web_deployed.id
-    private_ip_address            = try(local.web_lb_ips[0], cidrhost(local.sub_web_deployed.address_prefixes[0], local.ip_offsets.web_lb))
-    private_ip_address_allocation = "Static"
-=======
     name      = format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.web_alb_feip)
     subnet_id = local.sub_web_deployed.id
     private_ip_address = local.dynamic_ipaddresses ? (
@@ -176,18 +165,12 @@ resource "azurerm_lb" "web" {
       try(local.web_lb_ips[0], cidrhost(local.sub_web_deployed.address_prefixes[0], local.ip_offsets.web_lb))
     )
     private_ip_address_allocation = local.dynamic_ipaddresses ? "Dynamic" : "Static"
->>>>>>> ec53462cc559cff6d37923981a46549c0543ac6a
   }
 }
 
 resource "azurerm_lb_backend_address_pool" "web" {
-<<<<<<< HEAD
-  count               = local.enable_deployment  && local.webdispatcher_count > 0 ? 1 : 0
-  name                = format("%s%s", local.prefix, local.resource_suffixes.web_alb_bepool)
-=======
   count               = local.enable_deployment && local.webdispatcher_count > 0 ? 1 : 0
   name                = format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.web_alb_bepool)
->>>>>>> ec53462cc559cff6d37923981a46549c0543ac6a
   resource_group_name = var.resource_group[0].name
   loadbalancer_id     = azurerm_lb.web[0].id
 }
