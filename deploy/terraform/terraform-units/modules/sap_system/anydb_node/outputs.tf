@@ -39,7 +39,7 @@ output "dns_info_vms" {
     ])) : (
     flatten([for idx, vm in local.virtualmachine_names :
       {
-        format("%s%s%s%s", local.prefix, var.naming.separator, vm, local.resource_suffixes.vm) = azurerm_network_interface.anydb_db[idx].private_ip_address,
+        var.naming.virtualmachine_names.ANYDB_SECONDARY_DNSNAME[idx] = azurerm_network_interface.db[idx].private_ip_address
       }
     ])
     )

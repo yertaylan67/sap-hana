@@ -77,7 +77,7 @@ resource "azurerm_network_interface" "nics_dbnodes_storage" {
       local.hdb_vms[count.index].storage_nic_ip) : (
       cidrhost(var.storage_subnet.address_prefixes[0], tonumber(count.index) + local.hdb_ip_offsets.hdb_storage_vm)
     )
-    private_ip_address_allocation = "static"
+    private_ip_address_allocation = local.dynamic_ipaddresses ? "Dynamic" : "Static"
   }
 }
 
@@ -96,10 +96,20 @@ resource "azurerm_lb" "hdb" {
   sku                 = local.zonal_deployment ? "Standard" : "Basic"
 
   frontend_ip_configuration {
+<<<<<<< HEAD
     name                          = format("%s%s", local.prefix, local.resource_suffixes.db_alb_feip)
     subnet_id                     = var.db_subnet.id
     private_ip_address_allocation = "Static"
     private_ip_address            = try(local.hana_database.loadbalancer.frontend_ip, cidrhost(var.db_subnet.address_prefixes[0], tonumber(count.index) + local.hdb_ip_offsets.hdb_lb))
+=======
+    name      = format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.db_alb_feip)
+    subnet_id = var.db_subnet.id
+    private_ip_address = local.dynamic_ipaddresses ? (
+      null) : (
+      try(local.hana_database.loadbalancer.frontend_ip, cidrhost(var.db_subnet.address_prefixes[0], tonumber(count.index) + local.hdb_ip_offsets.hdb_lb))
+    )
+    private_ip_address_allocation = local.dynamic_ipaddresses ? "Dynamic" : "Static"
+>>>>>>> 5ccf7d6c... add dynamic IP to Hana node
   }
 
 }
