@@ -237,7 +237,6 @@ locals {
   sub_app_nsg_exists = length(local.sub_app_nsg_arm_id) > 0 ? true : false
   sub_app_nsg_name   = local.sub_app_nsg_exists ? try(split("/", local.sub_app_nsg_arm_id)[8], "") : try(local.var_sub_app_nsg.name, format("%s%s%s", var.naming.separator, local.prefix, local.resource_suffixes.app_subnet_nsg))
 
-<<<<<<< HEAD
   //Storage subnet
   sub_storage_defined  = try(var.infrastructure.vnets.sap.subnet_storage, null) == null ? false : true
   sub_storage          = try(var.infrastructure.vnets.sap.subnet_storage, {})
@@ -251,10 +250,8 @@ locals {
   sub_storage_nsg_arm_id = try(local.sub_storage_nsg.arm_id, "")
   sub_storage_nsg_exists = length(local.sub_storage_nsg_arm_id) > 0 ? true : false
   sub_storage_nsg_name   = local.sub_storage_nsg_exists ? try(split("/", local.sub_storage_nsg_arm_id)[8], "") : try(local.sub_storage_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.storage_subnet_nsg))
-=======
   // Support dynamic addressing
   dynamic_ipaddresses = try(local.var_infra.dynamic_addressing, false)
->>>>>>> output from sap_system support for anchor
 
 
   //---- Update infrastructure with defaults ----//
