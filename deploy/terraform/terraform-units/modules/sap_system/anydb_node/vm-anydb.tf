@@ -114,10 +114,8 @@ resource "azurerm_linux_virtual_machine" "dbserver" {
   boot_diagnostics {
     storage_account_uri = var.storage_bootdiag.primary_blob_endpoint
   }
-  tags = {
-    environment = "SAP"
-    SID         = upper(local.sap_sid)
-  }
+  
+  tags = local.tags
 }
 
 // Section for Windows Virtual machine 
@@ -181,10 +179,8 @@ resource "azurerm_windows_virtual_machine" "dbserver" {
   boot_diagnostics {
     storage_account_uri = var.storage_bootdiag.primary_blob_endpoint
   }
-  tags = {
-    environment = "SAP"
-    SID         = upper(local.sap_sid)
-  }
+  
+  tags = local.tags
 }
 
 // Creates managed data disks
