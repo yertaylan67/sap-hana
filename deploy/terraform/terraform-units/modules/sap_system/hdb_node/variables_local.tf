@@ -108,6 +108,11 @@ locals {
 
  // Support dynamic addressing
   dynamic_ipaddresses = try(local.hdb.dynamic_addressing, false)
+  ///////////////////////////////////////
+  // Tags
+  tags = try(local.hdb.tags,[])
+  ////////////////////////////////////////
+
 
   hdb_platform = try(local.hdb.platform, "NONE")
   hdb_version  = try(local.hdb.db_version, "2.00.043")
