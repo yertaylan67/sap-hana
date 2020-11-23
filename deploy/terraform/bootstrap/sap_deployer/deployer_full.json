@@ -16,5 +16,8 @@
         "enable_secure_transfer": true
     },
     "user_key_vault_id": "",
-    "private_key_vault_id": ""
+    "private_key_vault_id": "",
+    "public_key_secret_name": "",
+    "private_key_secret_name": "",
+    "password_secret_name": ""
 }
