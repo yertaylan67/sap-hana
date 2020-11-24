@@ -43,7 +43,7 @@ output "sid_kv_prvt" {
 }
 
 output "storage_subnet" {
-  value = local.enable_db_deployment && local.storage_subnet_needed ? (
+  value = local.enable_db_deployment && local.enable_storage_subnet ? (
     local.sub_storage_exists ? (
       data.azurerm_subnet.storage[0]) : (
       azurerm_subnet.storage[0]
