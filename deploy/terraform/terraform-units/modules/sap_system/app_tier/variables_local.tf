@@ -105,7 +105,7 @@ locals {
   sub_app_exists = length(local.sub_app_arm_id) > 0 ? true : false
   sub_app_name = local.sub_app_exists ? (
     try(split("/", local.sub_app_arm_id)[10], "")) : (
-    try(local.var_sub_app.name, format("%s%s", local.prefix, local.resource_suffixes.app_subnet))
+    try(local.var_sub_app.name, format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.app_subnet))
   )
   sub_app_prefix = try(local.var_sub_app.prefix, "")
 
@@ -115,7 +115,7 @@ locals {
   sub_app_nsg_exists = length(local.sub_app_nsg_arm_id) > 0 ? true : false
   sub_app_nsg_name = local.sub_app_nsg_exists ? (
     try(split("/", local.sub_app_nsg_arm_id)[8], "")) : (
-    try(local.var_sub_app_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.app_subnet_nsg))
+    try(local.var_sub_app_nsg.name, format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.app_subnet_nsg))
   )
 
   // WEB subnet
@@ -126,7 +126,7 @@ locals {
   sub_web_exists  = length(local.sub_web_arm_id) > 0 ? true : false
   sub_web_name = local.sub_web_exists ? (
     try(split("/", local.sub_web_arm_id)[10], "")) : (
-    try(local.sub_web.name, format("%s%s", local.prefix, local.resource_suffixes.web_subnet))
+    try(local.sub_web.name, format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.web_subnet))
   )
 
   sub_web_prefix = try(local.sub_web.prefix, "")
@@ -141,7 +141,7 @@ locals {
   sub_web_nsg_exists = length(local.sub_web_nsg_arm_id) > 0 ? true : false
   sub_web_nsg_name = local.sub_web_nsg_exists ? (
     try(split("/", local.sub_web_nsg_arm_id)[8], "")) : (
-    try(local.sub_web_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.web_subnet_nsg))
+    try(local.sub_web_nsg.name, format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.web_subnet_nsg))
   )
 
   sub_web_nsg_deployed = try(local.sub_web_defined ? (
@@ -166,6 +166,8 @@ locals {
   web_lb_ips               = try(var.application.web_lb_ips, [])
   web_nic_ips              = try(var.application.web_nic_ips, [])
   web_admin_nic_ips        = try(var.application.web_admin_nic_ips, [])
+
+  use_DHCP = try(var.application.use_DHCP, false)
 
   // Dual network cards
   apptier_dual_nics = try(var.application.dual_nics, false)
@@ -404,4 +406,17 @@ locals {
       }
     ]
   ])
+
+
+  full_appserver_names = flatten([for vm in local.app_virtualmachine_names :
+    format("%s%s%s%s", local.prefix, var.naming.separator, vm, local.resource_suffixes.vm)]
+  )
+
+  full_scsserver_names = flatten([for vm in local.scs_virtualmachine_names :
+    format("%s%s%s%s", local.prefix, var.naming.separator, vm, local.resource_suffixes.vm)]
+  )
+
+  full_webserver_names = flatten([for vm in local.web_virtualmachine_names :
+    format("%s%s%s%s", local.prefix, var.naming.separator, vm, local.resource_suffixes.vm)]
+  )
 }

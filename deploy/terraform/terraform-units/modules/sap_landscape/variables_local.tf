@@ -56,8 +56,8 @@ locals {
       "sku"       = try(local.var_iscsi.os.sku, "gen1")
       "version"   = try(local.var_iscsi.os.version, "latest")
   })
-  iscsi_auth_type     = try(local.var_iscsi.authentication.type, "key")
-  iscsi_auth_username = try(local.var_iscsi.authentication.username, "azureadm")
+  iscsi_auth_type     = local.iscsi_count > 0 ? try(local.var_iscsi.authentication.type, "key") : ""
+  iscsi_auth_username = local.iscsi_count > 0 ? try(local.var_iscsi.authentication.username, "azureadm") : ""
   iscsi_nic_ips       = local.sub_iscsi_exists ? try(local.var_iscsi.iscsi_nic_ips, []) : []
 
   // By default, ssh key for iSCSI uses generated public key. Provide sshkey.path_to_public_key and path_to_private_key overides it
@@ -96,14 +96,20 @@ locals {
   var_sub_iscsi    = try(local.var_vnet_sap.subnet_iscsi, {})
   sub_iscsi_arm_id = try(local.var_sub_iscsi.arm_id, "")
   sub_iscsi_exists = length(local.sub_iscsi_arm_id) > 0 ? true : false
-  sub_iscsi_name   = local.sub_iscsi_exists ? try(split("/", local.sub_iscsi_arm_id)[10], "") : try(local.var_sub_iscsi.name, format("%s%s", local.prefix, local.resource_suffixes.iscsi_subnet))
+  sub_iscsi_name = local.sub_iscsi_exists ? (
+    try(split("/", local.sub_iscsi_arm_id)[10], "")) : (
+    try(local.var_sub_iscsi.name, format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.iscsi_subnet))
+  )
   sub_iscsi_prefix = local.sub_iscsi_exists ? "" : try(local.var_sub_iscsi.prefix, "")
 
   // iSCSI NSG
   var_sub_iscsi_nsg    = try(local.var_sub_iscsi.nsg, {})
   sub_iscsi_nsg_arm_id = try(local.var_sub_iscsi_nsg.arm_id, "")
   sub_iscsi_nsg_exists = length(local.sub_iscsi_nsg_arm_id) > 0 ? true : false
-  sub_iscsi_nsg_name   = local.sub_iscsi_nsg_exists ? try(split("/", local.sub_iscsi_nsg_arm_id)[8], "") : try(local.var_sub_iscsi_nsg.name, format("%s%s", local.prefix, local.resource_suffixes.iscsi_subnet_nsg))
+  sub_iscsi_nsg_name = local.sub_iscsi_nsg_exists ? (
+    try(split("/", local.sub_iscsi_nsg_arm_id)[8], "")) : (
+    try(local.var_sub_iscsi_nsg.name, format("%s%s%s", local.prefix, var.naming.separator, local.resource_suffixes.iscsi_subnet_nsg))
+  )
 
   // Update infrastructure with defaults
   infrastructure = {
