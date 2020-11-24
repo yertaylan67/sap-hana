@@ -31,6 +31,14 @@ output "user_vault_name" {
   value     = module.sap_library.user_vault_name
 }
 
+output "library_user_key_vault_id" {
+  value = module.sap_library.library_user_key_vault_id
+}
+
+output "library_private_key_vault_id" {
+  value = module.sap_library.library_private_key_vault_id
+}
+
 output "remote_state_resource_group_name" {
   value = module.sap_library.remote_state_resource_group_name
 }
