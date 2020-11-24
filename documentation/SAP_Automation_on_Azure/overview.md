@@ -1,8 +1,12 @@
 ### <img src="assets/images/UnicornSAPBlack256x256.png" width="64px"> SAP Deployment Automation Framework <!-- omit in toc -->
-# SAP on Azure Deployment Automation Framework <!-- omit in toc -->
+# Overview <!-- omit in toc -->
 
 
 <!-- TODO -->
+
+The **SAP on Azure Deployment Automation Framework** is a collection of processes and a flexible workflow.
+
+
 
 
 The templates are split into:
@@ -58,27 +62,3 @@ Step 2) [**Select Terraform Deployment Unit**](#terraform-deployment-units)
 
 
 <br/><br/><br/><br/>  
-
----
-
-## Contributions
-
-If you want to contribute to our project, be sure to review the [contributing guidelines](/CONTRIBUTING.md).
-
-We use [GitHub issues](https://github.com/Azure/sap-hana/issues/) for feature requests and bugs.
-
-<br/>
-
-## License & Copyright
-
-Copyright © 2018-2020 Microsoft Azure.
-
-Licensed under the [MIT License](LICENSE).
-
-<br/>
-
-## Contact
-
-We look forward to your feedback and welcome any contributions!
-
-Please feel free to reach out to our team at ![image](/documentation/assets/contact.png).

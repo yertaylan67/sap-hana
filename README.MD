@@ -22,9 +22,9 @@ Please follow the linke below to the documentation:
 
 <center>
 
-[<img src="documentation/SAP_Automation_on_Azure/assets/images/documentation-clipart.png" width="256px">](documentation/SAP_Automation_on_Azure/overview.md)
+[<img src="documentation/SAP_Automation_on_Azure/assets/images/documentation-clipart.png" width="256px">](documentation/SAP_Automation_on_Azure/table_of_contents.md)
 
-## [SAP Deployment Automation Framework Documentation](documentation/SAP_Automation_on_Azure/overview.md) <!-- omit in toc -->
+## [SAP Deployment Automation Framework Documentation](documentation/SAP_Automation_on_Azure/table_of_contents.md) <!-- omit in toc -->
 
 </center>
 
