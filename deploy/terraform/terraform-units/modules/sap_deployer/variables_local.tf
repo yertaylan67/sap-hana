@@ -78,6 +78,8 @@ locals {
   // By default use generated public key. Provide sshkey.path_to_public_key and path_to_private_key overides it
   public_key  = (local.enable_deployers && local.enable_key) ? (local.key_exist ? data.azurerm_key_vault_secret.pk[0].value : try(file(var.sshkey.path_to_public_key), tls_private_key.deployer[0].public_key_openssh)) : null
   private_key = (local.enable_deployers && local.enable_key) ? (local.key_exist ? data.azurerm_key_vault_secret.ppk[0].value : try(file(var.sshkey.path_to_private_key), tls_private_key.deployer[0].private_key_pem)) : null
+  // Provide the ability to deploy without the VM
+  enable_vm = try(local.deployer_input[0].deploy_vm, true)
 
   deployers = [
     for idx, deployer in local.deployer_input : {
@@ -115,7 +117,7 @@ locals {
   // Deployer(s) information with updated pip
   deployers_updated = [
     for idx, deployer in local.deployers : merge({
-      "public_ip_address" = local.enable_deployer_public_ip ? azurerm_public_ip.deployer[idx].ip_address : ""
+      "public_ip_address" = local.enable_deployer_public_ip && local.enable_vm ? azurerm_public_ip.deployer[idx].ip_address : ""
     }, deployer)
   ]
 
