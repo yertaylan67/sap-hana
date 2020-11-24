@@ -11,7 +11,7 @@ data azurerm_client_config "current" {}
 
 // Public IP addresse and nic for Deployer
 resource "azurerm_public_ip" "deployer" {
-  count               = local.enable_deployer_public_ip ? length(local.deployers) : 0
+  count               = local.enable_deployer_public_ip && local.enable_vm ? length(local.deployers) : 0
   name                = format("%s%s%s%s", local.prefix, var.naming.separator, local.deployers[count.index].name, local.resource_suffixes.pip)
   location            = azurerm_resource_group.deployer[0].location
   resource_group_name = azurerm_resource_group.deployer[0].name
@@ -19,7 +19,7 @@ resource "azurerm_public_ip" "deployer" {
 }
 
 resource "azurerm_network_interface" "deployer" {
-  count               = length(local.deployers)
+  count               = local.enable_deployers && local.enable_vm ? length(local.deployers) : 0
   name                = format("%s%s%s%s", local.prefix, var.naming.separator, local.deployers[count.index].name, local.resource_suffixes.nic)
   location            = azurerm_resource_group.deployer[0].location
   resource_group_name = azurerm_resource_group.deployer[0].name
@@ -49,7 +49,7 @@ resource "azurerm_role_assignment" "sub_contributor" {
 
 // Linux Virtual Machine for Deployer
 resource "azurerm_linux_virtual_machine" "deployer" {
-  count                           = length(local.deployers)
+  count                           = local.enable_deployers && local.enable_vm ? length(local.deployers) : 0
   name                            = format("%s%s%s%s", local.prefix, var.naming.separator, local.deployers[count.index].name, local.resource_suffixes.vm)
   computer_name                   = local.deployers[count.index].name
   location                        = azurerm_resource_group.deployer[0].location
@@ -112,8 +112,7 @@ resource "azurerm_linux_virtual_machine" "deployer" {
 // Prepare deployer with pre-installed softwares if pip is created
 resource "null_resource" "prepare-deployer" {
   depends_on = [azurerm_linux_virtual_machine.deployer]
-  count      = local.enable_deployer_public_ip ? length(local.deployers) : 0
-
+  count      = local.enable_deployer_public_ip && local.enable_vm ? length(local.deployers) : 0
   connection {
     type        = "ssh"
     host        = azurerm_public_ip.deployer[count.index].ip_address
