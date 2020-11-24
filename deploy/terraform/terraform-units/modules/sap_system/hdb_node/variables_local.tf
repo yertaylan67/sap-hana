@@ -78,7 +78,7 @@ locals {
   vnet_sap_resource_group_name = split("/", local.vnet_sap_arm_id)[4]
   var_vnet_sap                 = try(var.infrastructure.vnets.sap, {})
 
-    // Define this variable to make it easier when implementing existing kv.
+  // Define this variable to make it easier when implementing existing kv.
   sid_kv_user = try(var.sid_kv_user[0], null)
 
   hdb_list = [
@@ -94,8 +94,8 @@ locals {
   //ANF support
   use_ANF = try(local.hdb.use_ANF, false)
   //Scalout subnet is needed if ANF is used and there are more than one hana node 
-  dbnode_per_site = length(try(local.hdb.dbnodes, [{}]))
- storage_subnet_needed = local.use_ANF && local.dbnode_per_site > 1
+  dbnode_per_site       = length(try(local.hdb.dbnodes, [{}]))
+  storage_subnet_needed = local.use_ANF && local.dbnode_per_site > 1
 
   // Zones
   zones            = try(local.hdb.zones, [])
@@ -153,21 +153,21 @@ locals {
   shine      = try(local.hdb.shine, { email = "shinedemo@microsoft.com" })
 
   dbnodes = flatten([[for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
-    name            = try("${dbnode.name}-0", format("%s%s%s%s", local.prefix, var.naming.separator, local.virtualmachine_names[idx], local.resource_suffixes.vm))
-    computername    = try("${dbnode.name}-0", local.computer_names[idx], local.resource_suffixes.vm)
-    role            = try(dbnode.role, "worker")
-    admin_nic_ip    = lookup(dbnode, "admin_nic_ips", [false, false])[0]
-    db_nic_ip       = lookup(dbnode, "db_nic_ips", [false, false])[0]
+    name           = try("${dbnode.name}-0", format("%s%s%s%s", local.prefix, var.naming.separator, local.virtualmachine_names[idx], local.resource_suffixes.vm))
+    computername   = try("${dbnode.name}-0", local.computer_names[idx], local.resource_suffixes.vm)
+    role           = try(dbnode.role, "worker")
+    admin_nic_ip   = lookup(dbnode, "admin_nic_ips", [false, false])[0]
+    db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[0]
     storage_nic_ip = lookup(dbnode, "storage_nic_ips", [false, false])[0]
 
     }
     ],
     [for idx, dbnode in try(local.hdb.dbnodes, [{}]) : {
-      name            = try("${dbnode.name}-1", format("%s%s%s%s", local.prefix, var.naming.separator, local.virtualmachine_names[idx + local.node_count], local.resource_suffixes.vm))
-      computername    = try("${dbnode.name}-1", local.computer_names[idx + local.node_count])
-      role            = try(dbnode.role, "worker")
-      admin_nic_ip    = lookup(dbnode, "admin_nic_ips", [false, false])[1]
-      db_nic_ip       = lookup(dbnode, "db_nic_ips", [false, false])[1]
+      name           = try("${dbnode.name}-1", format("%s%s%s%s", local.prefix, var.naming.separator, local.virtualmachine_names[idx + local.node_count], local.resource_suffixes.vm))
+      computername   = try("${dbnode.name}-1", local.computer_names[idx + local.node_count])
+      role           = try(dbnode.role, "worker")
+      admin_nic_ip   = lookup(dbnode, "admin_nic_ips", [false, false])[1]
+      db_nic_ip      = lookup(dbnode, "db_nic_ips", [false, false])[1]
       storage_nic_ip = lookup(dbnode, "storage_nic_ips", [false, false])[1]
       } if local.hdb_ha
     ]
@@ -212,25 +212,25 @@ locals {
   // Numerically indexed Hash of HANA DB nodes to be created
   hdb_vms = [
     for idx, dbnode in local.dbnodes : {
-      platform        = local.hdb_platform,
-      name            = dbnode.name
-      computername    = dbnode.computername
-      admin_nic_ip    = dbnode.admin_nic_ip,
-      db_nic_ip       = dbnode.db_nic_ip,
-      storage_nic_ip  = dbnode.storage_nic_ip,
-      size            = local.hdb_size,
-      os              = local.hdb_os,
-      authentication  = local.hdb_auth
-      sid             = local.hdb_sid
+      platform       = local.hdb_platform,
+      name           = dbnode.name
+      computername   = dbnode.computername
+      admin_nic_ip   = dbnode.admin_nic_ip,
+      db_nic_ip      = dbnode.db_nic_ip,
+      storage_nic_ip = dbnode.storage_nic_ip,
+      size           = local.hdb_size,
+      os             = local.hdb_os,
+      authentication = local.hdb_auth
+      sid            = local.hdb_sid
     }
   ]
 
   // Subnet IP Offsets
   // Note: First 4 IP addresses in a subnet are reserved by Azure
   hdb_ip_offsets = {
-    hdb_lb          = 4
-    hdb_admin_vm    = 10
-    hdb_db_vm       = 10
+    hdb_lb         = 4
+    hdb_admin_vm   = 10
+    hdb_db_vm      = 10
     hdb_storage_vm = 10
   }
 
